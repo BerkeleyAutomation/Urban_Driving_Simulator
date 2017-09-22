@@ -1,3 +1,4 @@
+from gym_urbandriving.assets.car import Car
 import sys
 import pygame
 import time
@@ -10,9 +11,9 @@ class Visualizer:
         pass
 
 class Simple_Visualizer(Visualizer):
-    def __init__(self):
+    def __init__(self, screen_width, screen_height):
         pygame.init()
-        self.surface = pygame.display.set_mode([500,500])
+        self.surface = pygame.display.set_mode([screen_width,screen_height])
 
 
     def render(self,state):
@@ -23,9 +24,10 @@ class Simple_Visualizer(Visualizer):
 
         self.surface.fill((255,255,255))
         for obj in state:
-            car = pygame.image.load("sprites/blue_car_lite.png")
-            car = pygame.transform.rotate(car,obj[2])
-            self.surface.blit(car,[obj[0]-car.get_width()/2, obj[1]-car.get_height()/2])
+            x, y, x_dim, y_dim, angle= obj.get_state()
+            car = pygame.image.load("gym_urbandriving/visualizer/sprites/blue_car_lite.png")
+            car = pygame.transform.rotate(car,angle)
+            self.surface.blit(car,[x-x_dim/2, y-y_dim/2])
             
         pygame.display.flip()
 
@@ -33,14 +35,13 @@ class Simple_Visualizer(Visualizer):
 
 
 if __name__ == "__main__":
-    state = [[0,0,0],[100,300,90]]
-    vis = Simple_Visualizer()
+    car = Car(100,200, vel=10)
+    state = [car]
+    vis = Simple_Visualizer(1000,1000)
     
 
     while(True):
         vis.render(state)
-        state[0][0] += 1
-        state[0][1] += 1
-        state[1][2] += 10
-
+        for obj in state:
+            obj.step((20,0))
 
