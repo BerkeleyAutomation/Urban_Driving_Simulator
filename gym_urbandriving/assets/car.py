@@ -1,12 +1,9 @@
 import numpy as np
+from gym_urbandriving.assets.primitives import *
 
-class Car:
-    def __init__(self, x, y, x_dim=25, y_dim=50, angle=0.0, vel=0.0, acc=0.0, max_vel=20.0, mass=100.0):
-        self.x = x
-        self.y = y
-        self.x_dim = x_dim
-        self.y_dim = y_dim
-        self.angle = angle
+class Car(Rectangle):
+    def __init__(self, x, y, xdim=50, ydim=25, angle=0.0, vel=0.0, acc=0.0, max_vel=20.0, mass=100.0):
+        Rectangle.__init__(self, x, y, xdim, ydim, angle, sprite="grey_car_lite.png")
         self.vel = vel
         self.acc = acc
         self.max_vel = max_vel
@@ -32,12 +29,11 @@ class Car:
         t = 1
         dist = self.vel * t + 0.5 * self.acc * (t ** 2)
         dx = dist * np.cos(np.radians(self.angle))
-        dy = dist * np.sin(np.radians(self.angle))
+        dy = dist * -np.sin(np.radians(self.angle))
         self.x += dx
         self.y += dy
         self.vel += self.acc
         self.vel = max(min(self.vel, self.max_vel), 0.0)
-        
     def get_state(self):
         """
         Get state. 
