@@ -58,13 +58,3 @@ class PyGameVisualizer:
 
 
 
-# if __name__ == "__main__":
-#     car = Car(100,200, vel=10)
-#     state = [car]
-#     vis = Simple_Visualizer(1000,1000)
-
-
-#     while(True):
-#         vis.render(state)
-#         for obj in state:
-#             obj.step((20,0))

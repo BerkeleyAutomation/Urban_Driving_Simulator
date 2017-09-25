@@ -3,6 +3,7 @@ from copy import deepcopy
 from gym_urbandriving.state import *
 from gym_urbandriving.assets import *
 from gym_urbandriving.agents import *
+import numpy as np
 
 class UrbanDrivingEnv(gym.Env):
     metadata = {'render.modes': ['human']}
@@ -18,8 +19,8 @@ class UrbanDrivingEnv(gym.Env):
         self.current_state = PositionState()
         self.time = 0
 
-        if not self.init_state:
-            self._reset()
+        #if not self.init_state:
+        self._reset()
 
         self.current_state = deepcopy(self.init_state)
         assert(self.init_state is not None)
@@ -55,27 +56,11 @@ class UrbanDrivingEnv(gym.Env):
     def _reset(self):
         self.time = 0
         if self.reset_random:
-            self.init_state = PositionState()
-            self.init_state.static_objects = [Terrain(175, 175, 350, 350),
-                                              Terrain(825, 175, 350, 350),
-                                              Terrain(175, 825, 350, 350),
-                                              Terrain(825, 825, 350, 350),
-                                              Street(500, 500, 200, 1000),
-                                              Street(500, 500, 1000, 200),
-                                              Sidewalk(200, 375, 400, 50),
-                                              Sidewalk(200, 625, 400, 50),
-                                              Sidewalk(800, 375, 400, 50),
-                                              Sidewalk(800, 625, 400, 50),
-                                              Sidewalk(375, 175, 50, 350),
-                                              Sidewalk(625, 175, 50, 350),
-                                              Sidewalk(375, 825, 50, 350),
-                                              Sidewalk(625, 825, 50, 350),
-            ]
-            self.init_state.dynamic_objects = [Car(500, 100, angle=-92, vel=5),
-                                               KinematicCar(100, 500, angle=14, vel=5),
+            self.init_state.dynamic_objects = [Car(500+np.random.normal(0, 50), 100+np.random.normal(0, 50), angle=-92, vel=5),
+                                               KinematicCar(100+np.random.normal(0, 50), 500+np.random.normal(0, 50), angle=14, vel=5),
                                                Pedestrian(100, 370, vel=2)
             ]
-
+            
         self.current_state = deepcopy(self.init_state)
         assert(self.current_state is not None)
         self.bg_agents = [BackgroundAgent(type(dynamic_object), i) \
