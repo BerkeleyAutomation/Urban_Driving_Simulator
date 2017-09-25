@@ -14,6 +14,8 @@ class PyGameVisualizer:
                         Circle:self.draw_circle}
         
     def render(self, state, valid_area):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT: sys.exit()
 
         new_surface = pygame.Surface((valid_area[1] - valid_area[0],
                                       valid_area[3] - valid_area[2]))
