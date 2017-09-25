@@ -8,7 +8,7 @@ from gym_urbandriving.assets.car import Car
 class KinematicCar(Car):
     def __init__(self, x, y, xdim=50, ydim=25, angle=0.0, vel=0.0, acc=0.0, max_vel=20.0, mass=100.0):
         Car.__init__(self, x, y, xdim, ydim, angle, vel, acc, max_vel, mass)
-        self.l_f = self.l_r = ydim / 2.0
+        self.l_f = self.l_r = self.ydim / 2.0
 
     def step(self, action):
         """
@@ -63,7 +63,7 @@ class KinematicCar(Car):
         # Differential equations
         beta = np.arctan((self.l_r / (self.l_f + self.l_r)) * np.tan(delta_f))
         dx = vel * np.cos(rad_angle + beta)
-        dy = vel * np.sin(rad_angle + beta)
+        dy = vel * -np.sin(rad_angle + beta)
         dangle = (vel / self.l_r) * np.sin(beta)
         dvel = acc
         output = [dx, dy, dvel, dangle]

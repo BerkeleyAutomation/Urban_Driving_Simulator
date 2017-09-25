@@ -1,12 +1,11 @@
 import numpy as np
+
 from gym_urbandriving.assets.primitives import *
 from gym_urbandriving.assets import *
 
-
-class Car(Rectangle):
-    
-    def __init__(self, x, y, xdim=50, ydim=25, angle=0.0, vel=0.0, acc=0.0, max_vel=20.0, mass=100.0):
-        Rectangle.__init__(self, x, y, xdim, ydim, angle, sprite="grey_car_lite.png")
+class Pedestrian(Circle):
+    def __init__(self, x, y, radius=10, angle=0.0, vel=0.0, acc=0.0, max_vel=5.0, mass=100.0):
+        Circle.__init__(self, x, y, radius, angle, sprite="triangle.png")
         self.vel = vel
         self.acc = acc
         self.max_vel = max_vel
@@ -50,7 +49,8 @@ class Car(Rectangle):
 
 
     def collides(self, other):
-        from gym_urbandriving.assets.kinematic_car import KinematicCar
-        if type(other) in {Terrain, Sidewalk, Car, KinematicCar, Pedestrian}:
+        from gym_urbandriving.assets import Car
+        from gym_urbandriving.assets import KinematicCar
+        if type(other) in {Terrain, Car, KinematicCar}:
             return self.intersect(other)
         return False
