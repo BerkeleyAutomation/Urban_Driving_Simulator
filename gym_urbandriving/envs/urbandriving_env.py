@@ -9,13 +9,12 @@ class UrbanDrivingEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
     def __init__(self, visualizer=None, init_state=None,
-                 reset_random=True, reward_fn=lambda x: 0, max_time=500):
+                 reward_fn=lambda x: 0, max_time=500):
         self.visualizer = visualizer
         self.reward_fn = reward_fn
         self.init_state = init_state
         self.bg_agents = []
         self.max_time = max_time
-        self.reset_random = reset_random
         self.current_state = PositionState()
         self.time = 0
 
@@ -55,15 +54,9 @@ class UrbanDrivingEnv(gym.Env):
 
     def _reset(self):
         self.time = 0
-        if self.reset_random:
-            self.init_state.dynamic_objects = [Car(500+np.random.normal(0, 50), 100+np.random.normal(0, 50), angle=-92, vel=5),
-                                               KinematicCar(100+np.random.normal(0, 50), 500+np.random.normal(0, 50), angle=14, vel=5),
-                                               Pedestrian(100, 370, vel=2)
-            ]
-            
         self.current_state = deepcopy(self.init_state)
         assert(self.current_state is not None)
-        self.bg_agents = [BackgroundAgent(type(dynamic_object), i) \
+        self.bg_agents = [BackgroundAgent(i) \
                           for i, dynamic_object in \
                           enumerate(self.current_state.dynamic_objects)]
         return

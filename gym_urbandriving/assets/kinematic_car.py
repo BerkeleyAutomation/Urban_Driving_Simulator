@@ -1,12 +1,12 @@
 import numpy as np
 import os
 from scipy.integrate import odeint
-
+from gym import spaces
 from gym_urbandriving.assets.primitives.rectangle import Rectangle
 from gym_urbandriving.assets.car import Car
 
 class KinematicCar(Car):
-    def __init__(self, x, y, xdim=50, ydim=25, angle=0.0, vel=0.0, acc=0.0, max_vel=20.0, mass=100.0):
+    def __init__(self, x, y, xdim=100, ydim=50, angle=0.0, vel=0.0, acc=0.0, max_vel=20.0, mass=100.0):
         Car.__init__(self, x, y, xdim, ydim, angle, vel, acc, max_vel, mass)
         self.l_f = self.l_r = self.ydim / 2.0
 
@@ -22,7 +22,7 @@ class KinematicCar(Car):
             action = [0, 0]
         # Unpack actions, convert angles to radians
         delta_f, a = action
-        delta_f, rad_angle = np.radians(delta_f), np.radians(self.angle)
+        delta_f, rad_angle = np.radians(10*delta_f), np.radians(self.angle)
 
         # Clamp acceleration if above maximum velocity
         if a > self.max_vel - self.vel:

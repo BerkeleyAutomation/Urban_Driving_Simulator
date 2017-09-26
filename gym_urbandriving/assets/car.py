@@ -1,7 +1,7 @@
 import numpy as np
 from gym_urbandriving.assets.primitives import *
 from gym_urbandriving.assets import *
-
+from gym import spaces
 
 class Car(Rectangle):
     
@@ -11,6 +11,8 @@ class Car(Rectangle):
         self.acc = acc
         self.max_vel = max_vel
         self.mass = mass
+        self.action_space = spaces.Box(np.array([-2, -1]),
+                                       np.array([2, 1]))
 
 
     def step(self, action, info_dict=None):
