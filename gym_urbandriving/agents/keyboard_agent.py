@@ -1,6 +1,10 @@
 import pygame
 
 class KeyboardAgent:
+    """
+    simple agent that acts on keyboard inputs
+    must be first agent on the main env's list
+    """
     def __init__(self, i=0):
         self.i = i
         return
@@ -13,7 +17,7 @@ class KeyboardAgent:
         elif keys[pygame.K_DOWN]:
             acc = -1
         if keys[pygame.K_LEFT]:
-            steer = 2
+            steer = 1.5
         elif keys[pygame.K_RIGHT]:
-            steer = -2
+            steer = -1.5
         return (steer, acc)

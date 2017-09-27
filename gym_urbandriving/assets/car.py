@@ -1,6 +1,11 @@
 import numpy as np
-from gym_urbandriving.assets.primitives import *
-from gym_urbandriving.assets import *
+from gym_urbandriving.assets.primitives.rectangle import Rectangle
+from gym_urbandriving.assets.primitives.circle import Circle
+from gym_urbandriving.assets.primitives.shape import Shape
+from gym_urbandriving.assets.terrain import Terrain
+from gym_urbandriving.assets.sidewalk import Sidewalk
+from gym_urbandriving.assets.pedestrian import Pedestrian
+
 from gym import spaces
 
 class Car(Rectangle):

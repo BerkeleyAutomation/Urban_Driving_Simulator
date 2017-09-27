@@ -1,7 +1,6 @@
 import numpy as np
-
-from gym_urbandriving.assets.primitives import *
-from gym_urbandriving.assets import *
+from gym_urbandriving.assets.primitives.circle import Circle
+from gym_urbandriving.assets.terrain import Terrain
 
 class Pedestrian(Circle):
     def __init__(self, x, y, radius=17, angle=0.0, vel=0.0, acc=0.0, max_vel=5.0, mass=100.0):

@@ -1,7 +1,6 @@
 import gym
 from copy import deepcopy
 from gym_urbandriving.state import *
-from gym_urbandriving.assets import *
 from gym_urbandriving.agents import *
 import numpy as np
 

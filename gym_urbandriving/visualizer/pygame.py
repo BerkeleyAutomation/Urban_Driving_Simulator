@@ -1,11 +1,16 @@
 from gym_urbandriving.assets.car import Car
-from gym_urbandriving.assets.primitives import *
+from gym_urbandriving.assets.primitives.rectangle import Rectangle
+from gym_urbandriving.assets.primitives.circle import Circle
+from gym_urbandriving.assets.primitives.shape import Shape
 import sys
 import pygame
 import time
 import numpy as np
 
 class PyGameVisualizer:
+    """
+    pygame visualizer class renders any state passed into it through render using pygame
+    """
     def __init__(self, screen_dim):
         pygame.init()
         self.screen_dim = screen_dim
@@ -15,6 +20,9 @@ class PyGameVisualizer:
         self.static_surface = None
 
     def render_statics(self, state, valid_area):
+        """
+        renders static objects of the state
+        """
         if self.static_surface:
             self.surface.blit(self.static_surface, (0, 0))
             return
@@ -31,6 +39,9 @@ class PyGameVisualizer:
         return
 
     def render_dynamics(self, state, valid_area):
+        """
+        renders dynamic objects of the state
+        """
         new_surface = pygame.Surface((valid_area[1] - valid_area[0],
                                       valid_area[3] - valid_area[2]),
                                      pygame.SRCALPHA)

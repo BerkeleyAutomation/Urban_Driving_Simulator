@@ -9,6 +9,10 @@ class PositionState:
         return
 
     def done(self):
+        """
+        returns true if collisions are present
+        TODO: have this call collides_any
+        """
         for i, dobj in enumerate(self.dynamic_objects):
             for j, sobj in enumerate(self.static_objects):
                 if dobj.collides(sobj):
@@ -19,6 +23,9 @@ class PositionState:
         return False
 
     def collides_any(self, obj_id):
+        """
+        checks for any collisions for a specified object
+        """
         dobj = self.dynamic_objects[obj_id]
         for j, sobj in enumerate(self.static_objects):
             if dobj.collides(sobj):
