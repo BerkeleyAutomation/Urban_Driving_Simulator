@@ -1,7 +1,6 @@
 
-class BackgroundAgent:
-    def __init__(self, i=0):
-        self.i = i
+class NullAgent:
+    def __init__(self, agentnum=0):
         return
     def eval_policy(self, state):
         return None

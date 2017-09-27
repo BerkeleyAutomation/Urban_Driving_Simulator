@@ -6,8 +6,8 @@ from gym_urbandriving.assets.primitives.rectangle import Rectangle
 from gym_urbandriving.assets.car import Car
 
 class KinematicCar(Car):
-    def __init__(self, x, y, xdim=100, ydim=50, angle=0.0, vel=0.0, acc=0.0, max_vel=20.0, mass=100.0):
-        Car.__init__(self, x, y, xdim, ydim, angle, vel, acc, max_vel, mass)
+    def __init__(self, x, y, xdim=100, ydim=50, angle=0.0, vel=0.0, acc=0.0, mass=100.0):
+        Car.__init__(self, x, y, xdim, ydim, angle, vel, acc, mass=mass)
         self.l_f = self.l_r = self.ydim / 2.0
 
     def step(self, action):
@@ -27,8 +27,8 @@ class KinematicCar(Car):
         # Clamp acceleration if above maximum velocity
         if a > self.max_vel - self.vel:
             a = self.max_vel - self.vel
-        elif self.vel + a < 0:
-            a = - self.vel
+        elif a < -self.max_vel - self.vel:
+            a = - self.max_vel - self.vel
 
         # Differential equations
         ode_state = [self.x, self.y, self.vel, rad_angle]

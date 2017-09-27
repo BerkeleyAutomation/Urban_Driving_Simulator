@@ -16,3 +16,7 @@ class Circle(Shape):
         self.angle = angle
         self.radius = radius
         self.primitive = Circle
+
+    def contains_point(self, point):
+        d = np.linalg.norm([self.x - point[0], self.y - point[1]])
+        return d < self.radius

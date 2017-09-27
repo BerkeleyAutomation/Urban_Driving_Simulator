@@ -5,7 +5,7 @@ from gym import spaces
 
 class Car(Rectangle):
     
-    def __init__(self, x, y, xdim=100, ydim=50, angle=0.0, vel=0.0, acc=0.0, max_vel=20.0, mass=100.0):
+    def __init__(self, x, y, xdim=100, ydim=50, angle=0.0, vel=0.0, acc=0.0, max_vel=10.0, mass=100.0):
         Rectangle.__init__(self, x, y, xdim, ydim, angle, sprite="grey_car.png")
         self.vel = vel
         self.acc = acc
@@ -30,7 +30,7 @@ class Car(Rectangle):
         self.angle %= 360.0
         self.angle = self.angle
         self.acc = action_acc
-        self.acc = max(min(self.acc, self.max_vel - self.vel), -self.vel)
+        self.acc = max(min(self.acc, self.max_vel - self.vel), -self.max_vel)
 
         t = 1
         dist = self.vel * t + 0.5 * self.acc * (t ** 2)
@@ -39,7 +39,7 @@ class Car(Rectangle):
         self.x += dx
         self.y += dy
         self.vel += self.acc
-        self.vel = max(min(self.vel, self.max_vel), 0.0)
+        self.vel = max(min(self.vel, self.max_vel), -self.max_vel)
         
     def get_state(self):
         """

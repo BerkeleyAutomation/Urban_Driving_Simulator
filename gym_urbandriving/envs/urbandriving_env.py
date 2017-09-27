@@ -9,7 +9,8 @@ class UrbanDrivingEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
     def __init__(self, visualizer=None, init_state=None,
-                 reward_fn=lambda x: 0, max_time=500):
+                 reward_fn=lambda x: 0, max_time=500,
+                 bgagent=NullAgent):
         self.visualizer = visualizer
         self.reward_fn = reward_fn
         self.init_state = init_state
@@ -18,16 +19,15 @@ class UrbanDrivingEnv(gym.Env):
         self.current_state = PositionState()
         self.time = 0
 
-        #if not self.init_state:
         self._reset()
 
         self.current_state = deepcopy(self.init_state)
         assert(self.init_state is not None)
         assert(self.current_state is not None)
 
-    def _step(self, action, state_type=PositionState):
+    def _step(self, action, agentnum=0, state_type=PositionState):
         actions = [None]*len(self.current_state.dynamic_objects)
-        actions[0] = action
+        actions[agentnum] = action
 
         for i in range(1, len(self.current_state.dynamic_objects)):
             actions[i] = self.bg_agents[i].eval_policy(self.current_state,)
@@ -39,24 +39,15 @@ class UrbanDrivingEnv(gym.Env):
 
         state = self.get_state_copy(state_type=state_type)
         reward = self.reward_fn(self.current_state)
-        done = (self.time > self.max_time) or self.done()
+        done = (self.time > self.max_time) or self.current_state.done()
         return state, reward, done
 
-    def done(self):
-        for i, dobj in enumerate(self.current_state.dynamic_objects):
-            for j, sobj in enumerate(self.current_state.static_objects):
-                if dobj.collides(sobj):
-                    return True
-            for j, dobj1 in enumerate(self.current_state.dynamic_objects[i+1:]):
-                if dobj.collides(dobj1):
-                    return True
-        return False
 
     def _reset(self):
         self.time = 0
         self.current_state = deepcopy(self.init_state)
         assert(self.current_state is not None)
-        self.bg_agents = [SimpleAvoidanceAgent(i,(900,500)) \
+        self.bg_agents = [NullAgent(i) \
                           for i, dynamic_object in \
                           enumerate(self.current_state.dynamic_objects)]
         return
