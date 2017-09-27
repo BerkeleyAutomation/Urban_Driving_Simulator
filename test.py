@@ -26,14 +26,14 @@ def f():
                                  Sidewalk(200, 375, 400, 50),
                                  Sidewalk(200, 625, 400, 50),
                                  Sidewalk(800, 375, 400, 50),
-                                 Sidewalk(800, 625, 400, 50),
+                                 Sidewalk(800, 625, 400, 50),\
                                  Sidewalk(375, 175, 50, 350),
                                  Sidewalk(625, 175, 50, 350),
                                  Sidewalk(375, 825, 50, 350),
                                  Sidewalk(625, 825, 50, 350),
     ]
-    init_state.dynamic_objects = [KinematicCar(500, 100, angle=-92, vel=5),
-                                  KinematicCar(100, 500, angle=0, vel=5),
+    init_state.dynamic_objects = [Car(450, 100, angle=-92, vel=5),
+                                  KinematicCar(100, 550, angle=0, vel=5),
                                   Pedestrian(100, 370, vel=2)
     ]
 

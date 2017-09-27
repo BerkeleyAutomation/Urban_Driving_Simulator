@@ -44,10 +44,10 @@ class UrbanDrivingEnv(gym.Env):
 
     def done(self):
         for i, dobj in enumerate(self.current_state.dynamic_objects):
-            for sobj in self.current_state.static_objects:
+            for j, sobj in enumerate(self.current_state.static_objects):
                 if dobj.collides(sobj):
                     return True
-            for dobj1 in self.current_state.dynamic_objects[i+1:]:
+            for j, dobj1 in enumerate(self.current_state.dynamic_objects[i+1:]):
                 if dobj.collides(dobj1):
                     return True
         return False

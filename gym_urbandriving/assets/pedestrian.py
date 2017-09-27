@@ -4,8 +4,8 @@ from gym_urbandriving.assets.primitives import *
 from gym_urbandriving.assets import *
 
 class Pedestrian(Circle):
-    def __init__(self, x, y, radius=10, angle=0.0, vel=0.0, acc=0.0, max_vel=5.0, mass=100.0):
-        Circle.__init__(self, x, y, radius, angle, sprite="triangle.png")
+    def __init__(self, x, y, radius=17, angle=0.0, vel=0.0, acc=0.0, max_vel=5.0, mass=100.0):
+        Circle.__init__(self, x, y, radius, angle, sprite="person.png")
         self.vel = vel
         self.acc = acc
         self.max_vel = max_vel

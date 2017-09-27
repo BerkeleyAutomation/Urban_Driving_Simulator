@@ -5,8 +5,8 @@ from gym import spaces
 
 class Car(Rectangle):
     
-    def __init__(self, x, y, xdim=50, ydim=25, angle=0.0, vel=0.0, acc=0.0, max_vel=20.0, mass=100.0):
-        Rectangle.__init__(self, x, y, xdim, ydim, angle, sprite="grey_car_lite.png")
+    def __init__(self, x, y, xdim=100, ydim=50, angle=0.0, vel=0.0, acc=0.0, max_vel=20.0, mass=100.0):
+        Rectangle.__init__(self, x, y, xdim, ydim, angle, sprite="grey_car.png")
         self.vel = vel
         self.acc = acc
         self.max_vel = max_vel

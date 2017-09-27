@@ -22,12 +22,13 @@ class Rectangle(Shape):
         self.primitive = Rectangle
 
     def get_corners(self):
-        if self._x == self.x and self._y == self.y:
+        if self._x == self.x and self._y == self.y and self._angle == self.angle:
             return self.corners
         self._x = self.x
         self._y = self.y
+        self._angle = self.angle
         
-        angle = np.radians(self.angle)
+        angle = np.radians(-self.angle)
         corner_offsets = np.array([self.xdim / 2.0, self.ydim / 2.0])
         centers = np.array([self.x, self.y])
         signs = np.array([[1,1], [1,-1], [-1,1], [-1,-1]])
