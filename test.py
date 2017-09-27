@@ -38,12 +38,12 @@ def f():
     ]
 
     env = uds.UrbanDrivingEnv(visualizer=vis,init_state=init_state)
-
+    state= init_state
     agent = KeyboardAgent()
     action = None
     while(True):
-        state, reward, done = env._step(action)
         action = agent.eval_policy(state)
+        state, reward, done = env._step(action)
         env._render()
         if done:
             print("done")

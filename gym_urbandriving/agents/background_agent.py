@@ -1,4 +1,3 @@
-from gym_urbandriving.assets import *
 
 class BackgroundAgent:
     def __init__(self, i=0):

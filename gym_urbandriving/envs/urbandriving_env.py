@@ -56,7 +56,7 @@ class UrbanDrivingEnv(gym.Env):
         self.time = 0
         self.current_state = deepcopy(self.init_state)
         assert(self.current_state is not None)
-        self.bg_agents = [BackgroundAgent(i) \
+        self.bg_agents = [SimpleAvoidanceAgent(i,(900,500)) \
                           for i, dynamic_object in \
                           enumerate(self.current_state.dynamic_objects)]
         return
@@ -70,6 +70,6 @@ class UrbanDrivingEnv(gym.Env):
 
     def get_state_copy(self, state_type=PositionState):
         if state_type == PositionState:
-            return self.current_state
+            return deepcopy(self.current_state)
         elif state_type == RenderState:
             return RenderState(self.current_state)
