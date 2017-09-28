@@ -1,8 +1,8 @@
 import gym
 import gym_urbandriving as uds
 import cProfile
-from gym_urbandriving.assets import *
-from gym_urbandriving.agents import *
+from gym_urbandriving.assets import Terrain, Lane, Street, Sidewalk, KinematicCar, Pedestrian
+from gym_urbandriving.agents import KeyboardAgent
 
 def f():
 
