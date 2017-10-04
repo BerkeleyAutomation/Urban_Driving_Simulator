@@ -6,31 +6,34 @@ class PositionState:
         self.dimensions = (1000, 1000)
         self.dynamic_objects = []
         self.static_objects = []
+        self.dynamic_collisions = None
+        self.static_collisions = None
         return
 
-    def done(self):
-        """
-        returns true if collisions are present
-        TODO: have this call collides_any
-        """
+    def get_collisions(self):
+        if (self.dynamic_collisions is not None and
+            self.static_collisions is not None):
+            return self.dynamic_collisions, self.static_collisions
+        self.dynamic_collisions = []
+        self.static_collisions = []
         for i, dobj in enumerate(self.dynamic_objects):
             for j, sobj in enumerate(self.static_objects):
                 if dobj.collides(sobj):
-                    return True
-            for j, dobj1 in enumerate(self.dynamic_objects[i+1:]):
-                if dobj.collides(dobj1):
-                    return True
-        return False
+                    self.static_collisions.append({i, j})
+            for j in range(i, len(self.dynamic_objects)):
+                dobj1 = self.dynamic_objects[j]
+                if j > i and dobj.collides(dobj1):
+                    self.dynamic_collisions.append({i, j})
+        return self.dynamic_collisions, self.static_collisions
 
-    def collides_any(self, obj_id):
-        """
-        checks for any collisions for a specified object
-        """
-        dobj = self.dynamic_objects[obj_id]
-        for j, sobj in enumerate(self.static_objects):
-            if dobj.collides(sobj):
-                return True
-        for j, dobj1 in enumerate(self.dynamic_objects):
-            if j is not obj_id and dobj.collides(dobj1):
-                return True
-        return False
+    def collides_any(self, agent_num=0):
+        if (self.dynamic_collisions is None or
+            self.static_collisions is None):
+            self.get_collisions()
+            
+        return any([agent_num in pair for pair in self.dynamic_collisions +
+                    self.static_collisions])
+
+    def reset_collisions(self):
+        self.dynamic_collisions = None
+        self.static_collisions = None

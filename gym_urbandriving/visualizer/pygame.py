@@ -79,8 +79,8 @@ class PyGameVisualizer:
             obj = pygame.transform.rotate(obj, rect.angle)
         surface.blit(obj, pos)
         
-        for c in rect.get_corners():
-            pygame.draw.circle(surface, (255, 0, 255), c.astype(int), 5)
+        # for c in rect.get_corners():
+        #     pygame.draw.circle(surface, (255, 0, 255), c.astype(int), 5)
         return
 
     def draw_circle(self, circ, surface):

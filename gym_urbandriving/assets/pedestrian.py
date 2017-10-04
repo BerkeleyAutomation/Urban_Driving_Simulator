@@ -3,7 +3,7 @@ from gym_urbandriving.assets.primitives.circle import Circle
 from gym_urbandriving.assets.terrain import Terrain
 
 class Pedestrian(Circle):
-    def __init__(self, x, y, radius=17, angle=0.0, vel=0.0, acc=0.0, max_vel=5.0, mass=100.0):
+    def __init__(self, x, y, radius=17, angle=0.0, vel=0.0, acc=0.0, max_vel=2.0, mass=100.0):
         Circle.__init__(self, x, y, radius, angle, sprite="person.png")
         self.vel = vel
         self.acc = acc

@@ -1,3 +1,4 @@
 from gym_urbandriving.agents.null_agent import NullAgent
 from gym_urbandriving.agents.keyboard_agent import KeyboardAgent
 from gym_urbandriving.agents.simple_avoidance_agent import SimpleAvoidanceAgent
+from gym_urbandriving.agents.accel_agent import AccelAgent

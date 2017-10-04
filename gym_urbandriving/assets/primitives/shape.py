@@ -17,22 +17,28 @@ class Shape:
         from gym_urbandriving.assets.primitives.circle import Circle
 
         types = {self.primitive, other.primitive}
+        center_dist = np.linalg.norm([self.x - other.x, self.y - other.y])
         if types == {Rectangle, Rectangle}:
-            if np.linalg.norm([self.x - other.x, self.y - other.y]) > \
-               self.halfdiag + other.halfdiag:
+            if center_dist > self.halfdiag + other.halfdiag:
                 return False
-            other_corners = other.get_corners()
-            has_collision = any([self.contains_point(point) for point in other_corners] + \
-                                [other.contains_point(point) for point in self.get_corners()])
-            return has_collision
+
+            for point in other.get_corners():
+                if self.contains_point(point):
+                    return True
+            for point in self.get_corners():
+                if other.contains_point(point):
+                    return True
+            return False
         elif types == {Circle, Circle}:
-            if np.linalg.norm([self.x - other.x, self.y - other.y]) > \
-               self.radius + other.radius:
+            if center_dist > self.radius + other.radius:
                 return False
             return True
         elif types == {Rectangle, Circle}:
             rect = self if self.primitive is Rectangle else other
             circle = self if self.primitive is Circle else other
+
+            if (center_dist > rect.halfdiag + circle.radius):
+                return False
 
             angle = np.radians(rect.angle+45)
             A = (circle.x + circle.radius*np.cos(angle),
@@ -47,7 +53,10 @@ class Shape:
             circ_corners = [A, B, C, D]
             rect_corners = rect.get_corners()
 
-            has_collision = any([circle.contains_point(point) for point in rect_corners] + \
-                                [rect.contains_point(point) for point in circ_corners])
-
-            return has_collision
+            for point in rect_corners:
+                if circle.contains_point(point):
+                    return True
+            for point in circ_corners:
+                if rect.contains_point(point):
+                    return True
+            return False

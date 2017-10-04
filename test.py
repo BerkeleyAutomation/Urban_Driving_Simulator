@@ -1,8 +1,9 @@
 import gym
 import gym_urbandriving as uds
 import cProfile
-from gym_urbandriving.assets import Terrain, Lane, Street, Sidewalk, KinematicCar, Pedestrian
-from gym_urbandriving.agents import KeyboardAgent
+from gym_urbandriving.assets import Terrain, Lane, Street, Sidewalk, KinematicCar, Pedestrian, Car
+from gym_urbandriving.agents import KeyboardAgent, SimpleAvoidanceAgent, AccelAgent
+from threading import Thread
 
 def f():
 
@@ -32,21 +33,29 @@ def f():
                                  Sidewalk(375, 825, 50, 350),
                                  Sidewalk(625, 825, 50, 350),
     ]
-    init_state.dynamic_objects = [KinematicCar(500, 100, angle=-92, vel=5),
-                                  KinematicCar(100, 500, angle=0, vel=5),
-                                  Pedestrian(100, 370, vel=2)
+    init_state.dynamic_objects = [KinematicCar(450, 100, angle=-90, vel=10),
+                                  KinematicCar(50, 550, angle=0, vel=10),
+                                  KinematicCar(250, 550, angle=0, vel=10),
+                                  KinematicCar(900, 450, angle=-180, vel=10),
+                                  KinematicCar(550, 900, angle=-270, vel=0),
+                                  Pedestrian(350, 370, vel=2)
     ]
 
-    env = uds.UrbanDrivingEnv(visualizer=vis,init_state=init_state)
+    env = uds.UrbanDrivingEnv(visualizer=vis,init_state=init_state,
+                              bgagent=AccelAgent,
+                              max_time=500)
     state= init_state
-    agent = KeyboardAgent()
+    agent = AccelAgent()
     action = None
+    def job():
+        env._render()
     while(True):
         action = agent.eval_policy(state)
-        state, reward, done = env._step(action)
+        state, reward, done, info_dict = env._step(action)
         env._render()
         if done:
             print("done")
+            print(info_dict["dynamic_collisions"])
             env._reset()
 
 cProfile.run('f()', 'stats')
