@@ -5,6 +5,7 @@ from gym_urbandriving.assets import Terrain, Lane, Street, Sidewalk, KinematicCa
 from gym_urbandriving.agents import KeyboardAgent, SimpleAvoidanceAgent, AccelAgent, NullAgent
 
 import numpy as np
+import pickle
 
 def randomizer(state):
     state.dynamic_objects = []
@@ -46,6 +47,7 @@ def randomizer(state):
                (370, 650, 90), (370, 700, 90), (370, 750, 90),
                (630, 650, 90), (630, 700, 90), (630, 750, 90),
     ]
+
     for i in range(6):
         a = np.random.uniform()
         if a > 0.7:
@@ -62,7 +64,19 @@ def randomizer(state):
             state.dynamic_objects.append(KinematicCar(x, y, angle=angle, vel=vel))
     return state
 
+
+def vectorize_state(state):
+    state_vec = []
+    for obj in state.dynamic_objects:
+        state_vec.append(obj.x)
+        state_vec.append(obj.y)
+        state_vec.append(obj.vel)
+        state_vec.append(obj.angle)
+    return state_vec
+
 def f():
+    saved_states = []
+    saved_actions = []
 
     vis = uds.PyGameVisualizer((800, 800))
     init_state = uds.state.PositionState()
@@ -80,11 +94,17 @@ def f():
         env._render()
     while(True):
         action = agent.eval_policy(state)
+        saved_states.append(vectorize_state(state))
         state, reward, done, info_dict = env._step(action)
+        saved_actions.append(info_dict["saved_actions"])
         env._render()
         if done:
+            pickle.dump((saved_states, saved_actions),open("data/"+str(np.random.random())+"dump.data", "wb+"))
+
             print("done")
             print(info_dict["dynamic_collisions"])
             env._reset()
+            saved_states = []
+            saved_actions = []
 
 cProfile.run('f()', 'stats')

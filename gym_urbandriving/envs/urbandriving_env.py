@@ -52,7 +52,9 @@ class UrbanDrivingEnv(gym.Env):
         done = (self.time > self.max_time) or len(dynamic_coll) or len(static_coll)
 
         info_dict = {"dynamic_collisions":dynamic_coll,
-                     "static_collisions":static_coll}
+                     "static_collisions":static_coll,
+                     "saved_actions":actions}
+ 
         return state, reward, done, info_dict
 
 
