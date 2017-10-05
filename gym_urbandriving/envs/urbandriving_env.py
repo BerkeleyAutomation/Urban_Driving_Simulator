@@ -51,9 +51,14 @@ class UrbanDrivingEnv(gym.Env):
         reward = self.reward_fn(self.current_state)
         done = (self.time > self.max_time) or len(dynamic_coll) or len(static_coll)
 
+        predict_accuracy = None
+        if self.bgagent_type == ModelAgent:
+          predict_accuracy = [0 if o.ticks == 0 else o.correct/o.ticks  for o in self.bg_agents]
+
         info_dict = {"dynamic_collisions":dynamic_coll,
                      "static_collisions":static_coll,
-                     "saved_actions":actions}
+                     "saved_actions":actions,
+                     "predict_accuracy": predict_accuracy}
  
         return state, reward, done, info_dict
 

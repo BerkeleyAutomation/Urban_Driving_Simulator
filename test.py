@@ -2,7 +2,7 @@ import gym
 import gym_urbandriving as uds
 import cProfile
 from gym_urbandriving.assets import Terrain, Lane, Street, Sidewalk, KinematicCar, Pedestrian, Car
-from gym_urbandriving.agents import KeyboardAgent, SimpleAvoidanceAgent, AccelAgent, NullAgent
+from gym_urbandriving.agents import ModelAgent, KeyboardAgent, SimpleAvoidanceAgent, AccelAgent, NullAgent
 
 import numpy as np
 import pickle
@@ -50,7 +50,7 @@ def randomizer(state):
 
     for i in range(6):
         a = np.random.uniform()
-        if a > 0.7:
+        if a > 0.85:
             b = np.random.random_integers(0, len(ped_pos) - 1)
             x, y, angle = ped_pos[b]
             vel = np.random.uniform(0, 2)
@@ -68,15 +68,16 @@ def randomizer(state):
 def vectorize_state(state):
     state_vec = []
     for obj in state.dynamic_objects:
-        state_vec.append(obj.x)
-        state_vec.append(obj.y)
-        state_vec.append(obj.vel)
-        state_vec.append(obj.angle)
+        state_vec.append((obj.x-500)/500)
+        state_vec.append((obj.y-500)/500)
+        state_vec.append((obj.vel-10)/10)
+        state_vec.append(obj.angle/180)
     return state_vec
 
 def f():
     saved_states = []
     saved_actions = []
+    accs = []
 
     vis = uds.PyGameVisualizer((800, 800))
     init_state = uds.state.PositionState()
@@ -85,7 +86,7 @@ def f():
     env = uds.UrbanDrivingEnv(init_state=init_state,
                               visualizer=vis,
                               bgagent=AccelAgent,
-                              max_time=100,
+                              max_time=75,
                               randomizer=randomizer)
     state = init_state
     agent = AccelAgent()
@@ -99,10 +100,21 @@ def f():
         saved_actions.append(info_dict["saved_actions"])
         env._render()
         if done:
-            pickle.dump((saved_states, saved_actions),open("data/"+str(np.random.random())+"dump.data", "wb+"))
-
+            if type(agent) is AccelAgent:
+                print(saved_states[0])
+                pickle.dump((saved_states, saved_actions),open("data/"+str(np.random.random())+"dump.data", "wb+"))
+                
             print("done")
             print(info_dict["dynamic_collisions"])
+            
+            if type(agent) is ModelAgent:
+              info_dict["predict_accuracy"][0] = agent.correct/agent.ticks
+              print(info_dict["predict_accuracy"])
+              for e in info_dict["predict_accuracy"]:
+                accs.append(1-e)
+              print(np.average(accs))
+             
+
             env._reset()
             saved_states = []
             saved_actions = []
