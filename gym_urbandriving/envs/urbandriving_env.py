@@ -7,9 +7,13 @@ import numpy as np
 class UrbanDrivingEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
-    def __init__(self, visualizer=None, init_state=None,
-                 reward_fn=lambda x: 0, max_time=500,
-                 bgagent=NullAgent):
+    def __init__(self,
+                 init_state,
+                 visualizer=None,
+                 reward_fn=lambda x: 0,
+                 max_time=500,
+                 bgagent=NullAgent,
+                 randomizer=lambda state: state):
         self.visualizer = visualizer
         self.reward_fn = reward_fn
         self.init_state = init_state
@@ -18,6 +22,7 @@ class UrbanDrivingEnv(gym.Env):
         self.max_time = max_time
         self.current_state = PositionState()
         self.time = 0
+        self.randomizer = randomizer
 
         self._reset()
 
@@ -53,6 +58,7 @@ class UrbanDrivingEnv(gym.Env):
 
     def _reset(self):
         self.time = 0
+        self.init_state = self.randomizer(self.init_state)
         self.current_state = deepcopy(self.init_state)
         assert(self.current_state is not None)
         self.bg_agents = [self.bgagent_type(i) \
