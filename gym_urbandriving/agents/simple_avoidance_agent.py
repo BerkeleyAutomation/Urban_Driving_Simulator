@@ -1,4 +1,4 @@
-from gym_urbandriving.state import PositionState
+
 from copy import deepcopy
 import numpy as np
 

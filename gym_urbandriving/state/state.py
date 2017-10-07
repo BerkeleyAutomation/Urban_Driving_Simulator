@@ -2,10 +2,10 @@ import gym
 from copy import deepcopy
 
 class PositionState:
+    static_objects = []
     def __init__(self):
         self.dimensions = (1000, 1000)
         self.dynamic_objects = []
-        self.static_objects = []
         self.dynamic_collisions = None
         self.static_collisions = None
         return
@@ -37,3 +37,16 @@ class PositionState:
     def reset_collisions(self):
         self.dynamic_collisions = None
         self.static_collisions = None
+
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        result = cls.__new__(cls)
+        memo[id(self)] = result
+        for k, v in self.__dict__.items():
+            if (k == "static_objects"):
+                setattr(result, k, v)
+            elif (k in {"dynamic_collisions", "static_collisions"}):
+                setattr(result, k, None)
+            else:
+                setattr(result, k, deepcopy(v, memo))
+        return result

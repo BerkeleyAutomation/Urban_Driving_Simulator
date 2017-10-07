@@ -18,9 +18,12 @@ class Shape:
 
         types = {self.primitive, other.primitive}
         center_dist = np.linalg.norm([self.x - other.x, self.y - other.y])
+        min_dist = min(self.xdim, self.ydim)/2 + min(self.xdim, self.ydim)/2
         if types == {Rectangle, Rectangle}:
             if center_dist > self.halfdiag + other.halfdiag:
                 return False
+            if center_dist < min_dist:
+                return True
 
             for point in other.get_corners():
                 if self.contains_point(point):

@@ -10,7 +10,8 @@ from gym import spaces
 
 class Car(Rectangle):
     
-    def __init__(self, x, y, xdim=100, ydim=50, angle=0.0, vel=0.0, acc=0.0, max_vel=10.0, mass=100.0):
+    def __init__(self, x, y, xdim=100, ydim=50, angle=0.0, vel=0.0, acc=0.0,
+                 max_vel=7.5, mass=100.0):
         Rectangle.__init__(self, x, y, xdim, ydim, angle, sprite="grey_car.png")
         self.vel = vel
         self.acc = acc
@@ -58,6 +59,8 @@ class Car(Rectangle):
 
     def collides(self, other):
         from gym_urbandriving.assets.kinematic_car import KinematicCar
+        from gym_urbandriving.assets.lane import Lane
         if type(other) in {Terrain, Sidewalk, Car, KinematicCar, Pedestrian}:
             return self.intersect(other)
+
         return False
