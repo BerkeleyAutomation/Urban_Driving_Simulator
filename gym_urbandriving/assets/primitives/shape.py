@@ -18,8 +18,9 @@ class Shape:
 
         types = {self.primitive, other.primitive}
         center_dist = np.linalg.norm([self.x - other.x, self.y - other.y])
-        min_dist = min(self.xdim, self.ydim)/2 + min(self.xdim, self.ydim)/2
+
         if types == {Rectangle, Rectangle}:
+            min_dist = min(self.xdim, self.ydim)/2 + min(self.xdim, self.ydim)/2
             if center_dist > self.halfdiag + other.halfdiag:
                 return False
             if center_dist < min_dist:
