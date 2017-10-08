@@ -6,6 +6,7 @@ from gym_urbandriving.agents import ModelAgent, KeyboardAgent, SimpleAvoidanceAg
 
 import numpy as np
 import pickle
+import time
 
 def randomizer(state):
     state.dynamic_objects = []
@@ -33,11 +34,11 @@ def randomizer(state):
                                  Sidewalk(375, 825, 50, 350),
                                  Sidewalk(625, 825, 50, 350),
     ]
-    car_pos = [(450, 50, -90), (450, 200, -90), (450, 350, -90),
-               (550, 950, 90), (550, 800, 90), (550, 650, 90),
-               (50, 550, 0), (200, 550, 0), (350, 550, 0),
-               (950, 450, -180), (800, 450, -180), (650, 450, -180),
-    ]
+    car_pos_1 = [(450, 200, -90), (450, 350, -90)]
+    car_pos_2 = [(550, 700, 90), (550, 550, 90)]
+    car_pos_3 = [(200, 550, 0), (350, 550, 0)]
+    car_pos_4 = [(700, 450, -180), (550, 450, -180)]
+    
     ped_pos = [(350, 370, 0), (300, 370, 0), (250, 370, 0),
                (350, 630, 0), (300, 630, 0), (250, 630, 0),
                (650, 370, -180), (700, 370, -180), (750, 370, -180),
@@ -47,37 +48,44 @@ def randomizer(state):
                (370, 650, 90), (370, 700, 90), (370, 750, 90),
                (630, 650, 90), (630, 700, 90), (630, 750, 90),
     ]
-
-    for i in range(6):
+    
+    for car_pos in [car_pos_3, car_pos_4]:
         a = np.random.uniform()
-        if a > 0.85:
-            b = np.random.random_integers(0, len(ped_pos) - 1)
-            x, y, angle = ped_pos[b]
-            vel = np.random.uniform(0, 2)
-            ped_pos.pop(b)
-            state.dynamic_objects.append(Pedestrian(x, y, angle=angle, vel=vel))
+        if a>.5:
+            x, y, angle = car_pos[0]
+            vel = np.random.uniform(0, 10)
+            state.dynamic_objects.append(KinematicCar(x+25*np.random.normal(), y, angle=angle, vel=vel))
         else:
-            b = np.random.random_integers(0, len(car_pos) - 1)
-            x, y, angle = car_pos[b]
-            vel = np.random.uniform(0, 20)
-            car_pos.pop(b)
-            state.dynamic_objects.append(KinematicCar(x, y, angle=angle, vel=vel))
+            x, y, angle = car_pos[1]
+            vel = np.random.uniform(0, 10)
+            state.dynamic_objects.append(KinematicCar(x+25*np.random.normal(), y, angle=angle, vel=vel))
+    for car_pos in [ car_pos_1, car_pos_2]:
+        a = np.random.uniform()
+        if a>.5:
+            x, y, angle = car_pos[0]
+            vel = np.random.uniform(0, 10)
+            state.dynamic_objects.append(KinematicCar(x, y+25*np.random.normal(), angle=angle, vel=vel))
+        else:
+            x, y, angle = car_pos[1]
+            vel = np.random.uniform(0, 10)
+            state.dynamic_objects.append(KinematicCar(x, y+25*np.random.normal(), angle=angle, vel=vel))
+
     return state
 
 
 def vectorize_state(state):
     state_vec = []
     for obj in state.dynamic_objects:
-        state_vec.append((obj.x-500)/500)
-        state_vec.append((obj.y-500)/500)
-        state_vec.append((obj.vel-10)/10)
-        state_vec.append(obj.angle/180)
+        state_vec.append(np.array([(obj.x-500)/500, (obj.y-500)/500, (obj.vel-10)/10]))
     return state_vec
 
 def f():
     saved_states = []
     saved_actions = []
-    accs = []
+    accs = 0
+    totalticks = 0
+    num_exps = 0
+    start_time = time.time()
 
     vis = uds.PyGameVisualizer((800, 800))
     init_state = uds.state.PositionState()
@@ -85,11 +93,13 @@ def f():
 
     env = uds.UrbanDrivingEnv(init_state=init_state,
                               visualizer=vis,
-                              bgagent=AccelAgent,
-                              max_time=75,
+                              bgagent=ModelAgent,
+                              max_time=100,
                               randomizer=randomizer)
     state = init_state
-    agent = AccelAgent()
+    agent = ModelAgent()
+    reset_counter = 0
+    
     action = None
     def job():
         env._render()
@@ -97,22 +107,35 @@ def f():
         action = agent.eval_policy(state)
         saved_states.append(vectorize_state(state))
         state, reward, done, info_dict = env._step(action)
+        #print(info_dict["saved_actions"])
         saved_actions.append(info_dict["saved_actions"])
+        
+        if info_dict["saved_actions"] == [(0, 1), (0, 1), (0, 1), (0, 1)]:
+            reset_counter+=1
+        else:
+            reset_counter = 0
+
+        totalticks += 1
         env._render()
-        if done:
+        
+        if done or reset_counter >10:
+            reset_counter = -10
+            """
             if type(agent) is AccelAgent:
                 print(saved_states[0])
                 pickle.dump((saved_states, saved_actions),open("data/"+str(np.random.random())+"dump.data", "wb+"))
-                
-            print("done")
-            print(info_dict["dynamic_collisions"])
+            """
+            #print("done")
+            print((time.time()-start_time)/totalticks, totalticks)
+            #print(info_dict["dynamic_collisions"])
             
             if type(agent) is ModelAgent:
-              info_dict["predict_accuracy"][0] = agent.correct/agent.ticks
-              print(info_dict["predict_accuracy"])
-              for e in info_dict["predict_accuracy"]:
-                accs.append(1-e)
-              print(np.average(accs))
+              accs += info_dict["predict_accuracy"]
+              #print(accs/totalticks)
+              num_exps += 1
+              if num_exps == 131:
+                  exit
+
              
 
             env._reset()

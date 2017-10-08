@@ -53,7 +53,7 @@ class UrbanDrivingEnv(gym.Env):
 
         predict_accuracy = None
         if self.bgagent_type == ModelAgent:
-          predict_accuracy = [0 if o.ticks == 0 else o.correct/o.ticks  for o in self.bg_agents]
+          predict_accuracy = sum([o.score for o in self.bg_agents])/len(self.bg_agents)
 
         info_dict = {"dynamic_collisions":dynamic_coll,
                      "static_collisions":static_coll,

@@ -1,5 +1,4 @@
 from gym_urbandriving.state import PositionState
-from sklearn import linear_model
 import pickle
 
 from copy import deepcopy
@@ -9,18 +8,19 @@ class ModelAgent:
     def __init__(self, agent_num=0):
         self.agent_num = agent_num
         self.model = pickle.load(open("model.model", "rb"))
-        self.correct = 0
-        self.ticks = 0
+        self.score = 0
         return
     
     def vectorize_state(self, state):
-        state_vec = []
-        for obj in state.dynamic_objects:
-            state_vec.append((obj.x-500)/500)
-            state_vec.append((obj.y-500)/500)
-            state_vec.append((obj.vel-10)/10)
-            state_vec.append(obj.angle/180)
-        return state_vec
+      state_vec = []
+      for obj in state.dynamic_objects:
+        state_vec.append(np.array([(obj.x-500)/500, (obj.y-500)/500, (obj.vel-10)/10]))
+
+      s = []
+      for i in range(len(state_vec)):
+        if i != self.agent_num:
+          s.extend([e for e in state_vec[i]-state_vec[self.agent_num]])
+      return s
 
     
     def eval_policy(self, state, nsteps=8):
@@ -28,7 +28,7 @@ class ModelAgent:
         If we can accelerate, see if we crash in nsteps.
         If we crash, decelerate, else accelerate
         """
-
+        """
         # Accel agent's prediction
         from gym_urbandriving import UrbanDrivingEnv
         planning_env = UrbanDrivingEnv(init_state=state)
@@ -55,12 +55,21 @@ class ModelAgent:
             if time > best_time:
                 best_action = action
                 best_time = time
-
-        # Our prediction
-        pred_class = self.model.predict(np.matrix([[self.agent_num] + self.vectorize_state(state)]))
-        our_action = actions[2-pred_class[0]]
-        if our_action == best_action:
-            self.correct += 1
-        self.ticks += 1
+        """
         
+        # Our prediction
+        pred_class = self.model.predict(np.matrix([self.vectorize_state(state)]))
+        our_action = (0,pred_class[0])
+        
+        our_action = (0,1)
+        if pred_class<0:
+            our_action = (0,-1)
+        elif pred_class<.5:
+            our_action = (0,0)
+        else:
+            our_action = (0,1)
+
+        
+        #self.score += (best_action[1]-pred_class[0])**2
+    
         return our_action
