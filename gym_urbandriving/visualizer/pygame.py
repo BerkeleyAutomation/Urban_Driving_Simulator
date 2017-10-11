@@ -51,6 +51,20 @@ class PyGameVisualizer:
         new_surface = pygame.transform.scale(new_surface, (self.screen_dim))
         self.surface.blit(new_surface, (0, 0), None)
         return
+
+    def render_collisions(self, state, valid_area):
+        new_surface = pygame.Surface((valid_area[1] - valid_area[0],
+                                      valid_area[3] - valid_area[2]),
+                                     pygame.SRCALPHA)
+        dynamic_coll, static_coll = state.get_collisions()
+        for obj1id, obj2id in dynamic_coll:
+            obj1 = state.dynamic_objects[obj1id]
+            obj2 = state.dynamic_objects[obj2id]
+            pygame.draw.circle(new_surface, (255, 0, 255), obj1.get_pos().astype(int), 5)
+            pygame.draw.circle(new_surface, (255, 0, 255), obj2.get_pos().astype(int), 5)
+        new_surface = pygame.transform.scale(new_surface, (self.screen_dim))
+        self.surface.blit(new_surface, (0, 0), None)
+        return
     
     def render(self, state, valid_area, rerender_statics=False):
         if (rerender_statics):
@@ -62,6 +76,7 @@ class PyGameVisualizer:
 
         self.render_statics(state, valid_area)
         self.render_dynamics(state, valid_area)
+        self.render_collisions(state, valid_area)
 
         pygame.display.flip()
 
@@ -78,9 +93,7 @@ class PyGameVisualizer:
             pos = (x_off, y_off)
             obj = pygame.transform.rotate(obj, rect.angle)
         surface.blit(obj, pos)
-        
-        # for c in rect.get_corners():
-        #     pygame.draw.circle(surface, (255, 0, 255), c.astype(int), 5)
+
         return
 
     def draw_circle(self, circ, surface):

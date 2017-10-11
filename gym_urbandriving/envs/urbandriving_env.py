@@ -1,8 +1,14 @@
 import gym
 from copy import deepcopy
-from gym_urbandriving.state import *
 from gym_urbandriving.agents import *
 import numpy as np
+from multiprocessing import Pool, Queue
+
+
+def agent_update(dobj, agent, state, agentnum):
+    action = agent.eval_policy(state)
+    dobj.step(action)
+    return agentnum, dobj
 
 class UrbanDrivingEnv(gym.Env):
     metadata = {'render.modes': ['human']}
@@ -13,17 +19,19 @@ class UrbanDrivingEnv(gym.Env):
                  reward_fn=lambda x: 0,
                  max_time=500,
                  bgagent=NullAgent,
-                 randomizer=lambda state: state):
+                 randomize=False,
+                 nthreads=1):
         self.visualizer = visualizer
         self.reward_fn = reward_fn
         self.init_state = init_state
         self.bgagent_type = bgagent
         self.bg_agents = []
         self.max_time = max_time
-        self.current_state = PositionState()
         self.time = 0
-        self.randomizer = randomizer
-
+        self.randomize = randomize
+        self.nthreads = nthreads
+        if (self.nthreads > 1):
+            self.thread_pool = Pool(processes=self.nthreads)
         self._reset()
 
         self.current_state = deepcopy(self.init_state)
@@ -34,12 +42,24 @@ class UrbanDrivingEnv(gym.Env):
         actions = [None]*len(self.current_state.dynamic_objects)
         actions[agentnum] = action
         self.current_state.reset_collisions()
-
-        for i in range(1, len(self.current_state.dynamic_objects)):
-            actions[i] = self.bg_agents[i].eval_policy(self.current_state,)
-        actions[agentnum] = action
-        for i, dynamic_object in enumerate(self.current_state.dynamic_objects):
-            dynamic_object.step(actions[i])
+        if self.nthreads == 1:
+            for i in range(1, len(self.current_state.dynamic_objects)):
+                actions[i] = self.bg_agents[i].eval_policy(self.current_state,)
+            actions[agentnum] = action
+            for i, dynamic_object in enumerate(self.current_state.dynamic_objects):
+                dynamic_object.step(actions[i])
+        else:
+            dobjs = [self.thread_pool.apply_async(agent_update,
+                                                  (dobj, agent, self.current_state,
+                                                   i)) \
+                     for i, (dobj, agent) in enumerate(zip(self.current_state.dynamic_objects,
+                                               self.bg_agents)) \
+                     if i is not agentnum]
+           
+            for res in dobjs:
+                i, dobj = res.get()
+                self.current_state.dynamic_objects[i] = dobj
+            self.current_state.dynamic_objects[agentnum].step(action)
 
 
         self.time += 1
@@ -65,7 +85,8 @@ class UrbanDrivingEnv(gym.Env):
 
     def _reset(self):
         self.time = 0
-        self.init_state = self.randomizer(self.init_state)
+        if self.randomize:
+            self.init_state.randomize()
         self.current_state = deepcopy(self.init_state)
         assert(self.current_state is not None)
         self.bg_agents = [self.bgagent_type(i) \
@@ -77,11 +98,12 @@ class UrbanDrivingEnv(gym.Env):
         if close:
             return
         if self.visualizer:
-            self.visualizer.render(self.current_state, [0, self.current_state.dimensions[0],
-                                                        0, self.current_state.dimensions[1]])
+            window = [0, self.current_state.dimensions[0],
+                      0, self.current_state.dimensions[1]]
+            self.visualizer.render(self.current_state, window)
 
-    def get_state_copy(self, state_type=PositionState):
-        if state_type == PositionState:
+    def get_state_copy(self, state_type="raw"):
+        if state_type == "raw":
             return deepcopy(self.current_state)
         elif state_type == None:
             return None

@@ -33,7 +33,8 @@ class Rectangle(Shape):
         centers = np.array([self.x, self.y])
         signs = np.array([[1,1], [1,-1], [-1,1], [-1,-1]])
         corner_offsets = signs * corner_offsets
-        rotation_mat = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
+        rotation_mat = np.array([[np.cos(angle), -np.sin(angle)],
+                                 [np.sin(angle), np.cos(angle)]])
         rotated_corners = np.dot(corner_offsets, rotation_mat.T) + centers
         self.corners = rotated_corners
         return rotated_corners
