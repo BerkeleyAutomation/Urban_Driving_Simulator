@@ -77,7 +77,7 @@ class UrbanDrivingEnv(gym.Env):
 
         info_dict = {"dynamic_collisions":dynamic_coll,
                      "static_collisions":static_coll,
-                     "saved_actions":actions,
+                     "saved_actions": actions,
                      "predict_accuracy": predict_accuracy}
  
         return state, reward, done, info_dict
