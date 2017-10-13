@@ -1,5 +1,6 @@
 import gym
 from copy import deepcopy
+import numpy as np
 
 class PositionState:
     static_objects = []
@@ -50,3 +51,11 @@ class PositionState:
             else:
                 setattr(result, k, deepcopy(v, memo))
         return result
+
+    # TODO: fix this to get a better featurization
+    def vectorize_state(self):      
+        state_vec = []
+        for obj in self.dynamic_objects:
+            state_vec.extend([(obj.x-500)/500, (obj.y-500)/500, (obj.vel-10)/10])
+        return state_vec
+    
