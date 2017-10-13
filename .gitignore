@@ -6,3 +6,6 @@
 **/.DS_Store
 stats/
 *.pyc
+*.swp
+*.swo
+data/
