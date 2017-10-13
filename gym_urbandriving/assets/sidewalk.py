@@ -4,7 +4,7 @@ from gym_urbandriving.assets.pedestrian import Pedestrian
 
 class Sidewalk(Rectangle):
     def __init__(self, x, y, xdim, ydim):
-        Rectangle.__init__(self, x, y, xdim, ydim, sprite="gray.png");
+        Rectangle.__init__(self, x, y, xdim, ydim, sprite="gray.png", static=True);
 
     def generate_man(self, man_type=Pedestrian):
         man = man_type(0, 0, angle=self.angle)

@@ -6,7 +6,7 @@ import numpy as np
 
 class Lane(Street):
     def __init__(self, x, y, xdim, ydim, angle=0.0):
-        Rectangle.__init__(self, x, y, xdim, ydim, angle=angle, sprite="lane.png");
+        Rectangle.__init__(self, x, y, xdim, ydim, angle=angle, sprite="lane.png", static=True);
 
     def generate_car(self, car_type=KinematicCar):
         car = car_type(0, 0, angle=self.angle+np.random.uniform(-10, 10))

@@ -3,7 +3,7 @@ from gym_urbandriving.assets.primitives.shape import Shape
 
 
 class Rectangle(Shape):
-    def __init__(self, x, y, xdim, ydim, angle=0, sprite="no_texture.png"):
+    def __init__(self, x, y, xdim, ydim, angle=0, sprite="no_texture.png", static=False):
         """
         Initializes rectangle object.
 
@@ -12,7 +12,7 @@ class Rectangle(Shape):
             y: float, starting y position.
             angle: float, starting angle of car in degrees.
         """
-        Shape.__init__(self, x, y, sprite)
+        Shape.__init__(self, x, y, sprite, static=static)
         self.angle = angle
         self.xdim = xdim
         self.ydim = ydim
@@ -20,6 +20,16 @@ class Rectangle(Shape):
         self._x, self._y = None, None
         self.corners = self.get_corners()
         self.primitive = Rectangle
+        self.orthogonal = self.static and not self.angle % 90
+        if self.orthogonal:
+            if not self.angle % 180:
+                self.max_x, self.min_x = x + xdim/2, x-xdim/2
+                self.max_y, self.min_y = y + ydim/2, y-ydim/2
+            else:
+                self.max_y, self.min_y = x + xdim/2, x-xdim/2
+                self.max_x, self.min_x = y + ydim/2, y-ydim/2
+            
+            
 
     def get_corners(self):
         if self._x == self.x and self._y == self.y and self._angle == self.angle:
@@ -40,6 +50,9 @@ class Rectangle(Shape):
         return rotated_corners
     
     def contains_point(self, point):
+        if self.orthogonal:
+            x, y = point
+            return self.min_x < x < self.max_x and self.min_y < y < self.max_y
         a, b, c, d = self.get_corners()
         AM, AB, AC = point - a, b - a, c - a
         c1 = 0 <= np.dot(AM, AB) <= np.dot(AB, AB)
@@ -47,3 +60,4 @@ class Rectangle(Shape):
         contains = c1 and c2
         return contains
 
+ 

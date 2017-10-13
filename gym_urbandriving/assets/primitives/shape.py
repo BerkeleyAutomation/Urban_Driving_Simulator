@@ -4,10 +4,11 @@ SPRITE_DIR = "gym_urbandriving/visualizer/sprites/"
 
 
 class Shape:
-    def __init__(self, x, y, sprite="no_texture.png"):
+    def __init__(self, x, y, sprite="no_texture.png", static=False):
         self.x = x
         self.y = y
         self.sprite = SPRITE_DIR + sprite
+        self.static = static
 
     def get_pos(self):
         return np.array([self.x, self.y])
@@ -26,11 +27,11 @@ class Shape:
             if center_dist < min_dist:
                 return True
 
-            for point in other.get_corners():
-                if self.contains_point(point):
-                    return True
             for point in self.get_corners():
                 if other.contains_point(point):
+                    return True
+            for point in other.get_corners():
+                if self.contains_point(point):
                     return True
             return False
         elif types == {Circle, Circle}:

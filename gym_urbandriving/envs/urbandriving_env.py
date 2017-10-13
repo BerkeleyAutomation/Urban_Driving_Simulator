@@ -39,13 +39,18 @@ class UrbanDrivingEnv(gym.Env):
         assert(self.current_state is not None)
 
     def _step(self, action, agentnum=0, copy_state=True):
+        import time
         actions = [None]*len(self.current_state.dynamic_objects)
         actions[agentnum] = action
         self.current_state.reset_collisions()
         if self.nthreads == 1:
+            if self.bgagent_type is not NullAgent:
+                t = time.time()
             for i in range(1, len(self.current_state.dynamic_objects)):
                 actions[i] = self.bg_agents[i].eval_policy(self.current_state,)
             actions[agentnum] = action
+            if self.bgagent_type is not NullAgent:
+                print(time.time() - t)
             for i, dynamic_object in enumerate(self.current_state.dynamic_objects):
                 dynamic_object.step(actions[i])
         else:
