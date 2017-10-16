@@ -8,10 +8,23 @@ import time
 import numpy as np
 
 class PyGameVisualizer:
+
     """
-    pygame visualizer class renders any state passed into it through render using pygame
+    Py Game Visualizer.
+
     """
+
     def __init__(self, screen_dim):
+        """
+        Initializes pygame and its drawing surface. 
+
+        Parameters
+        ----------
+        screen_dim: 
+            Size of the window display. 
+
+        """
+
         pygame.init()
         self.screen_dim = screen_dim
         self.surface = pygame.display.set_mode(screen_dim)
@@ -21,7 +34,16 @@ class PyGameVisualizer:
 
     def render_statics(self, state, valid_area):
         """
-        renders static objects of the state
+        Renders the static objects of the state such as sidewalks and streets.
+
+        Parameters
+        ----------
+        state: PositionState
+            State object of the environment to be rendered. Should contain static and dynamic objects as well as collision checking information. 
+
+        valid_area: list
+            Two points in the form [x_1, x_2, y_1, y_2] that define the viewing window of the state. 
+
         """
         if self.static_surface:
             self.surface.blit(self.static_surface, (0, 0))
@@ -40,7 +62,16 @@ class PyGameVisualizer:
 
     def render_dynamics(self, state, valid_area):
         """
-        renders dynamic objects of the state
+        Renders dynamic objects of the state such as pedestrians and cars.
+
+        Parameters
+        ----------
+        state: PositionState
+            State object of the environment to be rendered. Should contain static and dynamic objects as well as collision checking information. 
+
+        valid_area: list
+            Two points in the form [x_1, x_2, y_1, y_2] that define the viewing window of the state. 
+
         """
         new_surface = pygame.Surface((valid_area[1] - valid_area[0],
                                       valid_area[3] - valid_area[2]),
@@ -53,6 +84,18 @@ class PyGameVisualizer:
         return
 
     def render_collisions(self, state, valid_area):
+        """
+        Renders a small circle on colliding cars for visual inspection of collisions.
+
+        Parameters
+        ----------
+        state: PositionState
+            State object of the environment to be rendered. Should contain static and dynamic objects as well as collision checking information. 
+
+        valid_area: list
+            Two points in the form [x_1, x_2, y_1, y_2] that define the viewing window of the state. 
+
+        """
         new_surface = pygame.Surface((valid_area[1] - valid_area[0],
                                       valid_area[3] - valid_area[2]),
                                      pygame.SRCALPHA)
@@ -66,7 +109,46 @@ class PyGameVisualizer:
         self.surface.blit(new_surface, (0, 0), None)
         return
     
-    def render(self, state, valid_area, rerender_statics=False):
+    def render_waypoints(self, waypoints, valid_area):
+        """
+        Renders dynamic objects of the state such as pedestrians and cars.
+
+        Parameters
+        ----------
+        waypoints: list
+            A list of [x, y] points that can be marked on the visualizer to use as guides. 
+
+        valid_area: list
+            Two points in the form [x_1, x_2, y_1, y_2] that define the viewing window of the state. 
+
+        """
+        new_surface = pygame.Surface((valid_area[1] - valid_area[0],
+                                      valid_area[3] - valid_area[2]),
+                                     pygame.SRCALPHA)
+        for w in waypoints:
+            pygame.draw.circle(new_surface, (0, 255, 255), [(int)(w[0]), (int)(w[1])], 5)
+        new_surface = pygame.transform.scale(new_surface, (self.screen_dim))
+        self.surface.blit(new_surface, (0, 0), None)
+        return
+
+    def render(self, state, valid_area, rerender_statics=False, waypoints=[]):
+        """
+        Renders the state and waypoints with lazy re-rerendering of static objects as needed. 
+
+        Parameters
+        ----------
+        state: PositionState
+            State object of the environment to be rendered. Should contain static and dynamic objects as well as collision checking information. 
+
+        valid_area: list
+            Two points in the form [x_1, x_2, y_1, y_2] that define the viewing window of the state. 
+
+        rerender_statics: bool
+            Whether to re-render static objects.
+
+        waypoints: list
+            Waypoints to add into the visualizer
+        """
         if (rerender_statics):
             self.static_surface = None
 
@@ -77,6 +159,7 @@ class PyGameVisualizer:
         self.render_statics(state, valid_area)
         self.render_dynamics(state, valid_area)
         self.render_collisions(state, valid_area)
+        self.render_waypoints(waypoints, valid_area)
 
         pygame.display.flip()
 

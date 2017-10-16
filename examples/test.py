@@ -3,7 +3,7 @@ import gym_urbandriving as uds
 import cProfile
 import time
 
-from gym_urbandriving.agents import KeyboardAgent, SimpleAvoidanceAgent, AccelAgent, NullAgent
+from gym_urbandriving.agents import KeyboardAgent, AccelAgent, NullAgent
 
 import numpy as np
 
@@ -34,5 +34,7 @@ def f():
             time.sleep(1)
             print(info_dict["dynamic_collisions"])
             env._reset()
+            state = env.current_state
+
 
 cProfile.run('f()', 'stats')
