@@ -10,7 +10,7 @@ from gym import spaces
 
 class Car(Rectangle):
     
-    def __init__(self, x, y, xdim=100, ydim=50, angle=0.0, vel=0.0, acc=0.0,
+    def __init__(self, x, y, xdim=80, ydim=40, angle=0.0, vel=0.0, acc=0.0,
                  max_vel=7.5, mass=100.0):
         Rectangle.__init__(self, x, y, xdim, ydim, angle, sprite="grey_car.png")
         self.vel = vel
@@ -63,4 +63,7 @@ class Car(Rectangle):
         if type(other) in {Terrain, Sidewalk, Car, KinematicCar, Pedestrian}:
             return self.intersect(other)
 
+        if type(other) is Lane:
+            a = abs(self.angle - other.angle) % 360
+            return a > 90 and a < 270 and other.intersect(self)
         return False

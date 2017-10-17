@@ -4,9 +4,11 @@ SPRITE_DIR = "gym_urbandriving/visualizer/sprites/"
 
 
 class Shape:
-    def __init__(self, x, y, sprite="no_texture.png", static=False):
+    def __init__(self, x, y, angle, mass, sprite="no_texture.png", static=False):
         self.x = x
         self.y = y
+        self.angle = angle % 360
+        self.mass = mass
         self.sprite = SPRITE_DIR + sprite
         self.static = static
 

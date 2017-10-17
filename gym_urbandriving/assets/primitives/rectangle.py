@@ -1,9 +1,10 @@
 import numpy as np
 from gym_urbandriving.assets.primitives.shape import Shape
-
+from copy import deepcopy
 
 class Rectangle(Shape):
-    def __init__(self, x, y, xdim, ydim, angle=0, sprite="no_texture.png", static=False):
+    def __init__(self, x, y, xdim, ydim, angle=0, mass=1, sprite="no_texture.png",
+                 static=False):
         """
         Initializes rectangle object.
 
@@ -12,8 +13,7 @@ class Rectangle(Shape):
             y: float, starting y position.
             angle: float, starting angle of car in degrees.
         """
-        Shape.__init__(self, x, y, sprite, static=static)
-        self.angle = angle
+        Shape.__init__(self, x, y, angle, mass, sprite=sprite, static=static)
         self.xdim = xdim
         self.ydim = ydim
         self.halfdiag = np.linalg.norm([xdim, ydim]) / 2
@@ -22,15 +22,10 @@ class Rectangle(Shape):
         self.primitive = Rectangle
         self.orthogonal = self.static and not self.angle % 90
         if self.orthogonal:
-            if not self.angle % 180:
-                self.max_x, self.min_x = x + xdim/2, x-xdim/2
-                self.max_y, self.min_y = y + ydim/2, y-ydim/2
-            else:
-                self.max_y, self.min_y = x + xdim/2, x-xdim/2
-                self.max_x, self.min_x = y + ydim/2, y-ydim/2
-            
-            
-
+            self.min_x = min([t[0] for t in self.corners])
+            self.max_x = max([t[0] for t in self.corners])
+            self.min_y = min([t[1] for t in self.corners])
+            self.max_y = max([t[1] for t in self.corners])
     def get_corners(self):
         if self._x == self.x and self._y == self.y and self._angle == self.angle:
             return self.corners
@@ -50,9 +45,9 @@ class Rectangle(Shape):
         return rotated_corners
     
     def contains_point(self, point):
-        if self.orthogonal:
-            x, y = point
-            return self.min_x < x < self.max_x and self.min_y < y < self.max_y
+        # if self.orthogonal:
+        #     x, y = point
+        #     return self.min_x < x < self.max_x and self.min_y < y < self.max_y
         a, b, c, d = self.get_corners()
         AM, AB, AC = point - a, b - a, c - a
         c1 = 0 <= np.dot(AM, AB) <= np.dot(AB, AB)

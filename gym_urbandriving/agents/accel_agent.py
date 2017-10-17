@@ -1,9 +1,14 @@
 from copy import deepcopy
 import numpy as np
+import ray
 
+@ray.remote
 class AccelAgent:
+    actions = [(0, 1), (2, 1), (-2, 1), (0, 0), (1, -1), (-1, -1)]
     def __init__(self, agent_num=0):
         self.agent_num = agent_num
+        from gym_urbandriving import UrbanDrivingEnv
+        self.planning_env = UrbanDrivingEnv(init_state=None)
         return
     
     def eval_policy(self, state, nsteps=8):
@@ -11,25 +16,22 @@ class AccelAgent:
         If we can accelerate, see if we crash in nsteps.
         If we crash, decelerate, else accelerate
         """
-        from gym_urbandriving import UrbanDrivingEnv
-        planning_env = UrbanDrivingEnv(init_state=state)
+
+        self.planning_env._reset(state)
         start_pos = state.dynamic_objects[self.agent_num].get_pos()
-        actions = [(0, 1), (2, 1), (-2, 1), (0, 0), (1, -1), (-1, -1)]
         best_action = None
         best_time = 0
         best_distance = 0
-        for action in actions:
-            planning_env._reset()
-            next_state, r, done, info_dict = planning_env._step(action,
-                                                                self.agent_num,
-                                                                copy_state=False)
+        for action in self.actions:
+            self.planning_env._reset()
+            next_state, r, done, info_dict = self.planning_env._step(action,
+                                                                self.agent_num)
             success = True
             for i in range(nsteps):
-                next_state, r, done, info_dict = planning_env._step(action,
-                                                                    self.agent_num,
-                                                                    copy_state=False)
-                time = planning_env.time
-                if (done and next_state.collides_any(self.agent_num)):
+                next_state, r, done, info_dict = self.planning_env._step(action,
+                                                                    self.agent_num)
+                time = self.planning_env.time
+                if (done and self.planning_env.collides_any(self.agent_num)):
                     break
 
             if time == nsteps + 1:
