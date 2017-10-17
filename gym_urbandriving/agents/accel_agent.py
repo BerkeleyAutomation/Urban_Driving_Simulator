@@ -1,8 +1,6 @@
 from copy import deepcopy
 import numpy as np
-import ray
 
-@ray.remote
 class AccelAgent:
     actions = [(0, 1), (2, 1), (-2, 1), (0, 0), (1, -1), (-1, -1)]
     def __init__(self, agent_num=0):
@@ -16,7 +14,6 @@ class AccelAgent:
         If we can accelerate, see if we crash in nsteps.
         If we crash, decelerate, else accelerate
         """
-
         self.planning_env._reset(state)
         start_pos = state.dynamic_objects[self.agent_num].get_pos()
         best_action = None
@@ -26,7 +23,6 @@ class AccelAgent:
             self.planning_env._reset()
             next_state, r, done, info_dict = self.planning_env._step(action,
                                                                 self.agent_num)
-            success = True
             for i in range(nsteps):
                 next_state, r, done, info_dict = self.planning_env._step(action,
                                                                     self.agent_num)

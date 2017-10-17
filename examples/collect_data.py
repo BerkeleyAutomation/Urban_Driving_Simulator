@@ -12,66 +12,75 @@ from copy import deepcopy
 from random import random
 from gym_urbandriving.agents import AccelAgent, KeyboardAgent, NullAgent
 
-ray.init()
 
+def early_stop_actions(actions):
+    """
+    Helper function used to determine if list of actions indicates that a demonstration can be terminated early. 
 
+    Params
+    --------
+    actions : list
+        List of actions taken by all the agents in a time step. 
 
+    Returns
+    -------
+    bool
+        True if approximately all the cars have gone through the intersection and are back up to speed. 
 
-saved_states = []
-saved_actions = []
+    """
+    return actions == [(0, 1), (0, 1), (0, 1), (0, 1)]
 
-vis = uds.PyGameVisualizer((800, 800))
-env = uds.UrbanDrivingEnv(init_state=None,
-                          visualizer=vis,
-                          bgagent=NullAgent,
-                          max_time=-1,
-                          randomize=False,
-)
-action_space = [(0, 1), (3, 0), (-3, 0), (0, 0)]
+def run_and_collect():
+    """
+    Main function to be run to collect driving data. 
+    Make sure that a data folder exists in the root directory of the project!
 
-reward_fn = lambda dest: lambda state:\
-            -np.linalg.norm(state.dynamic_objects[0].get_pos() - dest)
-steps_expanded = 0
-def tree_search(state, destination):
-    global steps_expanded
-    steps_expanded += 1
-    future_states = queue.PriorityQueue()
-    for action in action_space:
-        env._reset(state)
-        next_state, reward, done, info_dict = env._step(action)
-        if done:
-            reward = reward - 99999
-        future_states.put((-reward, random(), next_state, [action]))
-    while True:
-        best_reward, _, state, actions = future_states.get()
-        if reward_fn(destination)(state) > -10:
-            return actions
-        for next_action in action_space:
-            env._reset(state)
-            env._render()
-            next_state, reward, done, info_dict = env._step(next_action)
-            if done:
-                reward = reward - 99999
-            future_states.put((-reward + len(actions), random(), next_state,
-                               actions + [next_action]))
+    Examples
+    --------
+    python3 examples/collect_data.py
 
-action = None
-while(True):
-    destination = [1000, 550]
-    env.reward_fn = reward_fn(destination)
-    steps_expanded = 0
-    init_state = uds.state.SimpleIntersectionState(ncars=1, nped=0)
-    env._reset(init_state)
+    """
+
+    saved_states = []
+    saved_actions = []
+
+    vis = uds.PyGameVisualizer((800, 800))
+    init_state = uds.state.SimpleIntersectionState(ncars=4, nped=0)
+
+    env = uds.UrbanDrivingEnv(init_state=init_state,
+                              visualizer=vis,
+                              bgagent=AccelAgent,
+                              max_time=100,
+                              randomize=True,
+                              nthreads=4)
+
     env._render()
-    actions = tree_search(deepcopy(init_state), destination)
-    env._reset(init_state)
-    s = init_state
-    for action in actions:
-        s, r, d, i = env._step(action)
-        env._render()
+    state = init_state
+    agent = AccelAgent()
+    reset_counter = 0
+    action = None
 
-    print(r)
+    while(True):
+        action = agent.eval_policy(state)
+        saved_states.append(state.vectorize_state())
+        start_time = time.time()
+        state, reward, done, info_dict = env._step(action)
+        saved_actions.append(info_dict["saved_actions"])
 
+        # TODO: fix this line, it used to be used to shorten demos by stopping the sim after enough cars came back up to speed.
+        if early_stop_actions(info_dict["saved_actions"]): 
+            reset_counter+=1
+        else:
+            reset_counter = 0
+        if done or reset_counter >50:
+            # Time to save our current run and reset our env and our saved data
+            reset_counter = 0
+            env._reset()
+            state = env.current_state
+            
+            saved_states = []
+            saved_actions = []
 
-
-
+if __name__ == "__main__":
+  run_and_collect()
+>>>>>>> master

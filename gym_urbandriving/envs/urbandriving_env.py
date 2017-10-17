@@ -4,7 +4,13 @@ from gym_urbandriving.agents import *
 import numpy as np
 import ray
 
+@ray.remote
+class RayNode:
+    def __init__(self, agent_type, agent_num):
+        self.agent = agent_type(agent_num)
 
+    def eval_policy(self, state):
+        return self.agent.eval_policy(state)
 class UrbanDrivingEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
@@ -14,7 +20,8 @@ class UrbanDrivingEnv(gym.Env):
                  reward_fn=lambda x: 0,
                  max_time=500,
                  bgagent=NullAgent,
-                 randomize=False):
+                 randomize=False,
+                 use_ray=False):
         self.visualizer = visualizer
         self.reward_fn = reward_fn
         self.init_state = deepcopy(init_state)
@@ -23,33 +30,22 @@ class UrbanDrivingEnv(gym.Env):
         self.time = 0
         self.randomize = randomize
         self.statics_rendered = False
+        self.use_ray = use_ray
+        if use_ray:
+            ray.init()
         self.dynamic_collisions, self.static_collisions, self.last_col = [], [], -1
-        # TODO use Ray here
-
         if (self.init_state):
             self._reset()
-
-
 
     def get_collisions(self):
         if self.last_col == self.time:
             return self.dynamic_collisions, self.static_collisions
-        self.dynamic_collisions, self.static_collisions = [], []
-        for i, dobj in enumerate(self.current_state.dynamic_objects):
-            for j, sobj in enumerate(self.current_state.static_objects):
-                if dobj.collides(sobj):
-                    self.static_collisions.append([i, j])
-            for j in range(i, len(self.current_state.dynamic_objects)):
-                dobj1 = self.current_state.dynamic_objects[j]
-                if j > i and dobj.collides(dobj1):
-                    self.dynamic_collisions.append([i, j])
+        self.dynamic_collisions, self.static_collisions = self.current_state.get_collisions()
         self.last_col = self.time
         return self.dynamic_collisions, self.static_collisions
 
-
     def collides_any(self, agentnum):
-        if self.last_col != self.time:
-            self.get_collisions()
+        self.get_collisions()
         for coll in self.dynamic_collisions:
             if agentnum in coll:
                 return True
@@ -57,23 +53,29 @@ class UrbanDrivingEnv(gym.Env):
             if agentnum == coll[0]:
                 return True
         return False
+
     
     def _step(self, action, agentnum=0):
         assert(self.current_state is not None)
         # Get actions for all objects
         actions = [None]*len(self.current_state.dynamic_objects)
         actions[agentnum] = action
-        dynamic_objs = {}
 
-        stateid = ray.put(self.get_state_copy())
-        actionids = {}
-        for i, agent in self.bg_agents.items():
-            if i is not agentnum:
-                actionids[i] = agent.eval_policy.remote(stateid)
-        for i, aid in actionids.items():
-            action = ray.get(aid)
-            actions[i] = action
-        objids = {}
+        if self.use_ray:
+            assert(all([type(bgagent) == RayNode for i, bgagent in self.bg_agents.items()]))
+            stateid = ray.put(self.get_state_copy())
+            actionids = {}
+            for i, agent in self.bg_agents.items():
+                if i is not agentnum:
+                    actionids[i] = agent.eval_policy.remote(stateid)
+            for i, aid in actionids.items():
+                action = ray.get(aid)
+                actions[i] = action
+        else:
+            assert(all([type(bgagent) != RayNode for i, bgagent in self.bg_agents.items()]))
+            for i, agent in self.bg_agents.items():
+                if i is not agentnum:
+                    actions[i] = agent.eval_policy(self.get_state_copy())
         for i, dobj in enumerate(self.current_state.dynamic_objects):
             dobj.step(actions[i])
 
@@ -104,14 +106,15 @@ class UrbanDrivingEnv(gym.Env):
         if self.randomize:
             self.init_state.randomize()
         self.current_state = deepcopy(self.init_state)
-        if self.bgagent_type is not NullAgent:
-            self.bg_agents = {i: self.bgagent_type.remote(i)\
+        if self.use_ray:
+            self.bg_agents = {i: RayNode.remote(self.bgagent_type, i) \
                               for i in range(len(self.current_state.dynamic_objects))}
         else:
-            self.bg_agents = {}
+            self.bg_agents = {i: self.bgagent_type(i) \
+                              for i in range(len(self.current_state.dynamic_objects))}
         return
 
-    def _render(self, mode='human', close=False):
+    def _render(self, mode='human', close=False, waypoints=[]):
         if close:
             return
         if self.visualizer:
@@ -120,7 +123,8 @@ class UrbanDrivingEnv(gym.Env):
             self.get_collisions()
             self.visualizer.render(self.current_state, window,
                                    self.dynamic_collisions, self.static_collisions,
-                                   rerender_statics = not self.statics_rendered)
+                                   rerender_statics=not self.statics_rendered,
+                                   waypoints=waypoints)
             self.statics_rendered = True
 
     def get_state_copy(self):
