@@ -7,7 +7,17 @@ import pickle
 
 from gym_urbandriving.agents import ModelAgent
 
-def f():
+def test_model():
+    """
+    Main function to be run to test imitation learner. 
+    Make sure that a model.model file exists in the root directory of the project.
+
+    Examples
+    --------
+    python3 examples/test_model.py
+
+    """
+
     accs = 0
     totalticks = 0
     start_time = time.time()
@@ -52,5 +62,7 @@ def f():
             print(accs/totalticks)
 
             env._reset()
+            state = env.current_state
 
-cProfile.run('f()', 'stats')
+if __name__ == "__main__":
+  test_model()

@@ -7,6 +7,7 @@ from sklearn import linear_model
 from sklearn.neural_network import MLPRegressor
 from copy import deepcopy
 
+# Parameter Grids for sci-kit learn
 #param_grid = [{'C': [.01, 1, 100], 'gamma': [1, 10, 100], 'kernel': ['rbf', 'linear']}]
 #param_grid = [{'C': [10], 'gamma': [1], 'kernel': ['rbf']}]
 #param_grid = [{'alpha': [0, .01, .1, 1, 10, 100]}, {'learning_rate_init':[.01, .1, 1, 10, 100]}]
@@ -14,6 +15,22 @@ param_grid = [{'alpha': [0]}, {'learning_rate_init':[1]}]
 
 
 def process_files(list_of_paths):
+  """
+  Main function to be run to collect driving data. Make sure that a data folder exists in the root directory of the project!
+
+  Parameters
+  ----------
+  list_of_paths : list
+    List of all files that contain trajectory data gathered from calling collect_data.py
+
+  Returns
+  -------
+  X,y
+    X contains the features (vectorized state) of the data in a nxd numpy matrix where n in the number of samples collected and d is the dimension of the state vector. 
+    y contains the labels (output actions) of the data a numpy array.  
+  
+  """
+
   X = []
   y = []
   all_states = []
@@ -39,7 +56,17 @@ def process_files(list_of_paths):
   return X,y       
 
 
-if __name__ == "__main__":
+def learn():
+  """
+  Main function to be run to learn a model for imitation learning agents.
+  Make sure that a data folder with more than 5 data points exists in the root directory of the project. 
+
+  Examples
+  --------
+  python3 examples/learn_model.py
+
+  """
+
   all_data = glob.glob("data/*dump.data")
   train_data = all_data[0:len(all_data)*8//10]
   validation_data = all_data[len(all_data)*8//10: len(all_data)] # TODO: fix when there are <5 files
@@ -65,7 +92,10 @@ if __name__ == "__main__":
   sanity_error = np.mean(train_yp < .5)
   sanity_error2 =  np.mean(train_y < .5)
 
+  # TODO: more informative printout
   print(len(train_data), len(validation_data))
   print(sanity_error, sanity_error2, train_error, valid_error)
   pickle.dump(model, open("model.model", "wb"))
 
+if __name__ == "__main__":
+  learn()

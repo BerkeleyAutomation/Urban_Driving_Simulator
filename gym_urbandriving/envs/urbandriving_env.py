@@ -8,7 +8,7 @@ from multiprocessing import Pool, Queue
 def agent_update(dobj, agent, state, agentnum):
     action = agent.eval_policy(state)
     dobj.step(action)
-    return agentnum, dobj
+    return agentnum, dobj, action
 
 class UrbanDrivingEnv(gym.Env):
     metadata = {'render.modes': ['human']}
@@ -62,8 +62,9 @@ class UrbanDrivingEnv(gym.Env):
                      if i is not agentnum]
            
             for res in dobjs:
-                i, dobj = res.get()
+                i, dobj, agent_action = res.get()
                 self.current_state.dynamic_objects[i] = dobj
+                actions[i] = agent_action
             self.current_state.dynamic_objects[agentnum].step(action)
 
 
@@ -99,13 +100,13 @@ class UrbanDrivingEnv(gym.Env):
                           enumerate(self.current_state.dynamic_objects)]
         return
 
-    def _render(self, mode='human', close=False):
+    def _render(self, mode='human', close=False, waypoints = []):
         if close:
             return
         if self.visualizer:
             window = [0, self.current_state.dimensions[0],
                       0, self.current_state.dimensions[1]]
-            self.visualizer.render(self.current_state, window)
+            self.visualizer.render(self.current_state, window, waypoints = waypoints)
 
     def get_state_copy(self, state_type="raw"):
         if state_type == "raw":
