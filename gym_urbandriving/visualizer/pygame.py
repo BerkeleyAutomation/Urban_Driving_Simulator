@@ -83,7 +83,8 @@ class PyGameVisualizer:
         self.surface.blit(new_surface, (0, 0), None)
         return
 
-    def render_collisions(self, state, valid_area):
+
+    def render_collisions(self, state, dynamic_collisions, static_collisions, valid_area):
         """
         Renders a small circle on colliding cars for visual inspection of collisions.
 
@@ -99,16 +100,22 @@ class PyGameVisualizer:
         new_surface = pygame.Surface((valid_area[1] - valid_area[0],
                                       valid_area[3] - valid_area[2]),
                                      pygame.SRCALPHA)
-        dynamic_coll, static_coll = state.get_collisions()
-        for obj1id, obj2id in dynamic_coll:
+ 
+        for obj1id, obj2id in dynamic_collisions:
             obj1 = state.dynamic_objects[obj1id]
             obj2 = state.dynamic_objects[obj2id]
+            pygame.draw.circle(new_surface, (255, 0, 255), obj1.get_pos().astype(int), 5)
+            pygame.draw.circle(new_surface, (255, 0, 255), obj2.get_pos().astype(int), 5)
+        for obj1id, obj2id in static_collisions:
+            obj1 = state.dynamic_objects[obj1id]
+            obj2 = state.static_objects[obj2id]
             pygame.draw.circle(new_surface, (255, 0, 255), obj1.get_pos().astype(int), 5)
             pygame.draw.circle(new_surface, (255, 0, 255), obj2.get_pos().astype(int), 5)
         new_surface = pygame.transform.scale(new_surface, (self.screen_dim))
         self.surface.blit(new_surface, (0, 0), None)
         return
     
+
     def render_waypoints(self, waypoints, valid_area):
         """
         Renders dynamic objects of the state such as pedestrians and cars.
@@ -131,7 +138,9 @@ class PyGameVisualizer:
         self.surface.blit(new_surface, (0, 0), None)
         return
 
-    def render(self, state, valid_area, rerender_statics=False, waypoints=[]):
+    def render(self, state, valid_area, dynamic_collisions=[],
+               static_collisions=[],
+               rerender_statics=False, waypoints=[]):
         """
         Renders the state and waypoints with lazy re-rerendering of static objects as needed. 
 
@@ -158,19 +167,22 @@ class PyGameVisualizer:
 
         self.render_statics(state, valid_area)
         self.render_dynamics(state, valid_area)
-        self.render_collisions(state, valid_area)
-        self.render_waypoints(waypoints, valid_area)
+        self.render_collisions(state,
+                               dynamic_collisions, static_collisions, valid_area)
 
+        self.render_waypoints(waypoints, valid_area)
         pygame.display.flip()
 
     def draw_rectangle(self, rect, surface):
         obj = pygame.image.load(rect.sprite)
         obj = pygame.transform.scale(obj, (rect.xdim, rect.ydim))
-
+        corners = rect.get_corners()
+        # for c in corners:
+        #     pygame.draw.circle(surface, (255, 255, 0), (int(c[0]), int(c[1])), 5)
         if rect.angle == 0:
             pos = (rect.x - rect.xdim/2, rect.y - rect.ydim/2)
         else:
-            corners = rect.get_corners()
+
             x_off = min(corners[:,0])
             y_off = min(corners[:,1])
             pos = (x_off, y_off)

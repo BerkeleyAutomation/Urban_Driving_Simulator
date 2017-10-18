@@ -4,8 +4,14 @@ import cProfile
 import time
 import numpy as np
 import pickle
+import os
+import ray
+import queue
+import pygame
+from copy import deepcopy
+from random import random
+from gym_urbandriving.agents import AccelAgent, KeyboardAgent, NullAgent
 
-from gym_urbandriving.agents import AccelAgent
 
 def early_stop_actions(actions):
     """
@@ -66,18 +72,9 @@ def run_and_collect():
             reset_counter+=1
         else:
             reset_counter = 0
-
-        env._render()
-
         if done or reset_counter >50:
             # Time to save our current run and reset our env and our saved data
             reset_counter = 0
-
-            pickle.dump((saved_states, saved_actions),open("data/"+str(np.random.random())+"dump.data", "wb+"))
-
-            print("done")
-            print(info_dict["dynamic_collisions"])
-
             env._reset()
             state = env.current_state
             
@@ -86,3 +83,4 @@ def run_and_collect():
 
 if __name__ == "__main__":
   run_and_collect()
+>>>>>>> master

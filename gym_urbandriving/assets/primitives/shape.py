@@ -4,9 +4,11 @@ SPRITE_DIR = "gym_urbandriving/visualizer/sprites/"
 
 
 class Shape:
-    def __init__(self, x, y, sprite="no_texture.png", static=False):
+    def __init__(self, x, y, angle, mass, sprite="no_texture.png", static=False):
         self.x = x
         self.y = y
+        self.angle = angle % 360
+        self.mass = mass
         self.sprite = SPRITE_DIR + sprite
         self.static = static
 
@@ -21,7 +23,7 @@ class Shape:
         center_dist = np.linalg.norm([self.x - other.x, self.y - other.y])
 
         if types == {Rectangle, Rectangle}:
-            min_dist = min(self.xdim, self.ydim)/2 + min(self.xdim, self.ydim)/2
+            min_dist = min(self.xdim, self.ydim)/2
             if center_dist > self.halfdiag + other.halfdiag:
                 return False
             if center_dist < min_dist:

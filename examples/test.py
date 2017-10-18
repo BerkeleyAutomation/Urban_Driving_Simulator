@@ -7,28 +7,26 @@ from gym_urbandriving.agents import KeyboardAgent, AccelAgent, NullAgent
 
 import numpy as np
 
-
 def f():
-
     vis = uds.PyGameVisualizer((800, 800))
-    init_state = uds.state.ArenaState(ncars=5, nped=0)
-
+    init_state = uds.state.SimpleIntersectionState(ncars=1, nped=0)
     env = uds.UrbanDrivingEnv(init_state=init_state,
                               visualizer=vis,
-                              bgagent=AccelAgent,
                               max_time=250,
                               randomize=True,
-                              nthreads=4)
+                              bgagent=AccelAgent,
+                              use_ray=True
+    )
     env._render()
     state = init_state
-    agent = AccelAgent()
+    agent = KeyboardAgent()
     action = None
     while(True):
         action = agent.eval_policy(state)
-
         start_time = time.time()
         state, reward, done, info_dict = env._step(action)
         env._render()
+        done = False
         if done:
             print("done")
             time.sleep(1)
@@ -37,4 +35,4 @@ def f():
             state = env.current_state
 
 
-cProfile.run('f()', 'stats')
+cProfile.run('f()', 'temp/stats')

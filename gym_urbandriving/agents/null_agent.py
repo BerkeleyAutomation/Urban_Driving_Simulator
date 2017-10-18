@@ -1,4 +1,3 @@
-
 class NullAgent:
     def __init__(self, agent_num=0):
         return
