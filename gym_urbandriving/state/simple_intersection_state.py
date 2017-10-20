@@ -36,11 +36,12 @@ class SimpleIntersectionState(PositionState):
     def randomize(self):
         self.dynamic_objects = []
         while len(self.dynamic_objects) < self.ncars:
+            i = np.random.random_integers(0, 3) if len(self.dynamic_objects) else np.random.random_integers(0, 2)
             lane = [Lane(200, 550, 400, 100),
                     Lane(800, 450, 400, 100, angle=-180),
                     Lane(450, 200, 400, 100, angle=-90),
                     Lane(550, 800, 400, 100, angle=90)
-            ][0]
+            ][np.random.random_integers(0, 3)]
             car = lane.generate_car()
             car.vel = 0
             if not any([car.collides(obj) for obj in self.static_objects+self.dynamic_objects]):

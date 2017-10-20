@@ -1,6 +1,7 @@
 import numpy as np
 from gym_urbandriving.assets.primitives.shape import Shape
 from copy import deepcopy
+import shapely.geometry
 
 class Circle(Shape):
     def __init__(self, x, y, radius, angle=0.0, mass=100, sprite="no_texture.png"):
@@ -15,7 +16,9 @@ class Circle(Shape):
         Shape.__init__(self, x, y, angle, mass, sprite)
         self.radius = radius
         self.primitive = Circle
-        
-    def contains_point(self, point):
-        d = np.linalg.norm([self.x - point[0], self.y - point[1]])
-        return d < self.radius
+
+    def get_shapely_obj(self):
+        if self.shapely_obj:
+            return self.shapely_obj
+        self.shapely_obj = shapely.geometry.Point(self.get_pos()).buffer(self.radius)
+        return self.shapely_obj

@@ -20,4 +20,5 @@ class Lane(Street):
         x, y = np.dot([x, y], rotation_mat.T)
         x, y = x+self.x, y+self.y
         car.x, car.y = x, y
+        car.vel = np.random.uniform(0, 5)
         return car

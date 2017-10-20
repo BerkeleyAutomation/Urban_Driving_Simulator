@@ -25,7 +25,8 @@ env = uds.UrbanDrivingEnv(init_state=None,
 action_space = [(0, 1), (3, 0), (-3, 0), (0, 0)]
 
 reward_fn = lambda dest: lambda state:\
-            -np.linalg.norm(state.dynamic_objects[0].get_pos() - dest)
+            -np.linalg.norm(state.dynamic_objects[0].get_pos() - dest) + \
+            2 * state.min_dist_to_coll(0)
 steps_expanded = 0
 
 def tree_search(state, destination):
@@ -46,18 +47,19 @@ def tree_search(state, destination):
             return actions
         for next_action in action_space:
             env._reset(state)
-            next_state, reward, done, info_dict = env._step(next_action)
+            for i in range(3):
+                next_state, reward, done, info_dict = env._step(next_action)
             if done:
                 reward = reward - 99999
             future_states.put((-reward + len(actions), random(), next_state,
-                               actions + [next_action]))
+                               actions + [next_action] * 3))
 
 action = None
 while(True):
     destination = [450, 1000]
     env.reward_fn = reward_fn(destination)
     steps_expanded = 0
-    init_state = uds.state.SimpleIntersectionState(ncars=1, nped=0)
+    init_state = uds.state.SimpleIntersectionState(ncars=2, nped=0)
     env._reset(init_state)
     env._render()
     actions = tree_search(deepcopy(init_state), destination)
