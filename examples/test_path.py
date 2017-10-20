@@ -3,13 +3,12 @@ import gym_urbandriving as uds
 import cProfile
 import time
 
-from gym_urbandriving.agents import  NullAgent, TreeSearchAgent
+from gym_urbandriving.agents import KeyboardAgent, AccelAgent, NullAgent, SimplePathAgent
 
 import numpy as np
 import pygame
-from copy import deepcopy
 
-def run():
+def test_path():
     """
     Main function to be run to test simple_path_agent with hard coded path. 
 
@@ -24,19 +23,17 @@ def run():
 
     env = uds.UrbanDrivingEnv(init_state=init_state,
                               visualizer=vis,
-                              bgagent=NullAgent,
+                              bgagent=SimplePathAgent,
                               max_time=250,
                               randomize=True,
-                              use_ray=False)
+                              nthreads=4)
 
-    env._reset()
-    state = env.current_state
-    agent = TreeSearchAgent(vis = vis)
+    env._render()
+    state = init_state
+    agent = SimplePathAgent()
     action = None
-
     while(True):
-        print 
-        action = agent.eval_policy(deepcopy(state))
+        action = agent.eval_policy(state)
         start_time = time.time()
         state, reward, done, info_dict = env._step(action)
 
@@ -53,4 +50,4 @@ def run():
 
 
 if __name__ == "__main__":
-  run()
+  test_path()
