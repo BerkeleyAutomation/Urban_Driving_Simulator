@@ -55,10 +55,10 @@ from copy import deepcopy
 import numpy as np
 import queue
 import gym_urbandriving as uds
-
+from gym_urbandriving.agents import NullAgent
 
 class TreeSearchAgent:
-    def __init__(self, agent_num=0, target_loc=[450,900], collect_radius = 10, vis=None):
+    def __init__(self, agent_num=0, target_loc=[450,900], collect_radius = 15, vis=None):
         self.agent_num = agent_num
         self.target_loc = target_loc
         self.waypoints = None
@@ -68,12 +68,17 @@ class TreeSearchAgent:
         self.vis = vis
 
         self.action_space = [(0, 1), (3, 0), (-3, 0), (0, 0)]
+
         def reward_function(state, dest, wayp):
-            return -np.linalg.norm(state.dynamic_objects[0].get_pos() - dest) 
+            pos = state.dynamic_objects[0].get_pos()
+            distance = np.linalg.norm( pos - dest)
+            wayp = sum([max(-50, -np.linalg.norm(pos-w)) for w in wayp])
+            return -distance + 10*wayp
+
         self.reward_fn = reward_function
         from gym_urbandriving import UrbanDrivingEnv
 
-        self.planning_env = UrbanDrivingEnv(init_state=None, visualizer = vis)
+        self.planning_env = UrbanDrivingEnv(init_state=None, bgagent=NullAgent, visualizer = vis)
 
         return
 

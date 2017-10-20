@@ -3,7 +3,7 @@ import gym_urbandriving as uds
 import cProfile
 import time
 
-from gym_urbandriving.agents import  NullAgent, TreeSearchAgent
+from gym_urbandriving.agents import  NullAgent, TreeSearchAgent, SimplePathAgent
 
 import numpy as np
 import pygame
@@ -41,7 +41,6 @@ def run():
         state, reward, done, info_dict = env._step(action)
 
         env._render(waypoints = agent.waypoints)
-
         if done:
             print("done")
             time.sleep(1)

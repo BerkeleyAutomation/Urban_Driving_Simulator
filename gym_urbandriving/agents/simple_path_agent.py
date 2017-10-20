@@ -2,83 +2,62 @@ from copy import deepcopy
 import numpy as np
 
 class SimplePathAgent:
-    def __init__(self, agent_num=0, target_loc=[450,900], collect_radius = 10):
+    def __init__(self, agent_num=0, target_loc=[450,900], collect_radius = 15, vis=None, waypoints= None):
         self.agent_num = agent_num
         self.target_loc = target_loc
-        self.waypoints = None
+        self.waypoints = waypoints
+        self.current_action_index = 0
         self.collect_radius = collect_radius
+        self.vis = vis
+        self.action_space = [(0, 1), (3, 0), (-3, 0), (0, 0)]
+
+        def reward_function(state, dest, wayp):
+            pos = state.dynamic_objects[self.agent_num].get_pos()
+            distance = np.linalg.norm( pos - dest)
+            wayp = sum([max(-50, -np.linalg.norm(pos-w)) for w in wayp])
+            return -distance + 10*wayp
+
+        self.reward_fn = reward_function
+        from gym_urbandriving import UrbanDrivingEnv
+
+        self.planning_env = UrbanDrivingEnv(init_state=None)
         return
 
-    def eval_policy(self, state, nsteps=8):
-        """
-        If we can accelerate, see if we crash in nsteps.
-        If we crash, decelerate, else accelerate
-        """
+    def update_waypoints(self, old_waypoints, new_state):
+        current_position = new_state.dynamic_objects[self.agent_num].get_pos()
+        new_waypoints = [w for w in old_waypoints if ((w[0]-current_position[0])**2 + (w[1]-current_position[1])**2)>self.collect_radius**2]
+        return new_waypoints
+
+    def eval_policy(self, state):
         if self.waypoints == None:
             start_pos = state.dynamic_objects[self.agent_num].get_pos()
-            x_vals = []
-            y_vals = []
-            intermediate_pos = [0,0]
-
             if start_pos[1] < 400:
-                intermediate_pos = [450,450]
-                y_vals = np.arange(start_pos[1], intermediate_pos[1], 10)
-                x_vals = np.linspace(start_pos[0], intermediate_pos[0] , y_vals.size)
-                print('case1')
+                self.waypoints = [[450,250+50*i] for i in range(10)]
+                # Coming from above
+                print("Coming from above")
             elif start_pos[0]<450:
-                intermediate_pos = [450,550]
-                x_vals = np.arange(start_pos[0], intermediate_pos[0],10)
-                y_vals = np.linspace(start_pos[1], intermediate_pos[1], x_vals.size)
-                print('case2')
+                self.waypoints = [[250,550], [300,545], [350,540], [400,535],  [425,540], [440,550],[450,560] , [460,575], [465, 600], [460, 650],[455, 700],[450, 750]]
+                # Coming from the left
+                print("Coming from the left")
             elif start_pos[0]>450:
-                intermediate_pos = [450,450]
-                x_vals = np.arange(intermediate_pos[0],start_pos[0],10)
-                y_vals = np.linspace(intermediate_pos[1], start_pos[1], x_vals.size)
-                print('case3')
-
-            y_finish = np.arange(intermediate_pos[1], self.target_loc[1],10)
-            self.waypoints = [[x_vals[i], y_vals[i]] for i in range(x_vals.size)]
-            self.waypoints.extend([[self.target_loc[0], y_finish[i]] for i in range(y_finish.size)])
-
+                self.waypoints = [[750,450], [700,450], [650,450], [600,450], [540,460], [485,485], [460,540], [450,600], [450,650], [450,700], [450,750]]
+                # Coming from the right 
+                print("Coming from the right")
         else:
             current_position = state.dynamic_objects[self.agent_num].get_pos()
             self.waypoints = [w for w in self.waypoints if ((w[0]-current_position[0])**2 + (w[1]-current_position[1])**2)>self.collect_radius**2]
 
-        from gym_urbandriving import UrbanDrivingEnv
-        planning_env = UrbanDrivingEnv(init_state=state)
-        start_pos = state.dynamic_objects[self.agent_num].get_pos()
-        actions = [(1,1), (0,1), (-1,1), 
-                    (1,-1), (0,-1), (-1,-1)]
 
-        best_action = None
         best_reward = 0
+        best_action = None
 
-        for action in actions:
-            planning_env._reset()
-            next_state, r, done, info_dict = planning_env._step(action,
-                                                                self.agent_num,
-                                                                copy_state=False)
-
-            next_pos = next_state.dynamic_objects[self.agent_num].get_pos()
-            waypoints_collected = len([w for w in self.waypoints if ((w[0]-next_pos[0])**2 + (w[1]-next_pos[1])**2)<= self.collect_radius**2])
-            time_to_collision = 1
-            for i in range(nsteps):
-                next_state, r, done, info_dict = planning_env._step(action,
-                                                                    self.agent_num,
-                                                                    copy_state=False)
-                waypoints_collected += len([w for w in self.waypoints if ((w[0]-next_pos[0])**2 + (w[1]-next_pos[1])**2)<= self.collect_radius**2])
-
-                if (done and next_state.collides_any(self.agent_num)):
-                    time_to_collision = i
-                    break
-
-            distance_to_goal = ((self.target_loc[0]-next_pos[0])**2 + (self.target_loc[1]-next_pos[1])**2)**.5
-            print(distance_to_goal)
-            reward  = 1000*waypoints_collected + time_to_collision - distance_to_goal/1000
-            if reward > best_reward or best_action == None:
+        for action in self.action_space:
+            self.planning_env._reset(state)
+            next_state, _, done, info_dict = self.planning_env._step(action, self.agent_num)
+            new_waypoints = self.update_waypoints(self.waypoints, next_state)
+            reward = self.reward_fn(next_state, self.target_loc, new_waypoints)
+            if not done and (reward > best_reward or best_action == None):
                 best_action = action
                 best_reward = reward
-
-            print(best_reward)
-            print(best_action)
+        print(str(best_action) + ",")
         return best_action

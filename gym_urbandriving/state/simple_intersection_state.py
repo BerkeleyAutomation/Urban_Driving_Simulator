@@ -39,9 +39,9 @@ class SimpleIntersectionState(PositionState):
             lane = [Lane(200, 550, 400, 100),
                     Lane(800, 450, 400, 100, angle=-180),
                     Lane(450, 200, 400, 100, angle=-90),
-                    Lane(550, 800, 400, 100, angle=90)
+                    #Lane(550, 800, 400, 100, angle=90)
             ][np.random.randint(0,3)]
-            car = lane.generate_car()
+            car = lane.generate_car(randomize = False)
             car.vel = 0
             if not any([car.collides(obj) for obj in self.static_objects+self.dynamic_objects]):
                 self.dynamic_objects.append(car)

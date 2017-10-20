@@ -8,16 +8,32 @@ class Lane(Street):
     def __init__(self, x, y, xdim, ydim, angle=0.0):
         Rectangle.__init__(self, x, y, xdim, ydim, angle=angle, sprite="lane.png", static=True);
 
-    def generate_car(self, car_type=KinematicCar):
-        car = car_type(0, 0, angle=self.angle+np.random.uniform(-10, 10))
-        angle = np.radians(-self.angle)
-        rotation_mat = np.array([[np.cos(angle), -np.sin(angle)],
-                                 [np.sin(angle), np.cos(angle)]])
-        x = np.random.uniform(0-self.xdim/2+car.xdim/2,
-                              0+self.xdim/2-car.xdim/2)
-        y = np.random.uniform(0-self.ydim/2+car.ydim/2,
-                              0+self.ydim/2-car.ydim/2)
-        x, y = np.dot([x, y], rotation_mat.T)
-        x, y = x+self.x, y+self.y
-        car.x, car.y = x, y
-        return car
+    def generate_car(self, car_type=KinematicCar, randomize = True):
+        if randomize:
+            car = car_type(0, 0, angle=self.angle+np.random.uniform(-10, 10))
+            angle = np.radians(-self.angle)
+            rotation_mat = np.array([[np.cos(angle), -np.sin(angle)],
+                                     [np.sin(angle), np.cos(angle)]])
+            x = np.random.uniform(0-self.xdim/2+car.xdim/2,
+                                  0+self.xdim/2-car.xdim/2)
+            y = np.random.uniform(0-self.ydim/2+car.ydim/2,
+                                  0+self.ydim/2-car.ydim/2)
+            print(x,y)
+            x, y = np.dot([x, y], rotation_mat.T)
+            x, y = x+self.x, y+self.y
+            car.x, car.y = x, y
+            return car
+        else:
+            car = car_type(0, 0, angle =self.angle)
+            angle = np.radians(-self.angle)
+            rotation_mat = np.array([[np.cos(angle), -np.sin(angle)],
+                                     [np.sin(angle), np.cos(angle)]])
+            x = -self.xdim/2+car.xdim/2
+            y = 0      
+            x, y = np.dot([x, y], rotation_mat.T)
+            x, y = x+self.x, y+self.y
+            car.x, car.y = x, y
+            return car
+
+
+
