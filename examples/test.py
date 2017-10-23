@@ -9,12 +9,12 @@ import numpy as np
 
 def f():
     vis = uds.PyGameVisualizer((800, 800))
-    init_state = uds.state.SimpleIntersectionState(ncars=1, nped=0)
+    init_state = uds.state.SimpleIntersectionState(ncars=4, nped=2)
     env = uds.UrbanDrivingEnv(init_state=init_state,
                               visualizer=vis,
                               max_time=250,
                               randomize=True,
-                              bgagent=AccelAgent,
+                              bgagent=NullAgent,
                               use_ray=True
     )
     env._render()
@@ -26,6 +26,7 @@ def f():
         start_time = time.time()
         state, reward, done, info_dict = env._step(action)
         env._render()
+        print(state.min_dist_to_coll(0))
         done = False
         if done:
             print("done")

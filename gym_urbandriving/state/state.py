@@ -31,3 +31,14 @@ class PositionState:
             if agentnum == coll[0]:
                 return True
         return False
+
+    def min_dist_to_coll(self, agentnum):
+        min_dist = np.finfo('f').max
+        obj = self.dynamic_objects[agentnum]
+        for j, sobj in enumerate(self.static_objects):
+            if obj.can_collide(sobj):
+                min_dist = min(min_dist, obj.dist_to(sobj))
+        for j, dobj in enumerate(self.dynamic_objects):
+            if j != agentnum and obj.can_collide(dobj):
+                min_dist = min(min_dist, obj.dist_to(dobj))
+        return min_dist

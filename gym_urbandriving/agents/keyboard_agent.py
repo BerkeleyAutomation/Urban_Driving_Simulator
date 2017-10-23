@@ -2,13 +2,31 @@ import pygame
 
 class KeyboardAgent:
     """
-    simple agent that acts on keyboard inputs
-    must be first agent on the main env's list
+    Agent which interprets user keyboard inputs
+
+    Attributes
+    ----------
+    agent_num : int
+        Index of this agent in the world.
+        Used to access its object in state.dynamic_objects
     """
-    def __init__(self, i=0):
-        self.i = i
+    def __init__(self, agent_num=0):
+        self.agent_num = agent_num
         return
     def eval_policy(self, state):
+        """
+        Returns action based on keyboard input
+
+        Parameters
+        ----------
+        state : PositionState
+            State of the world, unused
+
+        Returns
+        -------
+        action
+            Keyboard action
+        """
         steer, acc = 0, 0
         pygame.event.pump()
         keys = pygame.key.get_pressed()
