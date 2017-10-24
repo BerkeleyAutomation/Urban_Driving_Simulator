@@ -1,4 +1,6 @@
 import numpy as np
+from copy import deepcopy
+import shapely.geometry
 
 SPRITE_DIR = "gym_urbandriving/visualizer/sprites/"
 
@@ -11,59 +13,30 @@ class Shape:
         self.mass = mass
         self.sprite = SPRITE_DIR + sprite
         self.static = static
+        self.shapely_obj = None
 
     def get_pos(self):
         return np.array([self.x, self.y])
 
     def intersect(self, other):
-        from gym_urbandriving.assets.primitives.rectangle import Rectangle
-        from gym_urbandriving.assets.primitives.circle import Circle
+        return self.get_shapely_obj().intersects(other.get_shapely_obj())
 
-        types = {self.primitive, other.primitive}
-        center_dist = np.linalg.norm([self.x - other.x, self.y - other.y])
+    def contains_point(self, point):
+        return self.get_shapely_obj().contains(shapely.geomtry.Point(point))
 
-        if types == {Rectangle, Rectangle}:
-            min_dist = min(self.xdim, self.ydim)/2
-            if center_dist > self.halfdiag + other.halfdiag:
-                return False
-            if center_dist < min_dist:
-                return True
+    def dist_to(self, other):
+        return self.get_shapely_obj().distance(other.get_shapely_obj())
 
-            for point in self.get_corners():
-                if other.contains_point(point):
-                    return True
-            for point in other.get_corners():
-                if self.contains_point(point):
-                    return True
-            return False
-        elif types == {Circle, Circle}:
-            if center_dist > self.radius + other.radius:
-                return False
-            return True
-        elif types == {Rectangle, Circle}:
-            rect = self if self.primitive is Rectangle else other
-            circle = self if self.primitive is Circle else other
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        result = cls.__new__(cls)
+        memo[id(self)] = result
+        for k, v in self.__dict__.items():
+            if k is "shapely_obj":
+                setattr(result, k, None)
+            else:
+                setattr(result, k, deepcopy(v, memo))
+        return result
 
-            if (center_dist > rect.halfdiag + circle.radius):
-                return False
-
-            angle = np.radians(rect.angle+45)
-            A = (circle.x + circle.radius*np.cos(angle),
-                 circle.y + circle.radius*np.sin(angle))
-            B = (circle.x + circle.radius*np.cos(angle+np.pi/2),
-                 circle.y + circle.radius*np.sin(angle+np.pi/2))
-            C = (circle.x + circle.radius*np.cos(angle+np.pi),
-                 circle.y + circle.radius*np.sin(angle+np.pi))
-            D = (circle.x + circle.radius*np.cos(angle-np.pi/2),
-                 circle.y + circle.radius*np.sin(angle-np.pi/2))
-
-            circ_corners = [A, B, C, D]
-            rect_corners = rect.get_corners()
-
-            for point in rect_corners:
-                if circle.contains_point(point):
-                    return True
-            for point in circ_corners:
-                if rect.contains_point(point):
-                    return True
-            return False
+    def collides(self, other):
+        return self.can_collide(other) and self.intersect(other)

@@ -83,4 +83,3 @@ def run_and_collect():
 
 if __name__ == "__main__":
   run_and_collect()
->>>>>>> master

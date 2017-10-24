@@ -84,7 +84,7 @@ class PyGameVisualizer:
         return
 
 
-    def render_collisions(self, state, dynamic_collisions, static_collisions, valid_area):
+    def render_collisions(self, state, valid_area):
         """
         Renders a small circle on colliding cars for visual inspection of collisions.
 
@@ -97,6 +97,8 @@ class PyGameVisualizer:
             Two points in the form [x_1, x_2, y_1, y_2] that define the viewing window of the state. 
 
         """
+        dynamic_collisions, static_collisions = state.get_collisions()
+        
         new_surface = pygame.Surface((valid_area[1] - valid_area[0],
                                       valid_area[3] - valid_area[2]),
                                      pygame.SRCALPHA)
@@ -138,8 +140,7 @@ class PyGameVisualizer:
         self.surface.blit(new_surface, (0, 0), None)
         return
 
-    def render(self, state, valid_area, dynamic_collisions=[],
-               static_collisions=[],
+    def render(self, state, valid_area, 
                rerender_statics=False, waypoints=[]):
         """
         Renders the state and waypoints with lazy re-rerendering of static objects as needed. 
@@ -167,8 +168,7 @@ class PyGameVisualizer:
 
         self.render_statics(state, valid_area)
         self.render_dynamics(state, valid_area)
-        self.render_collisions(state,
-                               dynamic_collisions, static_collisions, valid_area)
+        self.render_collisions(state, valid_area)
 
         self.render_waypoints(waypoints, valid_area)
         pygame.display.flip()

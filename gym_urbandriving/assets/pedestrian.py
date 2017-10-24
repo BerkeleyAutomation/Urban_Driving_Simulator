@@ -18,6 +18,7 @@ class Pedestrian(Circle):
             action: 1x2 array, steering / acceleration action.
             info_dict: dict, contains information about the environment.
         """
+        self.shapely_obj = None
         if action is None:
             action_steer, action_acc = 0.0, 0.0
         else:
@@ -47,9 +48,9 @@ class Pedestrian(Circle):
         return self.x,self.y,self.x_dim,self.y_dim,self.angle
 
 
-    def collides(self, other):
+    def can_collide(self, other):
         from gym_urbandriving.assets import Car
         from gym_urbandriving.assets import KinematicCar
         if type(other) in {Terrain, Car, KinematicCar}:
-            return self.intersect(other)
+            return True
         return False

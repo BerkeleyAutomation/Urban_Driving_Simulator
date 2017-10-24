@@ -37,23 +37,6 @@ class UrbanDrivingEnv(gym.Env):
         if (self.init_state):
             self._reset()
 
-    def get_collisions(self):
-        if self.last_col == self.time:
-            return self.dynamic_collisions, self.static_collisions
-        self.dynamic_collisions, self.static_collisions = self.current_state.get_collisions()
-        self.last_col = self.time
-        return self.dynamic_collisions, self.static_collisions
-
-    def collides_any(self, agentnum):
-        self.get_collisions()
-        for coll in self.dynamic_collisions:
-            if agentnum in coll:
-                return True
-        for coll in self.static_collisions:
-            if agentnum == coll[0]:
-                return True
-        return False
-
     
     def _step(self, action, agentnum=0):
         assert(self.current_state is not None)
@@ -80,7 +63,7 @@ class UrbanDrivingEnv(gym.Env):
             dobj.step(actions[i])
 
         self.time += 1
-        dynamic_coll, static_coll = self.get_collisions()
+        dynamic_coll, static_coll = self.current_state.get_collisions()
         state = self.get_state_copy()
         reward = self.reward_fn(self.current_state)
         done = (self.time == self.max_time) or len(dynamic_coll) or len(static_coll)
@@ -89,9 +72,7 @@ class UrbanDrivingEnv(gym.Env):
         if self.bgagent_type == ModelAgent:
             predict_accuracy = sum([o.score for o in self.bg_agents])/len(self.bg_agents)
 
-        info_dict = {"dynamic_collisions":dynamic_coll,
-                     "static_collisions":static_coll,
-                     "saved_actions": actions,
+        info_dict = {"saved_actions": actions,
                      "predict_accuracy": predict_accuracy}
  
         return state, reward, done, info_dict
@@ -120,9 +101,7 @@ class UrbanDrivingEnv(gym.Env):
         if self.visualizer:
             window = [0, self.current_state.dimensions[0],
                       0, self.current_state.dimensions[1]]
-            self.get_collisions()
             self.visualizer.render(self.current_state, window,
-                                   self.dynamic_collisions, self.static_collisions,
                                    rerender_statics=not self.statics_rendered,
                                    waypoints=waypoints)
             self.statics_rendered = True

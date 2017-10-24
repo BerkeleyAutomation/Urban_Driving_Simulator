@@ -6,8 +6,8 @@ from gym_urbandriving.assets.primitives.rectangle import Rectangle
 from gym_urbandriving.assets.car import Car
 
 class KinematicCar(Car):
-    def __init__(self, x, y, xdim=80, ydim=40, angle=0.0, vel=0.0, acc=0.0, mass=100.0):
-        Car.__init__(self, x, y, xdim, ydim, angle, vel, acc, mass=mass)
+    def __init__(self, x, y, xdim=80, ydim=40, angle=0.0, vel=0.0, mass=100.0):
+        Car.__init__(self, x, y, xdim, ydim, angle, vel, mass=mass)
         self.l_f = self.l_r = self.ydim / 2.0
 
     def step(self, action):
@@ -18,6 +18,7 @@ class KinematicCar(Car):
             action: 1x2 array, steering / acceleration action.
             info_dict: dict, contains information about the environment.
         """
+        self.shapely_obj = None
         if action is None:
             action = [0, 0]
         # Unpack actions, convert angles to radians
@@ -29,7 +30,6 @@ class KinematicCar(Car):
             a = self.max_vel - self.vel
         elif a < -self.max_vel - self.vel:
             a = - self.max_vel - self.vel
-
         # Differential equations
         ode_state = [self.x, self.y, self.vel, rad_angle]
         aux_state = (a, delta_f)

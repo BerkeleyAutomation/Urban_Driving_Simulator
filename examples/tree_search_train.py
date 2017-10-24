@@ -22,6 +22,7 @@ def run():
     vis = uds.PyGameVisualizer((800, 800))
     init_state = uds.state.SimpleIntersectionState(ncars=2, nped=0)
 
+
     env = uds.UrbanDrivingEnv(init_state=init_state,
                               visualizer=vis,
                               bgagent=AccelAgent,
