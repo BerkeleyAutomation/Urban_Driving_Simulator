@@ -3,6 +3,7 @@ import numpy as np
 
 class AccelAgent:
     actions = [(0, 1), (2, 1), (-2, 1), (0, 0), (1, -1), (-1, -1)]
+    #actions = [(0,1),(0,0),(0,-1)]
     def __init__(self, agent_num=0):
         self.agent_num = agent_num
         from gym_urbandriving import UrbanDrivingEnv

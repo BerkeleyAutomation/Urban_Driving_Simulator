@@ -55,7 +55,7 @@ from copy import deepcopy
 import numpy as np
 import queue
 import gym_urbandriving as uds
-from gym_urbandriving.agents import NullAgent
+from gym_urbandriving.agents import NullAgent, AccelAgent
 
 class TreeSearchAgent:
     def __init__(self, agent_num=0, target_loc=[450,900], collect_radius = 15, vis=None):
@@ -78,7 +78,7 @@ class TreeSearchAgent:
         self.reward_fn = reward_function
         from gym_urbandriving import UrbanDrivingEnv
 
-        self.planning_env = UrbanDrivingEnv(init_state=None, bgagent=NullAgent, visualizer = vis)
+        self.planning_env = UrbanDrivingEnv(init_state=None, bgagent=AccelAgent, visualizer = vis)
 
         return
 

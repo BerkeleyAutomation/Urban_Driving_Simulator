@@ -3,7 +3,7 @@ import gym_urbandriving as uds
 import cProfile
 import time
 
-from gym_urbandriving.agents import  NullAgent, TreeSearchAgent, SimplePathAgent
+from gym_urbandriving.agents import  NullAgent, TreeSearchAgent, SimplePathAgent, AccelAgent
 
 import numpy as np
 import pygame
@@ -20,18 +20,18 @@ def run():
     """
 
     vis = uds.PyGameVisualizer((800, 800))
-    init_state = uds.state.SimpleIntersectionState(ncars=1, nped=0)
+    init_state = uds.state.SimpleIntersectionState(ncars=2, nped=0)
 
     env = uds.UrbanDrivingEnv(init_state=init_state,
                               visualizer=vis,
-                              bgagent=NullAgent,
+                              bgagent=AccelAgent,
                               max_time=250,
                               randomize=True,
                               use_ray=False)
 
     env._reset()
     state = env.current_state
-    agent = TreeSearchAgent(vis = vis)
+    agent = TreeSearchAgent()
     action = None
 
     while(True):
