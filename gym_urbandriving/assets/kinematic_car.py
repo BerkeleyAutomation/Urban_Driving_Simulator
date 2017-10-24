@@ -6,7 +6,7 @@ from gym_urbandriving.assets.primitives.rectangle import Rectangle
 from gym_urbandriving.assets.car import Car
 
 class KinematicCar(Car):
-    def __init__(self, x, y, xdim=100, ydim=50, angle=0.0, vel=0.0, mass=100.0):
+    def __init__(self, x, y, xdim=80, ydim=40, angle=0.0, vel=0.0, mass=100.0):
         Car.__init__(self, x, y, xdim, ydim, angle, vel, mass=mass)
         self.l_f = self.l_r = self.ydim / 2.0
 
