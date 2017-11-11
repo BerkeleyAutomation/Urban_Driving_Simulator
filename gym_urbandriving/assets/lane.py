@@ -27,7 +27,6 @@ class Lane(Street):
         ----------
         car_type : Car, Kinematic or Dynamic Car
         """
-        
         car = car_type(0, 0, angle=self.angle+np.random.uniform(-10, 10))
         angle = np.radians(-self.angle)
         rotation_mat = np.array([[np.cos(angle), -np.sin(angle)],
