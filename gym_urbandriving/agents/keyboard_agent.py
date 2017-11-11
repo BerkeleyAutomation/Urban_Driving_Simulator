@@ -13,6 +13,7 @@ class KeyboardAgent:
     def __init__(self, agent_num=0):
         self.agent_num = agent_num
         return
+        
     def eval_policy(self, state):
         """
         Returns action based on keyboard input
