@@ -20,14 +20,15 @@ class TreeSearchAgent:
             pos = state.dynamic_objects[0].get_pos()
             distance = np.linalg.norm( pos - dest)
             wayp = sum([max(-50, -np.linalg.norm(pos-w)) for w in wayp])
-            return -distance + 25*wayp
+            log_coll = np.log(state.min_dist_to_coll(self.agent_num))
+            return -distance + 25*wayp + 100*log_coll
 
         self.reward_fn = reward_function
         from gym_urbandriving import UrbanDrivingEnv
 
         self.planning_env = UrbanDrivingEnv(init_state=None, bgagent=AccelAgent, visualizer = vis)
 
-        self.planning_threshold = 1000 # If solution isn't found within threshold number of steps, give up
+        self.planning_threshold = 500 # If solution isn't found within threshold number of steps, give up
         return
 
     def update_waypoints(self, old_waypoints, new_state):

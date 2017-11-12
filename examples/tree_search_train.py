@@ -54,6 +54,5 @@ def run():
             agent.waypoints = None
             agent.actions = None
 
+cProfile.run('run()', 'temp/stats')
 
-if __name__ == "__main__":
-  run()
