@@ -2,11 +2,10 @@ import gym
 import gym_urbandriving as uds
 import cProfile
 import time
+
+from gym_urbandriving.agents import  NullAgent, TreeSearchAgent, SimplePathAgent, AccelAgent
+
 import numpy as np
-import pickle
-import os
-import ray
-import queue
 import pygame
 from copy import deepcopy
 from random import random
@@ -14,59 +13,47 @@ from random import random
 from gym_urbandriving.assets import Car
 from gym_urbandriving.agents import AccelAgent, KeyboardAgent, NullAgent
 
-saved_states = []
-saved_actions = []
+def run():
+    """
+    Main function to be run to test simple_path_agent with hard coded path.
 
-vis = uds.PyGameVisualizer((800, 800))
-env = uds.UrbanDrivingEnv(init_state=None,
-                          visualizer=vis,
-                          agent_mappings={Car:NullAgent},
-                          max_time=-1,
-                          randomize=False,
-)
-action_space = [(0, 1), (3, 0), (-3, 0), (0, 0)]
+    Examples
+    --------
+    python3 examples/test_path.py
 
-reward_fn = lambda dest: lambda state:\
-            -np.linalg.norm(state.dynamic_objects[0].get_pos() - dest) + \
-            2 * state.min_dist_to_coll(0)
-steps_expanded = 0
+    """
 
-def tree_search(state, destination):
-    global steps_expanded
-    steps_expanded += 1
-    future_states = queue.PriorityQueue()
-    for action in action_space:
-        env._reset(state)
-        next_state, reward, done, info_dict = env._step(action)
-        if done:
-            reward = reward - 99999
-        future_states.put((-reward, random(), next_state, [action]))
-    while True:
-        best_reward, _, state, actions = future_states.get()
-        env._reset(state)
-        env._render(state)
-        if reward_fn(destination)(state) > -10:
-            return actions
-        for next_action in action_space:
-            env._reset(state)
-            for i in range(3):
-                next_state, reward, done, info_dict = env._step(next_action)
-            if done:
-                reward = reward - 99999
-            future_states.put((-reward + len(actions), random(), next_state,
-                               actions + [next_action] * 3))
-
-action = None
-while(True):
-    destination = [450, 1000]
-    env.reward_fn = reward_fn(destination)
-    steps_expanded = 0
+    vis = uds.PyGameVisualizer((800, 800))
     init_state = uds.state.SimpleIntersectionState(ncars=2, nped=0)
-    env._reset(init_state)
-    env._render()
-    actions = tree_search(deepcopy(init_state), destination)
-    env._reset(init_state)
-    s = init_state
-    for action in actions:
-        s, r, d, i = env._step(action)
-        env._render()
+
+
+    env = uds.UrbanDrivingEnv(init_state=None,
+                              visualizer=vis,
+                              agent_mappings={Car:NullAgent},
+                              max_time=-1,
+                              randomize=False,
+    )
+
+    env._reset()
+    state = env.current_state
+    agent = TreeSearchAgent()
+    action = None
+
+    while(True):
+        action = agent.eval_policy(deepcopy(state))
+        start_time = time.time()
+        state, reward, done, info_dict = env._step(action)
+
+        env._render(waypoints = agent.waypoints)
+        if done:
+            print("done")
+            time.sleep(1)
+            print(info_dict["dynamic_collisions"])
+            env._reset()
+            state = env.current_state
+            agent.waypoints = None
+            agent.actions = None
+
+
+if __name__ == "__main__":
+  run()
