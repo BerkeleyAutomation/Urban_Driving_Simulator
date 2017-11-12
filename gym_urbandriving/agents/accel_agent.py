@@ -16,12 +16,12 @@ class AccelAgent:
     planning_env : UrbanDrivingEnv
         World simulator used internally to plan
     """
-    actions = [(0, 1), (2, 1), (-2, 1), (0, 0), (1, -1), (-1, -1)]
-    #actions = [(0,1),(0,0),(0,-1)]
+
     def __init__(self, agent_num=0):
         self.agent_num = agent_num
         from gym_urbandriving import UrbanDrivingEnv
         self.planning_env = UrbanDrivingEnv(init_state=None)
+        self.valid_actions = [(0, 1), (2, 1), (-2, 1), (0, 0), (1, -1), (-1, -1)]
         return
 
     def eval_policy(self, state, nsteps=8):
@@ -42,12 +42,13 @@ class AccelAgent:
         action
             Best action
         """
+
         self.planning_env._reset(state)
         start_pos = state.dynamic_objects[self.agent_num].get_pos()
         best_action = None
         best_time = 0
         best_distance = 0
-        for action in self.actions:
+        for action in self.valid_actions:
             self.planning_env._reset()
             next_state, r, done, info_dict = self.planning_env._step(action,
                                                                 self.agent_num)

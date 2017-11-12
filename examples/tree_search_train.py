@@ -3,7 +3,7 @@ import gym_urbandriving as uds
 import cProfile
 import time
 
-from gym_urbandriving.agents import  NullAgent, TreeSearchAgent, SimplePathAgent, AccelAgent
+from gym_urbandriving.agents import  NullAgent, TreeSearchAgent, AccelAgent
 
 import numpy as np
 import pygame
@@ -15,12 +15,12 @@ def run():
 
     Examples
     --------
-    python3 examples/test_path.py
+    python3 examples/tree_search_train.py
 
     """
 
     vis = uds.PyGameVisualizer((800, 800))
-    init_state = uds.state.SimpleIntersectionState(ncars=2, nped=0)
+    init_state = uds.state.SimpleIntersectionState(ncars=3, nped=0)
 
 
     env = uds.UrbanDrivingEnv(init_state=init_state,
@@ -28,15 +28,17 @@ def run():
                               bgagent=AccelAgent,
                               max_time=250,
                               randomize=True,
-                              use_ray=False)
+                              use_ray=True)
 
     env._reset()
     state = env.current_state
-    agent = TreeSearchAgent()
+
+    # To see the training in action
+    agent = TreeSearchAgent(vis = vis)
+
     action = None
 
     while(True):
-        print 
         action = agent.eval_policy(deepcopy(state))
         start_time = time.time()
         state, reward, done, info_dict = env._step(action)
@@ -45,9 +47,10 @@ def run():
         if done:
             print("done")
             time.sleep(1)
-            print(info_dict["dynamic_collisions"])
             env._reset()
             state = env.current_state
+
+            # reset agent state
             agent.waypoints = None
             agent.actions = None
 
