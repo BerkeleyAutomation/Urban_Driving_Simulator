@@ -1,5 +1,5 @@
 from gym_urbandriving.state.state import PositionState
-from gym_urbandriving.assets import Street, KinematicCar
+from gym_urbandriving.assets import Street, Car
 import numpy as np
 
 class ArenaState(PositionState):
@@ -19,7 +19,8 @@ class ArenaState(PositionState):
                                      [np.sin(angle), np.cos(angle)]])
             x, y = np.dot([400, 0], rotation_mat.T)
             angle_offset = np.random.uniform(-30, 30)
-            car = KinematicCar(x+500, y+500, angle=180+degrees+angle_offset)
+            car = Car(x+500, y+500, angle=180+degrees+angle_offset,
+                      dynamics_model="kinematic")
             car.vel = 0
             if not any([car.collides(obj) for obj in self.static_objects+self.dynamic_objects]):
                 self.dynamic_objects.append(car)

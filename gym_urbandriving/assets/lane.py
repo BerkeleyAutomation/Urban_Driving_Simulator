@@ -1,6 +1,6 @@
 from gym_urbandriving.assets.street import Street
 from gym_urbandriving.assets.primitives import Rectangle
-from gym_urbandriving.assets.kinematic_car import KinematicCar
+from gym_urbandriving.assets.car import Car
 import numpy as np
 
 
@@ -8,8 +8,9 @@ class Lane(Street):
     def __init__(self, x, y, xdim, ydim, angle=0.0):
         Rectangle.__init__(self, x, y, xdim, ydim, angle=angle, sprite="lane.png", static=True);
 
-    def generate_car(self, car_type=KinematicCar):
-        car = car_type(0, 0, angle=self.angle+np.random.uniform(-10, 10))
+    def generate_car(self, car_type="point"):
+        car = Car(0, 0, angle=self.angle+np.random.uniform(-10, 10),
+                  dynamics_model=car_type)
         angle = np.radians(-self.angle)
         rotation_mat = np.array([[np.cos(angle), -np.sin(angle)],
                                  [np.sin(angle), np.cos(angle)]])

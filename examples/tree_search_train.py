@@ -10,6 +10,8 @@ import queue
 import pygame
 from copy import deepcopy
 from random import random
+
+from gym_urbandriving.assets import Car
 from gym_urbandriving.agents import AccelAgent, KeyboardAgent, NullAgent
 
 saved_states = []
@@ -18,7 +20,7 @@ saved_actions = []
 vis = uds.PyGameVisualizer((800, 800))
 env = uds.UrbanDrivingEnv(init_state=None,
                           visualizer=vis,
-                          bgagent=NullAgent,
+                          agent_mappings={Car:NullAgent},
                           max_time=-1,
                           randomize=False,
 )

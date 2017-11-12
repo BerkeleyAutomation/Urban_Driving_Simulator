@@ -48,18 +48,25 @@ class AccelAgent:
         best_distance = 0
         for action in self.actions:
             self.planning_env._reset()
+            pos = state.dynamic_objects[self.agent_num].get_pos()
+            dist_to_coll = state.min_dist_to_coll(self.agent_num)
             next_state, r, done, info_dict = self.planning_env._step(action,
                                                                 self.agent_num)
-            for i in range(nsteps):
-                next_state, r, done, info_dict = self.planning_env._step(action,
-                                                                    self.agent_num)
-                time = self.planning_env.time
-                if (done and next_state.collides_any(self.agent_num)):
-                    break
-
-            if time == nsteps + 1:
-                return action
-            if time > best_time:
+            delta_x = next_state.dynamic_objects[self.agent_num].get_pos()
+            delta_x = next_state.min_dist_to_coll(self.agent_num) + next_state.dynamic_objects[self.agent_num].vel
+            # for i in range(nsteps):
+            #     next_state, r, done, info_dict = self.planning_env._step(action,
+            #                                                         self.agent_num)
+            #     time = self.planning_env.time
+            #     if (done and next_state.collides_any(self.agent_num)):
+            #         break
+            
+            # if time == nsteps + 1:
+            #     return action
+            # if time > best_time:
+            #     best_action = action
+            #     best_time = time
+            if delta_x > best_distance:
                 best_action = action
-                best_time = time
+                best_distance = delta_x
         return best_action

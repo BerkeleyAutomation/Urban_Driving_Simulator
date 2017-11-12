@@ -2,3 +2,4 @@ from gym_urbandriving.agents.keyboard_agent import KeyboardAgent
 from gym_urbandriving.agents.accel_agent import AccelAgent
 from gym_urbandriving.agents.null_agent import NullAgent
 from gym_urbandriving.agents.model_agent import ModelAgent
+from gym_urbandriving.agents.traffic_light_agent import TrafficLightAgent

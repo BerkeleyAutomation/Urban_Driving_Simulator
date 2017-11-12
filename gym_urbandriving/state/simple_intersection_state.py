@@ -1,6 +1,6 @@
 from gym_urbandriving.state.state import PositionState
 from gym_urbandriving.assets import Terrain, Lane, Street, Sidewalk,\
-    KinematicCar, Pedestrian, Car
+    Pedestrian, Car, TrafficLight
 import numpy as np
 
 class SimpleIntersectionState(PositionState):
@@ -27,11 +27,13 @@ class SimpleIntersectionState(PositionState):
                       Sidewalk(625, 825, 50, 350),
     ]
 
-    def __init__(self, ncars=4, nped=2):
+    def __init__(self, ncars=4, nped=2, traffic_lights=False):
         self.ncars = ncars
         self.nped = nped
+        self.traffic_lights = traffic_lights
         PositionState.__init__(self)
         self.randomize()
+
 
     def randomize(self):
         self.dynamic_objects = []
@@ -60,4 +62,9 @@ class SimpleIntersectionState(PositionState):
             man.vel = 2
             if not any([man.collides(obj) for obj in self.static_objects+self.dynamic_objects]):
                 self.dynamic_objects.append(man)
+        if self.traffic_lights:
+            self.dynamic_objects.append(TrafficLight(600, 440, 0))
+            self.dynamic_objects.append(TrafficLight(400, 560, -180))
+            self.dynamic_objects.append(TrafficLight(560, 600, -90, initial_color="red"))
+            self.dynamic_objects.append(TrafficLight(440, 400, 90, initial_color="red"))
 
