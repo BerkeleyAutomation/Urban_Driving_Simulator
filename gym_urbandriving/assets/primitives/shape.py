@@ -6,12 +6,13 @@ SPRITE_DIR = "gym_urbandriving/visualizer/sprites/"
 
 
 class Shape:
+    SPRITE_DIR = "gym_urbandriving/visualizer/sprites/"
     def __init__(self, x, y, angle, mass, sprite="no_texture.png", static=False):
         self.x = x
         self.y = y
         self.angle = angle % 360
         self.mass = mass
-        self.sprite = SPRITE_DIR + sprite
+        self.sprite = self.SPRITE_DIR + sprite
         self.static = static
         self.shapely_obj = None
 
@@ -26,6 +27,9 @@ class Shape:
 
     def dist_to(self, other):
         return self.get_shapely_obj().distance(other.get_shapely_obj())
+
+    def get_sprite(self):
+        return self.sprite
 
     def __deepcopy__(self, memo):
         cls = self.__class__

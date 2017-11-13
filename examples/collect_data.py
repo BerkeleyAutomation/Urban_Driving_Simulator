@@ -10,7 +10,9 @@ import queue
 import pygame
 from copy import deepcopy
 from random import random
+
 from gym_urbandriving.agents import AccelAgent, KeyboardAgent, NullAgent
+from gym_urbandriving import Car
 
 
 def early_stop_actions(actions):
@@ -49,7 +51,7 @@ def run_and_collect():
 
     env = uds.UrbanDrivingEnv(init_state=init_state,
                               visualizer=vis,
-                              bgagent=AccelAgent,
+                              agent_mappings={Car:NullAgent},
                               max_time=100,
                               randomize=True,
                               nthreads=4)

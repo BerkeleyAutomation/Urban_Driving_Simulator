@@ -11,6 +11,7 @@ class RayNode:
 
     def eval_policy(self, state):
         return self.agent.eval_policy(state)
+    
 class UrbanDrivingEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
@@ -19,15 +20,14 @@ class UrbanDrivingEnv(gym.Env):
                  visualizer=None,
                  reward_fn=lambda x: 0,
                  max_time=500,
-                 bgagent=NullAgent,
                  randomize=False,
-                 use_ray=False):
+                 use_ray=False,
+                 agent_mappings={}):
         self.visualizer = visualizer
         self.reward_fn = reward_fn
         self.init_state = deepcopy(init_state)
-        self.bgagent_type = bgagent
+        self.agent_mappings = agent_mappings
         self.max_time = max_time
-        self.time = 0
         self.randomize = randomize
         self.statics_rendered = False
         self.use_ray = use_ray
@@ -62,15 +62,15 @@ class UrbanDrivingEnv(gym.Env):
         for i, dobj in enumerate(self.current_state.dynamic_objects):
             dobj.step(actions[i])
 
-        self.time += 1
+        self.current_state.time += 1
         dynamic_coll, static_coll = self.current_state.get_collisions()
         state = self.get_state_copy()
         reward = self.reward_fn(self.current_state)
-        done = (self.time == self.max_time) or len(dynamic_coll) or len(static_coll)
+        done = (self.current_state.time == self.max_time) or len(dynamic_coll) or len(static_coll)
 
         predict_accuracy = None
-        if self.bgagent_type == ModelAgent:
-            predict_accuracy = sum([o.score for o in self.bg_agents])/len(self.bg_agents)
+        # if self.bgagent_type == ModelAgent:
+        #     predict_accuracy = sum([o.score for o in self.bg_agents])/len(self.bg_agents)
 
         info_dict = {"saved_actions": actions,
                      "predict_accuracy": predict_accuracy}
@@ -83,16 +83,18 @@ class UrbanDrivingEnv(gym.Env):
         if new_state:
             self.init_state = new_state
             self.statics_rendered = False
-        self.time = 0
         if self.randomize:
             self.init_state.randomize()
         self.current_state = deepcopy(self.init_state)
-        if self.use_ray:
-            self.bg_agents = {i: RayNode.remote(self.bgagent_type, i) \
-                              for i in range(len(self.current_state.dynamic_objects))}
-        else:
-            self.bg_agents = {i: self.bgagent_type(i) \
-                              for i in range(len(self.current_state.dynamic_objects))}
+
+        self.bg_agents = {}
+        for i, obj in enumerate(self.current_state.dynamic_objects):
+            if type(obj) in self.agent_mappings:
+                if self.use_ray:
+                    self.bg_agents[i] = RayNode.remote(self.agent_mappings[type(obj)], i)
+                else:
+                    self.bg_agents[i] = self.agent_mappings[type(obj)](i)
+
         return
 
     def _render(self, mode='human', close=False, waypoints=[]):

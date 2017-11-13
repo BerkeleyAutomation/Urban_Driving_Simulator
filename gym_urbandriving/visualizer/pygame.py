@@ -174,7 +174,7 @@ class PyGameVisualizer:
         pygame.display.flip()
 
     def draw_rectangle(self, rect, surface):
-        obj = pygame.image.load(rect.sprite)
+        obj = pygame.image.load(rect.get_sprite())
         obj = pygame.transform.scale(obj, (rect.xdim, rect.ydim))
         corners = rect.get_corners()
         # for c in corners:
@@ -192,7 +192,7 @@ class PyGameVisualizer:
         return
 
     def draw_circle(self, circ, surface):
-        obj = pygame.image.load(circ.sprite)
+        obj = pygame.image.load(circ.get_sprite())
         obj = pygame.transform.scale(obj, (circ.radius*2, circ.radius*2))
         obj = pygame.transform.rotate(obj, circ.angle)
         surface.blit(obj, (circ.x-circ.radius,circ.y-circ.radius))
