@@ -6,6 +6,7 @@ import numpy as np
 import pickle
 
 from gym_urbandriving.agents import ModelAgent, AccelAgent
+from gym_urbandriving.assets import Car
 
 def test_model():
     """
@@ -27,7 +28,7 @@ def test_model():
 
     env = uds.UrbanDrivingEnv(init_state=init_state,
                               visualizer=vis,
-                              bgagent=AccelAgent,
+                              agent_mappings={Car:AccelAgent},
                               max_time=200,
                               randomize=True,
                               use_ray=True)

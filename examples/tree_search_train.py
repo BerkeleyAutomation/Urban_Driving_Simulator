@@ -8,10 +8,14 @@ from gym_urbandriving.agents import  NullAgent, TreeSearchAgent, AccelAgent
 import numpy as np
 import pygame
 from copy import deepcopy
+from random import random
+
+from gym_urbandriving.assets import Car
+from gym_urbandriving.agents import AccelAgent, KeyboardAgent, NullAgent
 
 def run():
     """
-    Main function to be run to test simple_path_agent with hard coded path. 
+    Main function to be run to test simple_path_agent with hard coded path.
 
     Examples
     --------
@@ -23,12 +27,13 @@ def run():
     init_state = uds.state.SimpleIntersectionState(ncars=3, nped=0)
 
 
-    env = uds.UrbanDrivingEnv(init_state=init_state,
+    env = uds.UrbanDrivingEnv(init_state=None,
                               visualizer=vis,
-                              bgagent=AccelAgent,
-                              max_time=250,
+                              agent_mappings={Car:AccelAgent},
+                              max_time=-1,
                               randomize=True,
                               use_ray=True)
+
 
     env._reset()
     state = env.current_state

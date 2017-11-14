@@ -7,6 +7,7 @@ class PositionState:
     def __init__(self):
         self.dimensions = (1000, 1000)
         self.dynamic_objects = []
+        self.time = 0
         return
 
     def get_collisions(self):

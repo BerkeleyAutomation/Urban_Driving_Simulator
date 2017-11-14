@@ -11,7 +11,7 @@ import pygame
 from copy import deepcopy
 from random import random
 from gym_urbandriving.agents import AccelAgent, KeyboardAgent, NullAgent, TreeSearchAgent
-
+from gym_urbandriving import Car
 
 def vectorize_state(state):
     res = []
@@ -55,8 +55,9 @@ def run_and_collect():
 
     env = uds.UrbanDrivingEnv(init_state=init_state,
                               visualizer=vis,
-                              bgagent=AccelAgent,
+                              agent_mappings={Car:AccelAgent},
                               max_time=200,
+
                               randomize=True,
                               use_ray=True)
 

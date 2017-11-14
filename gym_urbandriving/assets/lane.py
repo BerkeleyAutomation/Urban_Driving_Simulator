@@ -1,6 +1,6 @@
 from gym_urbandriving.assets.street import Street
 from gym_urbandriving.assets.primitives import Rectangle
-from gym_urbandriving.assets.kinematic_car import KinematicCar
+from gym_urbandriving.assets.car import Car
 import numpy as np
 
 
@@ -19,7 +19,7 @@ class Lane(Street):
         """
         Rectangle.__init__(self, x, y, xdim, ydim, angle=angle, sprite="lane.png", static=True);
 
-    def generate_car(self, car_type=KinematicCar):
+    def generate_car(self, car_type="kinematic"):
         """
         Creates a car on this lane ready to drive into the intersection
 
@@ -27,7 +27,8 @@ class Lane(Street):
         ----------
         car_type : Car, Kinematic or Dynamic Car
         """
-        car = car_type(0, 0, angle=self.angle+np.random.uniform(-10, 10))
+        car = Car(0, 0, angle=self.angle+np.random.uniform(-10, 10),
+                  dynamics_model=car_type)
         angle = np.radians(-self.angle)
         rotation_mat = np.array([[np.cos(angle), -np.sin(angle)],
                                  [np.sin(angle), np.cos(angle)]])
@@ -38,7 +39,5 @@ class Lane(Street):
         x, y = np.dot([x, y], rotation_mat.T)
         x, y = x+self.x, y+self.y
         car.x, car.y = x, y
+        car.vel = np.random.uniform(0, 5)
         return car
-
-
-

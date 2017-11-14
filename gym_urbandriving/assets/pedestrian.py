@@ -51,7 +51,6 @@ class Pedestrian(Circle):
 
     def can_collide(self, other):
         from gym_urbandriving.assets import Car
-        from gym_urbandriving.assets import KinematicCar
-        if type(other) in {Terrain, Car, KinematicCar}:
+        if type(other) in {Terrain, Car}:
             return True
         return False
