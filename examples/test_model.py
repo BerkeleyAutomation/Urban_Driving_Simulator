@@ -5,7 +5,7 @@ import time
 import numpy as np
 import pickle
 
-from gym_urbandriving.agents import ModelAgent
+from gym_urbandriving.agents import ModelAgent, AccelAgent
 
 def test_model():
     """
@@ -23,14 +23,15 @@ def test_model():
     start_time = time.time()
 
     vis = uds.PyGameVisualizer((800, 800))
-    init_state = uds.state.SimpleIntersectionState()
+    init_state = uds.state.SimpleIntersectionState(ncars=2, nped=0)
 
     env = uds.UrbanDrivingEnv(init_state=init_state,
                               visualizer=vis,
-                              bgagent=ModelAgent,
-                              max_time=250,
+                              bgagent=AccelAgent,
+                              max_time=200,
                               randomize=True,
-                              nthreads=4)
+                              use_ray=True)
+
     env._render()
     state = init_state
     agent = ModelAgent()
@@ -56,10 +57,9 @@ def test_model():
                         
             print("done")
             print((time.time()-start_time)/totalticks, totalticks)
-            print(info_dict["dynamic_collisions"])
             
-            accs += info_dict["predict_accuracy"]
-            print(accs/totalticks)
+            #accs += info_dict["predict_accuracy"]
+            #print(accs/totalticks)
 
             env._reset()
             state = env.current_state
