@@ -65,7 +65,41 @@ in the scene. For every other object, it queries its internal list of agents as 
 
 Designing a State
 ^^^^^^^^^^^^^^^^^
+Designing a state is very simple in UDS. To design a custom state, simply inherit from ``PositionState`` and implement your own array of ``static_objects`` and define your own ``randomize()`` function.
 
+::
+
+   class CustomState(PositionState):
+      static_objects = [Terrain(175, 175, 350, 350),
+                        Terrain(825, 175, 350, 350),
+                        Terrain(175, 825, 350, 350),
+                        Terrain(825, 825, 350, 350),
+                        Lane(200, 450, 400, 100, angle=-180),
+                        Lane(200, 550, 400, 100),
+                        Lane(800, 450, 400, 100, angle=-180),
+                        Lane(800, 550, 400, 100),
+                        Lane(450, 200, 400, 100, angle=-90),
+                        Lane(550, 200, 400, 100, angle=90),
+                        Lane(450, 800, 400, 100, angle=-90),
+                        Lane(550, 800, 400, 100, angle=90),
+                        Street(500, 500, 200, 200),
+                        Sidewalk(200, 375, 400, 50),
+                        Sidewalk(200, 625, 400, 50),
+                        Sidewalk(800, 375, 400, 50),
+                        Sidewalk(800, 625, 400, 50),
+                        Sidewalk(375, 175, 50, 350),
+                        Sidewalk(625, 175, 50, 350),
+                        Sidewalk(375, 825, 50, 350),
+                        Sidewalk(625, 825, 50, 350),]
+
+You should place the dynamic objects in the ``randomize()`` function
+
+
+::
+   
+      def randomize(self):
+         self.dynamic_objects = []
+         self.dynamic_objects.append(Car(500, 200))
 
 Imitation Learning
 ^^^^^^^^^^^^^^^^^^

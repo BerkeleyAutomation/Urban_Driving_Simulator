@@ -45,6 +45,14 @@ class Car(Rectangle):
         self.l_f = self.l_r = self.ydim / 2.0
 
     def step(self, action):
+        """
+        Updates this object given this action input
+
+        Parameters
+        ----------
+        action :
+            The action to take
+        """
         if self.dynamics_model == "kinematic":
             self.kinematic_model_step(action)
         else:
@@ -53,7 +61,7 @@ class Car(Rectangle):
     def point_model_step(self, action, info_dict=None):
         """
         Updates the car for one timestep based on point model
-        
+
         Parameters
         ----------
         action: 1x2 array,
@@ -80,7 +88,7 @@ class Car(Rectangle):
         self.y += dy
         self.vel += acc
         self.vel = max(min(self.vel, self.max_vel), -self.max_vel)
-        
+
     def kinematic_model_step(self, action):
         """
         Updates the car for one timestep.
@@ -118,7 +126,7 @@ class Car(Rectangle):
         equation variables for dynamics.
         SciPy ODE integrator calls this function.
 
-        Args:
+        :
             state: 1x6 array, contains x, y, dx_body, dy_body, rad_angle, rad_dangle
                 of car.
             t: float, timestep.
@@ -152,6 +160,16 @@ class Car(Rectangle):
     def can_collide(self, other):
         """
         Specifies whether this object can collide with another object
+
+        Parameters
+        ----------
+        other : 
+            Object to test collision against
+
+        Returns
+        -------
+        bool 
+           True if this object can collide with other
         """
         from gym_urbandriving.assets.lane import Lane
         if type(other) in {Terrain, Sidewalk, Car, Pedestrian}:
