@@ -1,0 +1,6 @@
+numpy
+gym
+shapely
+pygame
+scipy
+ray
