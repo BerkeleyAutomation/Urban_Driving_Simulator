@@ -5,10 +5,42 @@ import numpy as np
 
 
 class Lane(Street):
+    """
+    Represents a lane of road. Lanes have directionality, so cars should drive in the
+    right direction.
+
+    Parameters
+    ----------
+    x : float
+       Upper left x coordinate of the lane block
+    y : float
+       Upper left y coordinate of the lane block
+    xdim : float
+       Width of the lane block
+    ydim : float
+       Height of the lane block
+    angle ; float
+       In degrees, the rotation of the lane block.
+    """
     def __init__(self, x, y, xdim, ydim, angle=0.0):
         Rectangle.__init__(self, x, y, xdim, ydim, angle=angle, sprite="lane.png", static=True);
 
     def generate_car(self, car_type="kinematic", randomize=True):
+        """
+        Generates a car on the lane, facing the right direction.
+
+        Parameters
+        ----------
+        car_type : "kinematic" or "point"
+            Specifies dynamics model for the car
+        randomize : bool
+            Specifies if the car's position is randomized
+
+        Returns
+        -------
+        Car
+            Generated Car object
+        """
         if randomize:
             car = Car(0, 0, angle=self.angle+np.random.uniform(-10, 10),
                       dynamics_model=car_type)
@@ -36,4 +68,3 @@ class Lane(Street):
             x, y = x+self.x, y+self.y
             car.x, car.y = x, y
             return car
-
