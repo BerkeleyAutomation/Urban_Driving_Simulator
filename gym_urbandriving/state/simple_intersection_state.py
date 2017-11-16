@@ -4,6 +4,18 @@ from gym_urbandriving.assets import Terrain, Lane, Street, Sidewalk,\
 import numpy as np
 
 class SimpleIntersectionState(PositionState):
+    """
+    Instance of a :class:`PositionState` describing a four-way intersection
+    
+    Parameters
+    ----------
+    ncars : int
+        Number of cars to generate
+    nped : int
+        Number of pedestrians to generate
+    traffic_lights : bool
+        Whether or not to generate traffic lights
+    """
     static_objects = [Terrain(175, 175, 350, 350),
                       Terrain(825, 175, 350, 350),
                       Terrain(175, 825, 350, 350),
@@ -36,6 +48,9 @@ class SimpleIntersectionState(PositionState):
 
 
     def randomize(self):
+        """
+        Randomly generates car and pedestrian positions
+        """
         self.dynamic_objects = []
         while len(self.dynamic_objects) < self.ncars:
             i = np.random.random_integers(0, 3) if len(self.dynamic_objects) else np.random.random_integers(0, 2)

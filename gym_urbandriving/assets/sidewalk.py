@@ -3,10 +3,32 @@ from gym_urbandriving.assets.primitives.rectangle import Rectangle
 from gym_urbandriving.assets.pedestrian import Pedestrian
 
 class Sidewalk(Rectangle):
-    def __init__(self, x, y, xdim, ydim, angle=0.0):
-        Rectangle.__init__(self, x, y, xdim, ydim, angle=angle, sprite="gray.png", static=True);
+    """
+    Represents a block of sidewalk. Passable for pedestrians, not for cars
+
+    Parameters
+    ----------
+    x : float
+       Upper left x coordinate of the sidewalk block
+    y : float
+       Upper left y coordinate of the sidewalk block
+    xdim : float
+       Width of the sidewalk block
+    ydim : float
+       Height of the sidewalk block
+    """
+    def __init__(self, x, y, xdim, ydim):
+        Rectangle.__init__(self, x, y, xdim, ydim, sprite="gray.png", static=True)
 
     def generate_man(self, man_type=Pedestrian):
+        """
+        Generates a man on the sidewalk
+
+        Returns
+        -------
+        Pedestrian
+            Generated Pedestrian object
+        """
         man = man_type(0, 0, angle=self.angle)
         angle = np.radians(-self.angle)
         rotation_mat = np.array([[np.cos(angle), -np.sin(angle)],
