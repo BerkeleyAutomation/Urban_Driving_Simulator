@@ -3,6 +3,5 @@ from gym_urbandriving.agents.accel_agent import AccelAgent
 from gym_urbandriving.agents.null_agent import NullAgent
 from gym_urbandriving.agents.model_agent import ModelAgent
 from gym_urbandriving.agents.traffic_light_agent import TrafficLightAgent
-from gym_urbandriving.agents.simple_path_agent import SimplePathAgent
 from gym_urbandriving.agents.tree_search_agent import TreeSearchAgent
 

@@ -17,8 +17,8 @@ class Sidewalk(Rectangle):
     ydim : float
        Height of the sidewalk block
     """
-    def __init__(self, x, y, xdim, ydim):
-        Rectangle.__init__(self, x, y, xdim, ydim, sprite="gray.png", static=True)
+    def __init__(self, x, y, xdim, ydim, angle=0.0):
+        Rectangle.__init__(self, x, y, xdim, ydim, angle=angle, sprite="gray.png", static=True)
 
     def generate_man(self, man_type=Pedestrian):
         """
