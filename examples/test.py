@@ -2,11 +2,11 @@ import gym
 import gym_urbandriving as uds
 import cProfile
 import time
+import numpy as np
 
 from gym_urbandriving.agents import KeyboardAgent, AccelAgent, NullAgent, TrafficLightAgent
 from gym_urbandriving.assets import Car, TrafficLight
 
-import numpy as np
 
 """
  Test File, to demonstrate general functionality of environment
@@ -51,6 +51,7 @@ def f():
         # Simulate the state
         state, reward, done, info_dict = env._step(action)
         env._render()
+        # keep simulator running in spite of collisions or timing out
         done = False
         # If we crash, sleep for a moment, then reset
         if done:

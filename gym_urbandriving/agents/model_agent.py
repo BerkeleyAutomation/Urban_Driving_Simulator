@@ -10,9 +10,15 @@ class ModelAgent:
         self.model = pickle.load(open("model.model", "rb"))
         self.score = 0
         return
+
+    def vectorize_state(self, state):
+        res = []
+        for obj in state.dynamic_objects:
+            res.extend([obj.x, obj.y, obj.vel, obj.angle])
+        return res
+
     
-    
-    def eval_policy(self, state, nsteps=8):
+    def eval_policy(self, state):
         """
         If we can accelerate, see if we crash in nsteps.
         If we crash, decelerate, else accelerate
@@ -45,21 +51,5 @@ class ModelAgent:
                 best_action = action
                 best_time = time
         """
-        
-        # Our prediction
-        pred_class = self.model.predict(np.array([state.vectorize_state()]))
-        our_action = (0,pred_class[0])
-
-        # TODO: fix arbitrary quantization
-        our_action = (0,1)
-        if pred_class<0:
-            our_action = (0,-1)
-        elif pred_class<.5:
-            our_action = (0,0)
-        else:
-            our_action = (0,1)
-
-        
-        #self.score += (best_action[1]-pred_class[0])**2
     
-        return our_action
+        return self.model.predict(np.array([self.vectorize_state(state)]))[0]

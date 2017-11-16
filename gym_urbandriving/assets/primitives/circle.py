@@ -4,7 +4,7 @@ from copy import deepcopy
 import shapely.geometry
 
 class Circle(Shape):
-    def __init__(self, x, y, radius, angle=0.0, mass=100, sprite="no_texture.png"):
+    def __init__(self, x, y, radius, angle=0.0, mass=100, sprite="no_texture.png", static=False):
         """
         Initializes rectangle object.
 
@@ -13,7 +13,7 @@ class Circle(Shape):
             y: float, starting y position.
             angle: float, starting angle of car in degrees.
         """
-        Shape.__init__(self, x, y, angle, mass, sprite)
+        Shape.__init__(self, x, y, angle, mass, sprite=sprite, static=static)
         self.radius = radius
         self.primitive = Circle
 

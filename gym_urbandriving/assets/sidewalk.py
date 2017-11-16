@@ -42,4 +42,3 @@ class Sidewalk(Rectangle):
         man.x, man.y = x, y
         return man
 
-

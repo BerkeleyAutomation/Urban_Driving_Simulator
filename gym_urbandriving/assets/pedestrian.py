@@ -29,6 +29,7 @@ class Pedestrian(Circle):
         self.acc = acc
         self.max_vel = max_vel
         self.mass = mass
+        self.angle = angle
 
 
     def step(self, action, info_dict=None):

@@ -31,12 +31,12 @@ class SimpleIntersectionState(PositionState):
                       Street(500, 500, 200, 200),
                       Sidewalk(200, 375, 400, 50),
                       Sidewalk(200, 625, 400, 50),
-                      Sidewalk(800, 375, 400, 50),
-                      Sidewalk(800, 625, 400, 50),
-                      Sidewalk(375, 175, 50, 350),
-                      Sidewalk(625, 175, 50, 350),
-                      Sidewalk(375, 825, 50, 350),
-                      Sidewalk(625, 825, 50, 350),
+                      Sidewalk(800, 375, 400, 50, angle=-180),
+                      Sidewalk(800, 625, 400, 50, angle=-180),
+                      Sidewalk(375, 175, 350, 50, angle=-90),
+                      Sidewalk(625, 175, 350, 50, angle=-90),
+                      Sidewalk(375, 825, 350, 50, angle=90),
+                      Sidewalk(625, 825, 350, 50, angle=90)
     ]
 
     def __init__(self, ncars=4, nped=2, traffic_lights=False):
@@ -59,20 +59,20 @@ class SimpleIntersectionState(PositionState):
                     Lane(450, 200, 400, 100, angle=-90),
                     Lane(550, 800, 400, 100, angle=90)
             ][np.random.random_integers(0, 2)]
-            car = lane.generate_car(randomize = True)
+            car = lane.generate_car()
             car.vel = 0
             if not any([car.collides(obj) for obj in self.static_objects+self.dynamic_objects]):
                 self.dynamic_objects.append(car)
         while len(self.dynamic_objects) < self.ncars+self.nped:
             sidewalk = [Sidewalk(200, 375, 400, 50),
-                        Sidewalk(200, 625, 400, 50),
-                        Sidewalk(800, 375, 400, 50),
-                        Sidewalk(800, 625, 400, 50),
-                        Sidewalk(375, 175, 50, 350),
-                        Sidewalk(625, 175, 50, 350),
-                        Sidewalk(375, 825, 50, 350),
-                        Sidewalk(625, 825, 50, 350),
-            ][np.random.random_integers(0, 1)]
+                      Sidewalk(200, 625, 400, 50),
+                      Sidewalk(800, 375, 400, 50, angle=-180),
+                      Sidewalk(800, 625, 400, 50, angle=-180),
+                      Sidewalk(375, 175, 350, 50, angle=-90),
+                      Sidewalk(625, 175, 350, 50, angle=-90),
+                      Sidewalk(375, 825, 350, 50, angle=90),
+                      Sidewalk(625, 825, 350, 50, angle=90)
+            ][np.random.random_integers(0, 7)]
             man = sidewalk.generate_man()
             man.vel = 2
             if not any([man.collides(obj) for obj in self.static_objects+self.dynamic_objects]):
