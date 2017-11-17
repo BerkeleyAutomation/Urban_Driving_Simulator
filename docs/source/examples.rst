@@ -103,3 +103,112 @@ You should place the dynamic objects in the ``randomize()`` function
 
 Imitation Learning
 ^^^^^^^^^^^^^^^^^^
+
+Finally, we will walk through training an Imitation Learning Agent to mimic a Tree Search Agent. First, we need to set up an environment in which to collect data. 
+
+::
+
+    vis = uds.PyGameVisualizer((800, 800))
+    init_state = uds.state.SimpleIntersectionState(ncars=2, nped=0)
+
+    env = uds.UrbanDrivingEnv(init_state=init_state,
+                              visualizer=vis,
+                              agent_mappings={Car:AccelAgent},
+                              max_time=200,
+
+                              randomize=True,
+                              use_ray=True)
+
+    env._render()
+    state = env.current_state
+    agent = TreeSearchAgent()
+
+We will also need arrays to store the state and actions taken by the agent 
+
+::
+
+    saved_states = []
+    saved_actions = []
+
+
+As well as a function that will turn our state into a vector form that is easier to load later. 
+
+::
+
+   def vectorize_state(state):
+       res = []
+       for obj in state.dynamic_objects:
+           res.extend([obj.x, obj.y, obj.vel, obj.angle])
+       return res
+
+We can now save the vectorized state every time step, and the actions taken by each agent, which we obtain with ``info_dict["saved_actions"]``. 
+
+::
+
+        action = agent.eval_policy(deepcopy(state))
+        saved_states.append(vectorize_state(state))
+        start_time = time.time()
+        state, reward, done, info_dict = env._step(action)
+        saved_actions.append(info_dict["saved_actions"])
+
+And after a demonstration is over, we can reset our env, our saved states and actions, and dump our data to a pickle file. 
+
+::
+
+   if done:
+         env._reset()
+         state = env.current_state
+
+         # reset agent state
+         agent.waypoints = None
+         agent.actions = None
+
+         pickle.dump((saved_states, saved_actions),open("data/"+str(np.random.random())+"dump.data", "wb+"))
+
+         saved_states = []
+         saved_actions = []
+
+
+All of this is included in ``examples/collect_data.py`` and running this file should start to generate pickle files in the ``./data`` directory. 
+
+To then learn from this data, we use a random decision forest. This is currently implemented in ``examples/learn_model.py``. 
+
+The most important lines are 
+
+::
+
+  model = RandomForestClassifier(n_estimators=10, criterion='gini', max_features=None, max_depth=15)
+  model.fit(train_X, train_y)
+
+Here, we make a RandomForestClassifier and fit it to the data. In general, any scipy classifier will work. 
+
+Finally, we can test our model in the environment again, only this time we set our agent to be a ModelAgent. 
+
+:: 
+
+    vis = uds.PyGameVisualizer((800, 800))
+    init_state = uds.state.SimpleIntersectionState(ncars=2, nped=0)
+
+    env = uds.UrbanDrivingEnv(init_state=init_state,
+                              visualizer=vis,
+                              agent_mappings={Car:AccelAgent},
+                              max_time=200,
+                              randomize=True,
+                              use_ray=True)
+
+    env._render()
+    state = init_state
+    agent = ModelAgent()
+
+
+The Model Agent will load the model that we learned and saved, and apply the appropriate action. 
+
+::
+
+    def eval_policy(self, state):    
+        return self.model.predict(np.array([self.vectorize_state(state)]))[0]
+
+
+It must also vectorize the state the same way our data collector does. 
+
+
