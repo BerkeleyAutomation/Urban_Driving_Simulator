@@ -3,6 +3,7 @@ import numpy as np
 import queue
 import gym_urbandriving as uds
 from gym_urbandriving.agents import NullAgent, AccelAgent
+from gym_urbandriving.assets import Car
 
 class TreeSearchAgent:
     def __init__(self, agent_num=0, target_loc=[450,900], collect_radius = 15, vis=None):
@@ -26,7 +27,10 @@ class TreeSearchAgent:
         self.reward_fn = reward_function
         from gym_urbandriving import UrbanDrivingEnv
 
-        self.planning_env = UrbanDrivingEnv(init_state=None, bgagent=AccelAgent, visualizer = vis)
+        self.planning_env = uds.UrbanDrivingEnv(init_state=None,
+                              visualizer=vis,
+                              agent_mappings={Car:AccelAgent}
+                            )
 
         self.planning_threshold = 500 # If solution isn't found within threshold number of steps, give up
         return
