@@ -1,6 +1,7 @@
 numpy
 gym
 shapely
-pygame
+image
+pygame>=1.9.3
 scipy
 ray

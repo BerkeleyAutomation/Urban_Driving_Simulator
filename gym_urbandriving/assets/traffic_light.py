@@ -34,5 +34,6 @@ class TrafficLight(Rectangle):
         return False
 
     def get_sprite(self):
-        return Shape.SPRITE_DIR + self.colors[self.color]
+        self.sprite = self.colors[self.color]
+        return Shape.get_sprite(self)
         

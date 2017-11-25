@@ -1,6 +1,7 @@
 import numpy as np
 from copy import deepcopy
 import shapely.geometry
+import os
 
 SPRITE_DIR = "gym_urbandriving/visualizer/sprites/"
 
@@ -13,6 +14,7 @@ class Shape:
         self.angle = angle % 360
         self.mass = mass
         self.sprite = self.SPRITE_DIR + sprite
+        self.sprite = sprite
         self.static = static
         self.shapely_obj = None
 
@@ -29,7 +31,9 @@ class Shape:
         return self.get_shapely_obj().distance(other.get_shapely_obj())
 
     def get_sprite(self):
-        return self.sprite
+        basedir = os.path.dirname(__file__)
+        filename = os.path.join(basedir, "../../visualizer/sprites/", self.sprite)
+        return filename
 
     def __deepcopy__(self, memo):
         cls = self.__class__
