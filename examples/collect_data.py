@@ -11,7 +11,7 @@ import pygame
 from copy import deepcopy
 from random import random
 from gym_urbandriving.agents import AccelAgent, KeyboardAgent, NullAgent, TreeSearchAgent
-from gym_urbandriving import Car
+from gym_urbandriving.assets import Car
 
 def vectorize_state(state):
     res = []
