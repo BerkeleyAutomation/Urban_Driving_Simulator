@@ -13,10 +13,16 @@ class PositionState:
         self.time = 0
         return
 
+    def randomize(self):
+        """
+        Not implemented
+        """
+        pass
+
     def get_collisions(self):
         """
         Get list of all collisions in this state
-        
+
         Returns
         -------
         list
@@ -39,7 +45,7 @@ class PositionState:
     def collides_any(self, agentnum):
         """
         Returns if the agentnum object in the scene is colliding with any other object
-        
+
         Parameters
         ----------
         agentnum : int
@@ -62,7 +68,7 @@ class PositionState:
     def min_dist_to_coll(self, agentnum):
         """
         Returns the minimum distance between the object with id agentnum and a collideable object.
-        
+
         Parameters
         ----------
         agentnum : int
