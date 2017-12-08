@@ -1,23 +1,23 @@
 Examples
 =========
 
-Introduction
-^^^^^^^^^^^^
+Setup and KeyboardAgent Tutorial
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 This introduction will guide you through running a simple example on the simulator
 
 ::
 
    import gym
    import gym_urbandriving as uds
-   from uds.agents import KeyboardAgent, NullAgent
-   form uds.state import SimpleIntersectionState
-   from uds.assets import Car, Pedestrian
-   from uds import UrbanDrivingEnv
+   from gym_urbandriving.agents import KeyboardAgent, NullAgent
+   from gym_urbandriving.state import SimpleIntersectionState
+   from gym_urbandriving.assets import Car, Pedestrian
+   from gym_urbandriving import UrbanDrivingEnv
 
    vis = uds.PyGameVisualizer((800, 800))
    init_state = SimpleIntersectionState(ncars=3, nped=2)
    env = UrbanDrivingEnv(init_state=init_state,
-                         visualizer=vis
+                         visualizer=vis,
                          max_time=500,
                          randomize=True,
                          agent_mappings={Car:NullAgent,
@@ -62,15 +62,18 @@ object in the state. ``env._step()`` applies the action to the ``0th`` controlla
 in the scene. For every other object, it queries its internal list of agents as specified in
 ``agent_mappings``. Once every action is collected, ``env_.step`` advances the state and returns.
 
+:download:`Download <../../examples/setup_tutorial.py>`
 
-Designing a State
-^^^^^^^^^^^^^^^^^
+
+State Design Tutorial
+^^^^^^^^^^^^^^^^^^^^^
 Designing a state is very simple in UDS. To design a custom state, simply inherit from ``PositionState``, implement your own array of ``static_objects`` and define your own ``randomize()`` function.
 
-First, create a custom state class that inherits from ``PositionState``. Let's also set up the render cycle.
+First, create a custom state class that inherits from ``PositionState``. Let's also set up the render cycle. 
 
 ::
 
+   import random
    import gym_urbandriving as uds
    from gym_urbandriving.state import PositionState
    from gym_urbandriving.agents import NullAgent
@@ -88,11 +91,12 @@ First, create a custom state class that inherits from ``PositionState``. Let's a
    while(True):
       env._render()
 
-Now, running this script should generate a blank screen.
+Now, running this script should generate a blank screen. 
 
 .. image:: blank.png
 
-Lets add the streets to our state now. Streets are composed of ``Lane`` and ``Street`` objects. ``Lane`` objects are associated with directionality, so use these to construct the two sides of a road. ``Street`` objects should be used at intersections, where cars can travel in any direction. Lets build a three-way intersection between a four lane road and a two lane road. Place down the four lane road first. For rectangular objects, the arguments are the coordinates of the centroid, the height and width of the object, and then any rotation around the centroid.
+
+Lets add the streets to our state now. Streets are composed of ``Lane`` and ``Street`` objects. ``Lane`` objects are associated with directionality, so use these to construct the two sides of a road. ``Street`` objects should be used at intersections, where cars can travel in any direction. Lets build a three-way intersection between a four lane road and a two lane road. Place down the four lane road first. For rectangular objects, the arguments are the coordinates of the centroid, the height and width of the object, and then any rotation around the centroid. Edit the ``CustomState`` class to look like the following.
 
 ::
 
@@ -131,7 +135,7 @@ Notice how the angle of the lanes is manipulated so the road has proper directio
 
 .. image:: custom2.png
 
-We are almost done. All thats left is to fill in the empty blocks with ``Terrain`` objects and write our own ``randomize`` function. The easiest way is to use the ``Lane`` objects' builtin ``generate_car`` and the ``Sidewalk`` objects' builtin ``generate_man`` functions. When generating objects, you need to check if they collide with other randomly generated objects
+We are almost done. All thats left is to fill in the empty blocks with ``Terrain`` objects and write our own ``randomize`` function. The easiest way is to use the ``Lane`` objects' builtin ``generate_car`` and the ``Sidewalk`` objects' built-in ``generate_man`` functions. These ``generate`` functions try to the position the actors facing the ``angle`` of the object. When generating objects, you should check if they collide with other randomly generated objects
 
 ::
 
@@ -148,10 +152,11 @@ We are almost done. All thats left is to fill in the empty blocks with ``Terrain
                         Lane(450, 250, 500, 100, angle=-90),
                         Lane(550, 250, 500, 100, angle=90),
                         Sidewalk(200, 475, 400, 50),
-                        Sidewalk(800, 475, 400, 50),
-                        Terrain(200, 225, 400, 450),
-                        Terrain(800, 225, 400, 450),
-                        Terrain(500, 950, 1000, 100)]
+                        Sidewalk(800, 475, 400, 50,angle=-180),
+                        Terrain([(0, 0), (400, 0), (400, 450), (0, 450)]),
+                        Terrain([(600, 0), (1000, 0), (1000, 450), (600, 450)]),
+                        Terrain([(0, 900), (1000, 900), (1000, 1000), (0, 1000)]),
+                        ]
 
       def randomize(self):
             self.dynamic_objects = []
@@ -170,6 +175,8 @@ We are almost done. All thats left is to fill in the empty blocks with ``Terrain
 Now, you should see the following image (or something similar) when running this script.
 
 .. image:: custom3.png
+
+:download:`Download <../../examples/state_design_tutorial.py>`
 
 Imitation Learning
 ^^^^^^^^^^^^^^^^^^
