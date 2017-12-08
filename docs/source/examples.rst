@@ -287,6 +287,8 @@ We can then add our ``KeyboardAgent`` to control the main car in the scene, and 
         env._reset()
         state = env.get_state_copy()
 
+We have now background agents that should slow down or stop if there are obstacles in front that they will collide with in the next few timesteps. If there is a crash the simulator will briefly show pink dots to indicate which two objects collided and then reset for the next simulation. 
+
 See all of this action here:
 :download:`Download <../../examples/changing_background_agent_tutorial.py>`
 
