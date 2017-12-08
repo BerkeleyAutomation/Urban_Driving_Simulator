@@ -19,9 +19,8 @@ class AccelAgent:
 
     def __init__(self, agent_num=0):
         self.agent_num = agent_num
-        from gym_urbandriving import UrbanDrivingEnv
-        self.planning_env = UrbanDrivingEnv(init_state=None)
-        self.valid_actions = [(0, 1), (2, 1), (-2, 1), (0, 0), (1, -1), (-1, -1)]
+        self.valid_actions = [(0, 1), (3, .5), (-3, .5), (0, -1)]
+        self.quantum = 4
         return
 
     def eval_policy(self, state, nsteps=8):
@@ -41,26 +40,37 @@ class AccelAgent:
             Best action
         """
 
-        self.planning_env._reset(state)
-        start_pos = state.dynamic_objects[self.agent_num].get_pos()
         best_action = None
         best_time = 0
-        best_distance = 0
+        best_angle_offset = 90
+
         for action in self.valid_actions:
-            self.planning_env._reset()
+            state_copy = deepcopy(state)
             time = 0
-            next_state, r, done, info_dict = self.planning_env._step(action,
-                                                                self.agent_num)
-            for i in range(nsteps):
-                next_state, r, done, info_dict = self.planning_env._step(action,
-                                                                    self.agent_num)
+
+            for i, dobj in enumerate(state_copy.dynamic_objects):
+                if i != self.agent_num:
+                    dobj.step((0, 0))
+                else:
+                    dobj.step(action)
+
+            angle_offset = abs((state_copy.dynamic_objects[self.agent_num].angle-45)%90-45)
+
+            for z in range(nsteps//self.quantum):
+                for y in range(self.quantum):
+                    for i, dobj in enumerate(state_copy.dynamic_objects):
+                        if i != self.agent_num:
+                            dobj.step((0, 0))
+                        else:
+                            dobj.step(action)
+
                 time += 1
-                if (done and next_state.collides_any(self.agent_num)):
+                if (state_copy.collides_any(self.agent_num)):
                     break
 
-            if time == nsteps + 1:
-                return action
-            if time > best_time:
+            if time > best_time or (time == best_time and angle_offset < best_angle_offset):
                 best_action = action
                 best_time = time
+                best_angle_offset = angle_offset
+  
         return best_action
