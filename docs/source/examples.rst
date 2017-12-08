@@ -1,23 +1,23 @@
 Examples
 =========
 
-Introduction
+Setup and Keyboard Agent
 ^^^^^^^^^^^^
-This introduction will guide you through running a simple example on the simulator
+This introduction will guide you through running a simple example on the simulator with a car that can be controlled through the Keyboard. 
 
 ::
 
    import gym
    import gym_urbandriving as uds
    from uds.agents import KeyboardAgent, NullAgent
-   form uds.state import SimpleIntersectionState
+   from uds.state import SimpleIntersectionState
    from uds.assets import Car, Pedestrian
    from uds import UrbanDrivingEnv
 
    vis = uds.PyGameVisualizer((800, 800))
    init_state = SimpleIntersectionState(ncars=3, nped=2)
    env = UrbanDrivingEnv(init_state=init_state,
-                         visualizer=vis
+                         visualizer=vis,
                          max_time=500,
                          randomize=True,
                          agent_mappings={Car:NullAgent,
@@ -27,7 +27,7 @@ This introduction will guide you through running a simple example on the simulat
    env._render()
 
 
-First we create a visualizer window of size 800x800. We use PyGame for visualization
+First we create a visualizer window of size 800x800. We use PyGame for visualization.
 
 The ``SimpleIntersectionState`` defines a simple four-way intersection. We instantiate
 our initial state with 3 cars and 2 pedestrians.
@@ -57,8 +57,8 @@ Next we setup the control and simulation loop
 
 We choose a ``KeyboardAgent`` to control the main car in the scene. Its ``agent_num``
 specifies the index of the object it is controlling in the scene. For any agent, calling
-``agent.eval_policy(state)`` returns the action the agent would take for the ``agent_num``
-object in the state. ``env._step()`` applies the action to the ``0th`` controllable object
+``agent.eval_policy(state)`` returns the action the agent would take assuming it was the 
+object at index ``agent_num`` of the states list of objects. ``env._step()`` applies the action to the ``0th`` controllable object
 in the scene. For every other object, it queries its internal list of agents as specified in
 ``agent_mappings``. Once every action is collected, ``env_.step`` advances the state and returns.
 
@@ -171,112 +171,117 @@ Now, you should see the following image (or something similar) when running this
 
 .. image:: custom3.png
 
-Imitation Learning
+Changing the Background Agent
 ^^^^^^^^^^^^^^^^^^
 
-Finally, we will walk through training an Imitation Learning Agent to mimic a Tree Search Agent. First, we need to set up an environment in which to collect data.
+Finally, we will walk through changing the Background Agent and how agents in general should interact with the environment for the simulator to work properly. 
+Let us first look at the basics needed for any Agent which is best outlined in our ``NullAgent``. 
 
 ::
 
-    vis = uds.PyGameVisualizer((800, 800))
-    init_state = uds.state.SimpleIntersectionState(ncars=2, nped=0)
-
-    env = uds.UrbanDrivingEnv(init_state=init_state,
-                              visualizer=vis,
-                              agent_mappings={Car:AccelAgent},
-                              max_time=200,
-
-                              randomize=True,
-                              use_ray=True)
-
-    env._render()
-    state = env.current_state
-    agent = TreeSearchAgent()
-
-We will also need arrays to store the state and actions taken by the agent
-
-::
-
-    saved_states = []
-    saved_actions = []
+  class NullAgent:
+      """
+      Agent which does nothing
+      """
+      def __init__(self, agent_num=0):
+          return
+      def eval_policy(self, state):
+          """
+          Returns None to simulate uncontrolled object
+          """
+          return None
 
 
-As well as a function that will turn our state into a vector form that is easier to load later.
+Every agent should support initialization with an ``agent_num``. This is so that it knows which object it is supposed to plan for and control. This leads us to the other required function ``eval_policy``, which takes in a state and returns the proper action. 
+
+Agents that do nothing are not very interesting, so we have provided a simple agent to better illustrate using our API, the ``AccelAgent``, that tries to move forward and stops as soon as it detects a collision some number of steps out. **Note: Accel agents are simple and unoptimized so expect them to be slower and act suboptimally**. In our ``AccelAgent`` we made changes to both the initializer and ``eval_policy``. 
 
 ::
 
-   def vectorize_state(state):
-       res = []
-       for obj in state.dynamic_objects:
-           res.extend([obj.x, obj.y, obj.vel, obj.angle])
-       return res
+  class AccelAgent:
+    """
+    Simple greedy search agent. Chooses action which maximizes expected time
+    to next collision. 
+    """
 
-We can now save the vectorized state every time step, and the actions taken by each agent, which we obtain with ``info_dict["saved_actions"]``.
+    def __init__(self, agent_num=0):
+        self.agent_num = agent_num
+        self.valid_actions = [(0, 1), (3, .5), (-3, .5), (0, -1)]
+        self.quantum = 4
+        return
 
-::
+    def eval_policy(self, state, nsteps=8):
+        best_action = None
+        best_time = 0
+        best_angle_offset = 90
 
-        action = agent.eval_policy(deepcopy(state))
-        saved_states.append(vectorize_state(state))
-        start_time = time.time()
-        state, reward, done, info_dict = env._step(action)
-        saved_actions.append(info_dict["saved_actions"])
+        for action in self.valid_actions:
+            state_copy = deepcopy(state)
+            time = 0
 
-And after a demonstration is over, we can reset our env, our saved states and actions, and dump our data to a pickle file.
+            for i, dobj in enumerate(state_copy.dynamic_objects):
+                if i != self.agent_num:
+                    dobj.step((0, 0))
+                else:
+                    dobj.step(action)
 
-::
+            angle_offset = abs((state_copy.dynamic_objects[self.agent_num].angle-45)%90-45)
 
-   if done:
-         env._reset()
-         state = env.current_state
+            for z in range(nsteps//self.quantum):
+                for y in range(self.quantum):
+                    for i, dobj in enumerate(state_copy.dynamic_objects):
+                        if i != self.agent_num:
+                            dobj.step((0, 0))
+                        else:
+                            dobj.step(action)
 
-         # reset agent state
-         agent.waypoints = None
-         agent.actions = None
+                time += 1
+                if (state_copy.collides_any(self.agent_num)):
+                    break
 
-         pickle.dump((saved_states, saved_actions),open("data/"+str(np.random.random())+"dump.data", "wb+"))
-
-         saved_states = []
-         saved_actions = []
-
-
-All of this is included in ``examples/collect_data.py`` and running this file should start to generate pickle files in the ``./data`` directory.
-
-To then learn from this data, we use a random decision forest. This is currently implemented in ``examples/learn_model.py``.
-
-The most important lines are
-
-::
-
-  model = RandomForestClassifier(n_estimators=10, criterion='gini', max_features=None, max_depth=15)
-  model.fit(train_X, train_y)
-
-Here, we make a RandomForestClassifier and fit it to the data. In general, any scipy classifier will work.
-
-Finally, we can test our model in the environment again, only this time we set our agent to be a ModelAgent.
-
-::
-
-    vis = uds.PyGameVisualizer((800, 800))
-    init_state = uds.state.SimpleIntersectionState(ncars=2, nped=0)
-
-    env = uds.UrbanDrivingEnv(init_state=init_state,
-                              visualizer=vis,
-                              agent_mappings={Car:AccelAgent},
-                              max_time=200,
-                              randomize=True,
-                              use_ray=True)
-
-    env._render()
-    state = init_state
-    agent = ModelAgent()
+            if time > best_time or (time == best_time and angle_offset < best_angle_offset):
+                best_action = action
+                best_time = time
+                best_angle_offset = angle_offset
+  
+        return best_action
 
 
-The Model Agent will load the model that we learned and saved, and apply the appropriate action.
+To put everything together, we first must set up the state as we did in the Setup and Keyboard Agent section, but this time we will and set our agent mappings to ``AccelAgent``. We will also use the ``use_ray`` flag turn `Ray`_ on, which will parallelize the planning of each agent for better performance. 
 
 ::
 
-    def eval_policy(self, state):
-        return self.model.predict(np.array([self.vectorize_state(state)]))[0]
+  vis = uds.PyGameVisualizer((800, 800))
+  init_state = SimpleIntersectionState(ncars=3, nped=2)
+  env = UrbanDrivingEnv(init_state=init_state,
+                        visualizer=vis,
+                        max_time=500,
+                        randomize=True,
+                        agent_mappings={Car:AccelAgent, 
+                                        Pedestrian:AccelAgent},
+                        use_ray=True
+                        )
+  state = init_state
+  env._render()
 
 
-It must also vectorize the state the same way our data collector does.
+We can then add our ``KeyboardAgent`` to control the main car in the scene, and the rest of the control and simulation loop is the same. 
+
+::
+
+  agent = KeyboardAgent(agent_num=0)
+  while (True):
+     action = agent.eval_policy(state)
+     state, reward, done, info_dict = env._step(action)
+     env._render()
+
+     if done:
+        env._reset()
+        state = env.get_state_copy()
+
+See all of this action here:
+:download:`Download <../../examples/changing_background_agent_tutorial.py>`
+
+
+
+.. _`Ray`: http://ray.readthedocs.io/en/latest/

@@ -19,8 +19,8 @@ class AccelAgent:
 
     def __init__(self, agent_num=0):
         self.agent_num = agent_num
-        self.valid_actions = [(0, 1), (3, .5), (-3, .5), (0, -1), (0, 0)]
-        self.quantum = 2
+        self.valid_actions = [(0, 1), (3, .5), (-3, .5), (0, -1)]
+        self.quantum = 4
         return
 
     def eval_policy(self, state, nsteps=8):
