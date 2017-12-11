@@ -38,7 +38,7 @@ class Shape:
 
     def __deepcopy__(self, memo):
         cls = self.__class__
-        IPython.embed()
+        
         result = cls.__new__(cls)
         memo[id(self)] = result
         for k, v in self.__dict__.items():
