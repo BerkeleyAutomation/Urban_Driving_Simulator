@@ -2,12 +2,11 @@ import numpy as np
 from copy import deepcopy
 import shapely.geometry
 import os
-import IPython
 
 SPRITE_DIR = "gym_urbandriving/visualizer/sprites/"
 
 
-class Shape:
+class Shape(object):
     SPRITE_DIR = "gym_urbandriving/visualizer/sprites/"
     def __init__(self, x, y, angle, mass, sprite="no_texture.png", static=False):
         self.x = x
