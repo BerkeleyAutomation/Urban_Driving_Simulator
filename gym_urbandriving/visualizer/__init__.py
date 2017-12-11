@@ -1,1 +1,1 @@
-from gym_urbandriving.visualizer.pygame import PyGameVisualizer
+from gym_urbandriving.visualizer.pygame_vis import PyGameVisualizer
