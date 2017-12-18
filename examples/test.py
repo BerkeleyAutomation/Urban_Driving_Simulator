@@ -31,7 +31,7 @@ def f():
                               randomize=True,
                               agent_mappings={Car:NullAgent,
                                               TrafficLight:TrafficLightAgent},
-                              use_ray=True
+                              use_ray=False
     )
 
     env._render()

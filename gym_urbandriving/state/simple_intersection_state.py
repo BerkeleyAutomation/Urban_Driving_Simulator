@@ -60,7 +60,6 @@ class SimpleIntersectionState(PositionState):
                     Lane(550, 800, 400, 100, angle=90)
             ][np.random.random_integers(0, 2)]
             car = lane.generate_car()
-            car.vel = 0
             if not any([car.collides(obj) for obj in self.static_objects+self.dynamic_objects]):
                 self.dynamic_objects.append(car)
         while len(self.dynamic_objects) < self.ncars+self.nped:
