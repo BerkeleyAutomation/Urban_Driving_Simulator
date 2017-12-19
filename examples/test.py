@@ -4,7 +4,7 @@ import cProfile
 import time
 import numpy as np
 
-from gym_urbandriving.agents import KeyboardAgent, AccelAgent, NullAgent, TrafficLightAgent
+from gym_urbandriving.agents import KeyboardAgent, AccelAgent, NullAgent, TrafficLightAgent, RRTAgent
 from gym_urbandriving.assets import Car, TrafficLight
 
 
@@ -18,7 +18,7 @@ def f():
     vis = uds.PyGameVisualizer((800, 800))
 
     # Create a simple-intersection state, with 4 cars, no pedestrians, and traffic lights
-    init_state = uds.state.SimpleIntersectionState(ncars=1, nped=0, traffic_lights=True)
+    init_state = uds.state.ArenaState(ncars=2, nped=0, traffic_lights=True)
 
     # Create the world environment initialized to the starting state
     # Specify the max time the environment will run to 500
@@ -29,16 +29,16 @@ def f():
                               visualizer=vis,
                               max_time=500,
                               randomize=True,
-                              agent_mappings={Car:NullAgent,
+                              agent_mappings={Car:RRTAgent,
                                               TrafficLight:TrafficLightAgent},
-                              use_ray=True
+                              use_ray=False
     )
 
     env._render()
     state = init_state
 
     # Car 0 will be controlled by our KeyboardAgent
-    agent = KeyboardAgent()
+    agent = NullAgent()
     action = None
 
     # Simulation loop

@@ -5,7 +5,7 @@ import numpy as np
 class ArenaState(PositionState):
     static_objects = [Street(500, 500, 1000, 1000)]
 
-    def __init__(self, ncars=4, nped=0):
+    def __init__(self, ncars=4, nped=0, traffic_lights=False):
         self.ncars = ncars
         PositionState.__init__(self)
         self.randomize()

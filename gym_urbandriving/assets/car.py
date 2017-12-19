@@ -101,7 +101,9 @@ class Car(Rectangle):
         if action is None:
             action = [0, 0]
         # Unpack actions, convert angles to radians
+
         delta_f, a = action
+        delta_f = max(min(3, delta_f), -3)
         delta_f, rad_angle = np.radians(10*delta_f), np.radians(self.angle)
 
         # Clamp acceleration if above maximum velocity
@@ -109,6 +111,7 @@ class Car(Rectangle):
             a = self.max_vel - self.vel
         elif a < -self.max_vel - self.vel:
             a = - self.max_vel - self.vel
+
         # Differential equations
         ode_state = [self.x, self.y, self.vel, rad_angle]
         aux_state = (a, delta_f)
