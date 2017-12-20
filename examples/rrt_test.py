@@ -4,7 +4,7 @@ import cProfile
 import time
 import numpy as np
 
-from gym_urbandriving.agents import KeyboardAgent, AccelAgent, NullAgent, TrafficLightAgent
+from gym_urbandriving.agents import KeyboardAgent, AccelAgent, NullAgent, TrafficLightAgent, RRTAgent
 from gym_urbandriving.assets import Car, TrafficLight
 
 
@@ -31,14 +31,14 @@ def f():
                               randomize=True,
                               agent_mappings={Car:NullAgent,
                                               TrafficLight:TrafficLightAgent},
-                              use_ray=True
+                              use_ray=False
     )
 
     env._render()
-    state = init_state
+    state = env.get_state_copy()
 
     # Car 0 will be controlled by our KeyboardAgent
-    agent = KeyboardAgent()
+    agent = RRTAgent()
     action = None
 
     # Simulation loop
