@@ -21,53 +21,20 @@ class MyDecomposition(oc.GridDecomposition):
         s[1] = coord[1]
 
 
-# Dynamics model for our car. Ydim of car should be 40 (default)
-def integrator(state, t, acc, delta_f):
-    x, y, vel, rad_angle = state
-    # Differential equations
-    beta = np.arctan((20. / (20. + 20.)) * np.tan(delta_f))
-    dx = vel * np.cos(rad_angle + beta)
-    dy = vel * -np.sin(rad_angle + beta)
-    dangle = (vel / 20.) * np.sin(beta)
-    dvel = acc
-    output = [dx, dy, dvel, dangle]
-    return output
 
-
-def propagate(start, control, duration, state):
-    # Since the environment discretizes the actions, I set the planner to discretize by 1 timestep as well.
-    assert(duration == 1.0)
-
-    # Rest of these lines are from car kinematic step functions
-    delta_f, a = control[0], control[1]
-    delta_f = max(min(3, delta_f), -3)
-    delta_f, rad_angle = np.radians(10*delta_f), np.radians(start[3])
-
-    vel = start[2]
-    if a > 5 - vel:
-        a = 5 - vel
-    elif a < -5 - vel:
-        a = -5 - vel
-
-    ode_state = [start[0], start[1], start[2], rad_angle]
-    aux_state = (a, delta_f)
-    t = np.arange(0.0, 1.0, 0.1)
-    delta_ode_state = odeint(integrator, ode_state, t, args=aux_state)
-    x, y, vel, new_angle = delta_ode_state[-1]
-    state[0] = x
-    state[1] = y
-    state[2] = vel
-    state[3] = np.rad2deg(new_angle) % 360
 
 class RRTAgent:
     def __init__(self, agent_num=0):
         self.agent_num = agent_num
         self.path = []
 
+
     def eval_policy(self, state):
+
         if len(self.path):
             # If we have a stored path just evaluate those steps
             return self.path.pop(0)
+            
         start_state = state
         # construct the state space we are planning in
         # State space will be [x, y, vel, angle]
@@ -104,6 +71,19 @@ class RRTAgent:
             start_state.dynamic_objects[self.agent_num].angle = state[3]
             return spaceInformation.satisfiesBounds(state) and not start_state.collides_any(self.agent_num)
 
+        def propagate(start, control, duration, state):
+            # Since the environment discretizes the actions, I set the planner to discretize by 1 timestep as well.
+            assert(duration == 1.0)
+
+            action = (control[0], control[1])
+
+            obj = start_state.dynamic_objects[self.agent_num]
+            if obj.dynamics_model == "kinematic":
+                state[0], state[1], state[2], state[3] = obj.kinematic_model_step(action, start[0], start[1], start[2], start[3])
+            else:
+                state[0], state[1], state[2], state[3] = obj.point_model_step(action, start[0], start[1], start[2], start[3])
+
+
         # define a simple setup class
         ss = oc.SimpleSetup(cspace)
         ss.setStateValidityChecker(ob.StateValidityCheckerFn(partial(isStateValid, ss.getSpaceInformation())))
@@ -131,7 +111,7 @@ class RRTAgent:
         #planner = oc.EST(si)
         #planner = oc.KPIECE1(si) # this is the default
         # SyclopEST and SyclopRRT require a decomposition to guide the search
-        decomp = MyDecomposition(500, bounds)
+        #decomp = MyDecomposition(500, bounds)
         #planner = oc.SyclopEST(si, decomp)
         #planner = oc.SyclopRRT(si, decomp)
         ss.setPlanner(planner)
@@ -153,5 +133,6 @@ class RRTAgent:
         
         if len(self.path):
             return self.path.pop(0)
+
         return
             
