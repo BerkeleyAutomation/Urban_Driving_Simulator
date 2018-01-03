@@ -2,8 +2,9 @@ from gym_urbandriving.state.state import PositionState
 from gym_urbandriving.assets import Terrain, Lane, Street, Sidewalk,\
     Pedestrian, Car, TrafficLight
 import numpy as np
+import IPython
 
-class SimpleIntersectionState(PositionState):
+class MultiIntersectionState(PositionState):
     """
     Instance of a :class:`PositionState` describing a four-way intersection
     
@@ -44,25 +45,41 @@ class SimpleIntersectionState(PositionState):
         self.nped = nped
         self.traffic_lights = traffic_lights
         PositionState.__init__(self)
+        self.lane_order = []
         self.randomize()
-
+        
 
     def randomize(self):
         """
         Randomly generates car and pedestrian positions
         """
         self.dynamic_objects = []
+        car_index_list = range(4)
+        i = 0
         while len(self.dynamic_objects) < self.ncars:
-            i = np.random.random_integers(0, 3) if len(self.dynamic_objects) else np.random.random_integers(0, 2)
-            lane = [Lane(200, 550, 400, 100),
-                    Lane(800, 450, 400, 100, angle=-180),
-                    Lane(450, 200, 400, 100, angle=-90),
-                    Lane(550, 800, 400, 100, angle=90)
-            ][np.random.random_integers(0, 2)]
+            #randomely generate cars with replacement in lanes
+            lanes = [
+                Lane(450, 200, 400, 100, angle=-90),
+                Lane(550, 800, 400, 100, angle=90),
+                Lane(800, 450, 400, 100, angle=-180),              
+                Lane(200, 550, 400, 100),
+            ]
+ 
+
+            ln_index = np.random.random_integers(0, len(car_index_list)-1)
+           
+            lane = lanes[car_index_list[ln_index]]
+
+            
+            
+
             car = lane.generate_car()
             car.vel = 0
             if not any([car.collides(obj) for obj in self.static_objects+self.dynamic_objects]):
                 self.dynamic_objects.append(car)
+                self.lane_order.append(car_index_list[ln_index])
+                car_index_list.pop(ln_index)
+                
 
         while len(self.dynamic_objects) < self.ncars+self.nped:
             sidewalk = [Sidewalk(200, 375, 400, 50),
@@ -78,7 +95,7 @@ class SimpleIntersectionState(PositionState):
             man.vel = 2
             if not any([man.collides(obj) for obj in self.static_objects+self.dynamic_objects]):
                 self.dynamic_objects.append(man)
-                
+
         if self.traffic_lights:
             self.dynamic_objects.append(TrafficLight(600, 440, 0))
             self.dynamic_objects.append(TrafficLight(400, 560, -180))

@@ -5,7 +5,7 @@ from ompl import base as ob
 from ompl import control as oc
 from ompl import geometric as og
 from scipy.integrate import odeint
-
+import IPython
 
 # Only SyclopsRRT and SyclopsEST use this, and both those planners fail in a highly constrained environment
 # I suspect its because of the sampleUniform. When planning, I observe that those 2 planners explore many invalid states
@@ -67,6 +67,7 @@ class RRTAgent:
     def eval_policy(self, state):
         if len(self.path):
             # If we have a stored path just evaluate those steps
+
             return self.path.pop(0)
         start_state = state
         # construct the state space we are planning in
@@ -139,7 +140,7 @@ class RRTAgent:
         si.setPropagationStepSize(1) # Propagation step size should be 1 to match our model
         
         # attempt to solve the problem
-        solved = ss.solve(10.0) # 30 second time limit
+        solved = ss.solve(30.0) # 30 second time limit
 
         if solved:
             # print the path to screen

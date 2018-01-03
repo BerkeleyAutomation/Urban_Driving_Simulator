@@ -18,7 +18,7 @@ def f():
     vis = uds.PyGameVisualizer((800, 800))
 
     # Create a simple-intersection state, with 4 cars, no pedestrians, and traffic lights
-    init_state = uds.state.SimpleIntersectionState(ncars=1, nped=0, traffic_lights=True)
+    init_state = uds.state.SimpleIntersectionState(ncars=2, nped=0, traffic_lights=True)
 
     # Create the world environment initialized to the starting state
     # Specify the max time the environment will run to 500
@@ -39,17 +39,23 @@ def f():
 
     # Car 0 will be controlled by our KeyboardAgent
     agent = RRTAgent()
+    #agent_two = RRTAgent(agent_num=1)
     action = None
 
     # Simulation loop
     while(True):
         # Determine an action based on the current state.
         # For KeyboardAgent, this just gets keypresses
-        action = agent.eval_policy(state)
         start_time = time.time()
+        action = agent.eval_policy(state)
+        state, reward, done, info_dict = env._step(action)
+
+        #action_two = agent_two.eval_policy(state)
+        #state, reward, done, info_dict = env._step(action_two)
+        
 
         # Simulate the state
-        state, reward, done, info_dict = env._step(action)
+       
         env._render()
         # keep simulator running in spite of collisions or timing out
         done = False
