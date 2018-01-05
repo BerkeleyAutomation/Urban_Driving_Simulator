@@ -45,7 +45,7 @@ class MultiIntersectionState(PositionState):
         self.nped = nped
         self.traffic_lights = traffic_lights
         PositionState.__init__(self)
-        self.lane_order = []
+        
         self.randomize()
         
 
@@ -54,7 +54,9 @@ class MultiIntersectionState(PositionState):
         Randomly generates car and pedestrian positions
         """
         self.dynamic_objects = []
+        self.lane_order = []
         car_index_list = range(4)
+
         i = 0
         while len(self.dynamic_objects) < self.ncars:
             #randomely generate cars with replacement in lanes
@@ -70,10 +72,16 @@ class MultiIntersectionState(PositionState):
            
             lane = lanes[car_index_list[ln_index]]
 
+            # print "INDEX ", car_index_list[ln_index]
+            # print "i ",i
+
+
             
             
 
             car = lane.generate_car()
+            # car.x = 69.0
+            # car.y = 545.0
             car.vel = 0
             if not any([car.collides(obj) for obj in self.static_objects+self.dynamic_objects]):
                 self.dynamic_objects.append(car)

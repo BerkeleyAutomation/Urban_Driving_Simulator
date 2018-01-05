@@ -37,13 +37,16 @@ def integrator(state, t, acc, delta_f):
 
 
 class RRTMPlanner:
-    def __init__(self, agents,planner=None,time=None):
+    def __init__(self, agents,planner=None,time=None, goal= None,prune = None,selection = None):
         self.agents = agents
         self.num_agents = len(agents)
 
         self.path = []
         self.planner = planner
         self.time = time
+        self.goal = goal
+        self.prune = prune
+        self.selection = selection
 
     def propagate(self,start, control, duration, state):
     # Since the environment discretizes the actions, I set the planner to discretize by 1 timestep as well.
@@ -172,10 +175,14 @@ class RRTMPlanner:
         elif self.planner == 'EST':
             planner = oc.EST(si)
         elif self.planner == 'KPIECE':
-            planner = oc.KPIECE(si)
+            planner = oc.KPIECE1(si)
         else:
             planner = oc.RRT(si)
 
+        planner.setSelectionRadius(self.selection)
+        planner.setPruningRadius(self.prune)
+        
+        planner.setGoalBias(self.goal)
         ss.setPlanner(planner)
         # (optionally) set propagation step size
         si.setPropagationStepSize(1) # Propagation step size should be 1 to match our model
