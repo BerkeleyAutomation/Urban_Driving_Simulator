@@ -15,7 +15,7 @@ class PositionState:
 
     def randomize(self):
         """
-        Not implemented
+        Not implemented. Override this in custom states"
         """
         pass
 
