@@ -81,10 +81,6 @@ class RRTMPlanner:
 
 
     def plan(self, state):
-        if len(self.path):
-            # If we have a stored path just evaluate those steps
-
-            return self.path.pop(0)
 
         start_state = state
         # construct the state space we are planning in
@@ -95,6 +91,7 @@ class RRTMPlanner:
         
         # set the bounds for the R^2 part of SE(2)
         bounds = ob.RealVectorBounds(4*self.num_agents)
+        
         for i in range(self.num_agents):
             car_idx = i*4
             bounds.setLow(car_idx, 0)
@@ -165,8 +162,7 @@ class RRTMPlanner:
         ss.setStartAndGoalStates(start, goal, 0.05)
         # (optionally) set planner
         si = ss.getSpaceInformation()
-        planner = oc.SST(si)
-        #planner = oc.EST(si)
+
 
         if self.planner == 'RRT':
             planner = oc.RRT(si) # this is the default
@@ -213,8 +209,12 @@ class RRTMPlanner:
                         agent_path.append((control[car_idx],control[car_idx+1]))
                 
                 paths.append(agent_path)
+
+            return paths
+        else:
+            return None
         
         
 
-        return paths
+        
             

@@ -158,7 +158,7 @@ class Car(Rectangle):
             state: 1x3 array, contains x, y, angle of car.
             info_dict: dict, contains information about car.
         """
-        return self.x, self.y, self.x_dim, self.y_dim, self.angle
+        return self.x, self.y, self.angle, self.vel
 
     def can_collide(self, other):
         """

@@ -15,6 +15,11 @@ class DataLogger():
 		self.rollout_info = {}
 		self.file_path = file_path
 
+		
+		if not os.path.exists(self.file_path):
+			os.makedirs(self.file_path)
+
+
 	def next_rollout(self):
 		"""
 		return: the String name of the next new potential rollout
@@ -42,15 +47,19 @@ class DataLogger():
 
 		path_index = self.next_rollout()
 
+
 		np.save(self.file_path+'/rollout_'+str(path_index),data)
 
 		self.rollout_info = {}
-		
+
+
 
 
 	def log_info(self,name,info):
 
 		self.rollout_info[name] = info
+
+
 
 
 
