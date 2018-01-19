@@ -36,7 +36,7 @@ class KeyboardAgent:
         elif keys[pygame.K_DOWN]:
             acc = -1
         if keys[pygame.K_LEFT]:
-            steer = 3
+            steer = 1
         elif keys[pygame.K_RIGHT]:
-            steer = -3
+            steer = -1
         return (steer, acc)

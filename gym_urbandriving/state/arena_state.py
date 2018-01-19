@@ -19,8 +19,7 @@ class ArenaState(PositionState):
                                      [np.sin(angle), np.cos(angle)]])
             x, y = np.dot([400, 0], rotation_mat.T)
             angle_offset = np.random.uniform(-30, 30)
-            car = Car(x+500, y+500, angle=180+degrees+angle_offset,
-                      dynamics_model="kinematic")
+            car = Car(x+500, y+500, angle=180+degrees+angle_offset)
             car.vel = 0
             if not any([car.collides(obj) for obj in self.static_objects+self.dynamic_objects]):
                 self.dynamic_objects.append(car)
