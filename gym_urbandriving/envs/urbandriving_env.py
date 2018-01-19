@@ -3,6 +3,7 @@ from copy import deepcopy
 from gym_urbandriving.agents import *
 import numpy as np
 import ray
+import gym_urbandriving
 
 @ray.remote
 class RayNode:
@@ -62,6 +63,7 @@ class UrbanDrivingEnv(gym.Env):
         self.randomize = randomize
         self.statics_rendered = False
         self.use_ray = use_ray
+        self.paused = False
         if use_ray:
             ray.init()
         self.dynamic_collisions, self.static_collisions, self.last_col = [], [], -1
@@ -93,6 +95,17 @@ class UrbanDrivingEnv(gym.Env):
         dict
 
         """
+
+        if isinstance(self.visualizer, gym_urbandriving.PyGameVisualizer):
+            import pygame
+            events = pygame.event.get()
+            for event in events:
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                    self.paused = not self.paused
+
+        if self.paused:
+            return self.current_state, 0, False, {}
+
         assert(self.current_state is not None)
         # Get actions for all objects
         actions = [None]*len(self.current_state.dynamic_objects)
