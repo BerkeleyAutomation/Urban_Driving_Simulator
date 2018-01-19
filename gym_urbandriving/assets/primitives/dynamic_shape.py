@@ -97,7 +97,8 @@ class DynamicShape():
         # Differential equations
         ode_state = [x, y, v, rad_angle]
         aux_state = (action_acc, action_steer)
-        t = np.arange(0.0, 1.0, 0.1)
+        step = 0.1
+        t = np.arange(0.0, 1.0, step)
         delta_ode_state = odeint(self.integrator, ode_state, t, args=aux_state)
         x, y, vel, angle = delta_ode_state[-1]
 

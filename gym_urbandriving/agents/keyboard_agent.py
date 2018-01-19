@@ -1,4 +1,5 @@
 import pygame
+import numpy as np
 
 class KeyboardAgent:
     """
@@ -12,6 +13,7 @@ class KeyboardAgent:
     """
     def __init__(self, agent_num=0):
         self.agent_num = agent_num
+        self.target_steer = None
         return
         
     def eval_policy(self, state):
@@ -28,6 +30,16 @@ class KeyboardAgent:
         action
             Keyboard action
         """
+
+        obj = state.dynamic_objects[self.agent_num]
+
+        ac2 = np.arctan2(500.0-obj.y, 500-obj.x)
+
+        self.target_steer = ac2-np.radians(obj.angle) if ac2-np.radians(obj.angle) >=  -np.pi else ac2-np.radians(obj.angle)+2*np.pi
+
+        print ac2, np.radians(obj.angle), self.target_steer
+        print state.dynamic_objects[self.agent_num].x, state.dynamic_objects[self.agent_num].y, state.dynamic_objects[self.agent_num].angle
+
         steer, acc = 0, 0
         pygame.event.pump()
         keys = pygame.key.get_pressed()
@@ -39,4 +51,7 @@ class KeyboardAgent:
             steer = 3
         elif keys[pygame.K_RIGHT]:
             steer = -3
-        return (steer, acc)
+
+
+        return (self.target_steer, acc)
+
