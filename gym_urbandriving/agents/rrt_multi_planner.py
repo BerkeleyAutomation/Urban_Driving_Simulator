@@ -37,7 +37,7 @@ def integrator(state, t, acc, delta_f):
 
 
 class RRTMPlanner:
-    def __init__(self, agents,planner=None,time=None, goal= None,prune = None,selection = None):
+    def __init__(self, agents, planner=None, time=None, goal= None, prune = None, selection = None):
         self.agents = agents
         self.num_agents = len(agents)
 
