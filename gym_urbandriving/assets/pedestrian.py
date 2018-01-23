@@ -49,15 +49,14 @@ class Pedestrian(Circle):
         else:
             action_steer, action_acc = action
         self.angle += action_steer
-        self.angle %= 360.0
-        self.angle = self.angle
+        self.angle &= 2*np.pi
         self.acc = action_acc
         self.acc = max(min(self.acc, self.max_vel - self.vel), -self.vel)
 
         t = 1
         dist = self.vel * t + 0.5 * self.acc * (t ** 2)
-        dx = dist * np.cos(np.radians(self.angle))
-        dy = dist * -np.sin(np.radians(self.angle))
+        dx = dist * np.cos(self.angle)
+        dy = dist * -np.sin(self.angle)
         self.x += dx
         self.y += dy
         self.vel += self.acc

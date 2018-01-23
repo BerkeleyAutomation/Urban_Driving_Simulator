@@ -35,8 +35,8 @@ class Lane(Polygon):
 
         """
         if not len(points) and not curvature:
-            a = angle % 360
-            a = np.radians(-a)
+            a = angle % (2*np.pi)
+            a = -a
             corner_offsets = np.array([xdim / 2.0, ydim / 2.0])
             centers = np.array([x, y])
             signs = np.array([[1,1], [1,-1], [-1,-1], [-1,1]])
@@ -46,11 +46,11 @@ class Lane(Polygon):
             points = np.dot(corner_offsets, rotation_mat.T) + centers
         if not len(points) and curvature:
             assert(inner_r < outer_r)
-            angles = [i*np.radians((curvature%360))/10 + np.radians(angle % 360) for i in range(11)]
+            angles = [i*curvature/10 + angle for i in range(11)]
             outers = [(outer_r*np.cos(a)+x, -outer_r*np.sin(a)+y) for a in angles]
             inners = [(inner_r*np.cos(a)+x, -inner_r*np.sin(a)+y) for a in angles]
             points = outers + inners[::-1]
-            angle = (curvature/2 + 90 + angle) % 360
+            angle = (curvature/2 + np.pi/2 + angle) % (2*np.pi)
         Polygon.__init__(self, points, angle, color=(40, 40, 40))
 
 
