@@ -88,6 +88,6 @@ class Car(Rectangle, DynamicShape):
             return True
 
         if type(other) is Lane:
-            a = abs(self.angle - other.angle) % 360
+            a = abs(self.angle % 360 - other.angle % 360) % 360
             return a > 90 and a < 270
         return False
