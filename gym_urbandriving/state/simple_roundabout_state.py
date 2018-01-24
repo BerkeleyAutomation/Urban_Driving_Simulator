@@ -7,7 +7,7 @@ import random
 class SimpleRoundaboutState(PositionState):
     """
     Instance of a :class:`PositionState` describing a four-way intersection
-    
+
     Parameters
     ----------
     ncars : int
@@ -36,15 +36,6 @@ class SimpleRoundaboutState(PositionState):
                        Terrain(200, 800, 400, 400, excludes=static_objects),
                        Terrain(800, 800, 400, 400, excludes=static_objects),
     ]
-        
-
-    def __init__(self, ncars=4, nped=2, traffic_lights=False):
-        self.ncars = ncars
-        self.nped = nped
-        self.traffic_lights = traffic_lights
-
-        PositionState.__init__(self)
-        self.randomize()
 
 
     def randomize(self):

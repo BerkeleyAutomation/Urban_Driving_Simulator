@@ -54,7 +54,7 @@ class Lane(Polygon):
         Polygon.__init__(self, points, angle, color=(40, 40, 40))
 
 
-    def generate_car(self, car_type="kinematic"):
+    def generate_car(self, car_model="kinematic"):
         """
         Creates a car on this lane ready to drive into the intersection
 
@@ -72,6 +72,6 @@ class Lane(Polygon):
                               self.maxx)
         y = np.random.uniform(self.miny,
                               self.maxy)
-        car = Car(x, y, angle=self.angle+np.random.uniform(-10, 10),
-                  dynamics_model=car_type)
+        car = Car(x, y, angle=self.angle+np.random.uniform(-0.1, 0.1),
+                  dynamics_model=car_model)
         return car

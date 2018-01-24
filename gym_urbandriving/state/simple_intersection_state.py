@@ -39,14 +39,6 @@ class SimpleIntersectionState(PositionState):
                       Sidewalk(625, 825, 350, 50, angle=(np.pi/2))
     ]
 
-    def __init__(self, ncars=4, nped=2, traffic_lights=False):
-        self.ncars = ncars
-        self.nped = nped
-        self.traffic_lights = traffic_lights
-        PositionState.__init__(self)
-        self.randomize()
-
-
     def randomize(self):
         """
         Randomly generates car and pedestrian positions
@@ -60,7 +52,7 @@ class SimpleIntersectionState(PositionState):
                     Lane(550, 800, 400, 100, angle=(np.pi/2)),
                     Lane(800, 450, 400, 100, angle=-np.pi),
                     Lane(200, 550, 400, 100)][start]
-            car = lane.generate_car()
+            car = lane.generate_car(self.car_model)
             car.destination = goal
             if not any([car.collides(obj) for obj in self.static_objects+self.dynamic_objects]):
                 self.dynamic_objects.append(car)

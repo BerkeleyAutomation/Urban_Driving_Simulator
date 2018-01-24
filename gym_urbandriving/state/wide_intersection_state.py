@@ -35,12 +35,6 @@ class WideIntersectionState(PositionState):
                       Sidewalk(725, 875, 50, 250),
     ]
 
-    def __init__(self, ncars=4, nped=2):
-        self.ncars = ncars
-        self.nped = nped
-        PositionState.__init__(self)
-        self.randomize()
-
     def randomize(self):
         self.dynamic_objects = []
         while len(self.dynamic_objects) < self.ncars:
