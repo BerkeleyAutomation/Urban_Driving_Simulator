@@ -7,10 +7,16 @@ class PositionState:
     Abstract class representing the objects in a scene
     """
     static_objects = []
-    def __init__(self):
+    def __init__(self, ncars=0, nped=0, traffic_lights=False, car_model="kinematic"):
         self.dimensions = (1000, 1000)
         self.dynamic_objects = []
         self.time = 0
+        self.ncars = ncars
+        self.nped = nped
+        self.traffic_lights = traffic_lights
+        assert (car_model in {"kinematic", "point"})
+        self.car_model = car_model
+        self.randomize()
         return
 
     def randomize(self):
