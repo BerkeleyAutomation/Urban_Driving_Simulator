@@ -37,7 +37,7 @@ class Car(Rectangle):
 
     """
     def __init__(self, x, y, xdim=80, ydim=40, angle=0.0, vel=0.0,
-                 max_vel=5, mass=100.0, dynamics_model="reeds_shepp"):
+                 max_vel=5, mass=100.0, dynamics_model="kinematic"):
         Rectangle.__init__(self, x, y, xdim, ydim, angle, mass=mass, sprite="grey_car.png")
         self.vel = vel
         self.max_vel = max_vel

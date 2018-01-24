@@ -54,7 +54,7 @@ class Lane(Polygon):
         Polygon.__init__(self, points, angle, color=(40, 40, 40))
 
 
-    def generate_car(self, car_type="reeds_shepp"):
+    def generate_car(self, car_type="kinematic"):
         """
         Creates a car on this lane ready to drive into the intersection
 
