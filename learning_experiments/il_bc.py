@@ -16,10 +16,10 @@ from gym_urbandriving.learner.plotter import Plotter
 
 ##PARAMTERS FOR THE EXPERIMENT
 NUM_DATA_PER_ITER = 2 #NUMBER OF TRAJECTORIES TO SAMPLE FROM THE SUPERVISOR 
-NUM_EVAL_POINTS = 5  #NUMBER OF TRAJECTORIES TO SAMPLE FROM THE LEANRED POLICY (i.e. for Evaluation) 
+NUM_EVAL_POINTS = 1 #NUMBER OF TRAJECTORIES TO SAMPLE FROM THE LEANRED POLICY (i.e. for Evaluation) 
 NUM_ITERS = 2 #NNumber of iterations 
 TIME_HORIZON = 100 #Time horizon for the learned policy
-PLANNING_TIME = 300 #planning time limit for the supervisor 
+PLANNING_TIME = 3 #planning time limit for the supervisor 
 
 #Path to save data
 

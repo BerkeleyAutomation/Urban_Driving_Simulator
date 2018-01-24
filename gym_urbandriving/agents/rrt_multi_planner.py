@@ -75,7 +75,7 @@ class RRTMPlanner:
             # Rest of these lines are from car kinematic step functions
             delta_f, a = control[cntr_idx], control[cntr_idx+1]
             delta_f = max(min(3, delta_f), -3)
-            delta_f, rad_angle = np.radians(10*delta_f), np.radians(start[car_idx+3])
+            delta_f, rad_angle = np.radians(10*delta_f), start[car_idx+3]
 
             vel = start[car_idx+2]
             if a > 5 - vel:
@@ -91,7 +91,7 @@ class RRTMPlanner:
             state[car_idx] = x
             state[car_idx+1] = y
             state[car_idx+2] = vel
-            state[car_idx+3] = np.rad2deg(new_angle) % 360
+            state[car_idx+3] = new_angle
 
 
     def plan(self, state):
@@ -130,7 +130,7 @@ class RRTMPlanner:
             bounds.setHigh(car_idx+0, state.dimensions[0]) 
             bounds.setHigh(car_idx+1, state.dimensions[1])
             bounds.setHigh(car_idx+2, 5)
-            bounds.setHigh(car_idx+3, 360)
+            bounds.setHigh(car_idx+3, 2*np.pi)
 
         space.setBounds(bounds)
 

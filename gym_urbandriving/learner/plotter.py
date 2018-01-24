@@ -21,7 +21,6 @@ class Plotter():
 		'''
 
 		self.file_path = file_path
-		self.alg_name = alg_name
 
 		if not os.path.exists(self.file_path+'/plots'):
 			os.makedirs(self.file_path+'/plots')
