@@ -21,8 +21,7 @@ class Sidewalk(Polygon):
     """
     def __init__(self, x, y, xdim, ydim, angle=0.0, points=[]):
         if not points:
-            a = angle % 360
-            a = np.radians(-a)
+            a = -angle
             corner_offsets = np.array([xdim / 2.0, ydim / 2.0])
             centers = np.array([x, y])
             signs = np.array([[1,1], [1,-1], [-1,-1], [-1,1]])
