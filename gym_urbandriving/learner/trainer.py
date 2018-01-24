@@ -31,7 +31,7 @@ class Trainer:
         self.SELECTION_RADIUS = 0.2
         self.NUM_DATA_POINTS = num_data_points
         self.NUM_EVAL_POINTS = num_eval_points
-        self.NUM_CARS = NUM_CARS
+        self.NUM_CARS = num_cars
 
         self.d_logger = DataLogger(file_path)
         self.il_learn = IL(file_path)
@@ -78,10 +78,10 @@ class Trainer:
 
         #Goals organized in NSEW order
         goal_states = []
-        goal_states.append([550,100,2,90])
-        goal_states.append([450,900,2,270])
+        goal_states.append([550,100,2,np.deg2rad(90.0)])
+        goal_states.append([450,900,2,np.deg2rad(270.0)])
         goal_states.append([900,550,2,0])
-        goal_states.append([100,450,2,180])
+        goal_states.append([100,450,2,np.deg2rad(180.0)])
 
         #Lanes that cannot be assigned 
         forbidden_lanes = []
@@ -117,7 +117,7 @@ class Trainer:
                     lane_count = 0
                     break;
             
-            if lane_count == NUM_CARS:
+            if lane_count == self.NUM_CARS:
                 break;
 
 
@@ -185,7 +185,7 @@ class Trainer:
         vis = uds.PyGameVisualizer((800, 800))
 
         # Create a simple-intersection state, with cars, no pedestrians, and traffic lights
-        init_state = uds.state.MultiIntersectionState(ncars=NUM_CARS, nped=0, traffic_lights=True)
+        init_state = uds.state.MultiIntersectionState(ncars=self.NUM_CARS, nped=0, traffic_lights=True)
 
         # Create the world environment initialized to the starting state
         # Specify the max time the environment will run to 500
@@ -229,7 +229,7 @@ class Trainer:
         self.d_logger.log_info('goal_states',goal_states)
         
 
-        for i in range(NUM_CARS):
+        for i in range(self.NUM_CARS):
 
             agents.append(RRTMAgent(goal_states[i],agent_num = i))
     
@@ -353,7 +353,7 @@ class Trainer:
             evaluations.append(rollout)
             
       
-        policy_success_rate = policy_success_rate/float(NUM_DATA_POINTS)
+        policy_success_rate = policy_success_rate/float(self.NUM_EVAL_POINTS)
 
         return evaluations, policy_success_rate
 
@@ -377,6 +377,6 @@ class Trainer:
             self.d_logger.save_rollout(rollout)
 
       
-        self.success_rate = success_rate/float(NUM_DATA_POINTS)
+        self.success_rate = success_rate/float(self.NUM_DATA_POINTS)
 
 
