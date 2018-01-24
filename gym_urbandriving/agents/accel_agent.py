@@ -42,7 +42,7 @@ class AccelAgent:
 
         best_action = None
         best_time = 0
-        best_angle_offset = 90
+        best_angle_offset = np.pi/2
 
         for action in self.valid_actions:
             state_copy = deepcopy(state)
@@ -54,7 +54,7 @@ class AccelAgent:
                 else:
                     dobj.step(action)
 
-            angle_offset = abs((state_copy.dynamic_objects[self.agent_num].angle-45)%90-45)
+            angle_offset = abs((state_copy.dynamic_objects[self.agent_num].angle-(np.pi/4))%(np.pi/2)-(np.pi/4))
 
             for z in range(nsteps//self.quantum):
                 for y in range(self.quantum):

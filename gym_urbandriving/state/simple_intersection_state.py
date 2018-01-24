@@ -20,59 +20,52 @@ class SimpleIntersectionState(PositionState):
                       Terrain(825, 175, 350, 350),
                       Terrain(175, 825, 350, 350),
                       Terrain(825, 825, 350, 350),
-                      Lane(200, 450, 400, 100, angle=-180),
+                      Lane(200, 450, 400, 100, angle=-np.pi),
                       Lane(200, 550, 400, 100),
-                      Lane(800, 450, 400, 100, angle=-180),
+                      Lane(800, 450, 400, 100, angle=-np.pi),
                       Lane(800, 550, 400, 100),
-                      Lane(450, 200, 400, 100, angle=-90),
-                      Lane(550, 200, 400, 100, angle=90),
-                      Lane(450, 800, 400, 100, angle=-90),
-                      Lane(550, 800, 400, 100, angle=90),
+                      Lane(450, 200, 400, 100, angle=-(np.pi/2)),
+                      Lane(550, 200, 400, 100, angle=(np.pi/2)),
+                      Lane(450, 800, 400, 100, angle=-(np.pi/2)),
+                      Lane(550, 800, 400, 100, angle=(np.pi/2)),
                       Street(500, 500, 200, 200),
                       Sidewalk(200, 375, 400, 50),
                       Sidewalk(200, 625, 400, 50),
-                      Sidewalk(800, 375, 400, 50, angle=-180),
-                      Sidewalk(800, 625, 400, 50, angle=-180),
-                      Sidewalk(375, 175, 350, 50, angle=-90),
-                      Sidewalk(625, 175, 350, 50, angle=-90),
-                      Sidewalk(375, 825, 350, 50, angle=90),
-                      Sidewalk(625, 825, 350, 50, angle=90)
+                      Sidewalk(800, 375, 400, 50, angle=-np.pi),
+                      Sidewalk(800, 625, 400, 50, angle=-np.pi),
+                      Sidewalk(375, 175, 350, 50, angle=-(np.pi/2)),
+                      Sidewalk(625, 175, 350, 50, angle=-(np.pi/2)),
+                      Sidewalk(375, 825, 350, 50, angle=(np.pi/2)),
+                      Sidewalk(625, 825, 350, 50, angle=(np.pi/2))
     ]
-
-    def __init__(self, ncars=4, nped=2, traffic_lights=False):
-        self.ncars = ncars
-        self.nped = nped
-        self.traffic_lights = traffic_lights
-        PositionState.__init__(self)
-        self.randomize()
-
 
     def randomize(self):
         """
         Randomly generates car and pedestrian positions
         """
+        car_goals = "NSEW"
         self.dynamic_objects = []
         while len(self.dynamic_objects) < self.ncars:
-            i = np.random.random_integers(0, 3) if len(self.dynamic_objects) else np.random.random_integers(0, 2)
-            lane = [Lane(200, 550, 400, 100),
-                    Lane(800, 450, 400, 100, angle=-180),
-                    Lane(450, 200, 400, 100, angle=-90),
-                    Lane(550, 800, 400, 100, angle=90)
-            ][np.random.random_integers(0, 2)]
-            car = lane.generate_car()
-            car.vel = 0
+            start = np.random.random_integers(0, 3)
+            goal = (np.random.random_integers(0, 2) + start) % 4
+            lane = [Lane(450, 200, 400, 100, angle=-(np.pi/2)),
+                    Lane(550, 800, 400, 100, angle=(np.pi/2)),
+                    Lane(800, 450, 400, 100, angle=-np.pi),
+                    Lane(200, 550, 400, 100)][start]
+            car = lane.generate_car(self.car_model)
+            car.destination = goal
             if not any([car.collides(obj) for obj in self.static_objects+self.dynamic_objects]):
                 self.dynamic_objects.append(car)
 
         while len(self.dynamic_objects) < self.ncars+self.nped:
             sidewalk = [Sidewalk(200, 375, 400, 50),
                       Sidewalk(200, 625, 400, 50),
-                      Sidewalk(800, 375, 400, 50, angle=-180),
-                      Sidewalk(800, 625, 400, 50, angle=-180),
-                      Sidewalk(375, 175, 350, 50, angle=-90),
-                      Sidewalk(625, 175, 350, 50, angle=-90),
-                      Sidewalk(375, 825, 350, 50, angle=90),
-                      Sidewalk(625, 825, 350, 50, angle=90)
+                      Sidewalk(800, 375, 400, 50, angle=-np.pi),
+                      Sidewalk(800, 625, 400, 50, angle=-np.pi),
+                      Sidewalk(375, 175, 350, 50, angle=-(np.pi/2)),
+                      Sidewalk(625, 175, 350, 50, angle=-(np.pi/2)),
+                      Sidewalk(375, 825, 350, 50, angle=(np.pi/2)),
+                      Sidewalk(625, 825, 350, 50, angle=(np.pi/2))
             ][np.random.random_integers(0, 7)]
             man = sidewalk.generate_man()
             man.vel = 2
@@ -81,7 +74,7 @@ class SimpleIntersectionState(PositionState):
                 
         if self.traffic_lights:
             self.dynamic_objects.append(TrafficLight(600, 440, 0))
-            self.dynamic_objects.append(TrafficLight(400, 560, -180))
-            self.dynamic_objects.append(TrafficLight(560, 600, -90, initial_color="red"))
-            self.dynamic_objects.append(TrafficLight(440, 400, 90, initial_color="red"))
+            self.dynamic_objects.append(TrafficLight(400, 560, -np.pi))
+            self.dynamic_objects.append(TrafficLight(560, 600, -(np.pi/2), initial_color="red"))
+            self.dynamic_objects.append(TrafficLight(440, 400, (np.pi/2), initial_color="red"))
 

@@ -1,8 +1,8 @@
 import numpy as np
-from gym_urbandriving.assets.primitives.rectangle import Rectangle
+from gym_urbandriving.assets.primitives import Rectangle, Polygon
 from gym_urbandriving.assets.pedestrian import Pedestrian
 
-class Sidewalk(Rectangle):
+class Sidewalk(Polygon):
     """
     Represents a block of sidewalk. Passable for pedestrians, not for cars
 
@@ -16,9 +16,21 @@ class Sidewalk(Rectangle):
        Width of the sidewalk block
     ydim : float
        Height of the sidewalk block
+    points : list
+       If specified, constructs sidewalk as polygon
     """
-    def __init__(self, x, y, xdim, ydim, angle=0.0):
-        Rectangle.__init__(self, x, y, xdim, ydim, angle=angle, sprite="gray.png", static=True)
+    def __init__(self, x, y, xdim, ydim, angle=0.0, points=[]):
+        if not points:
+            a = -angle
+            corner_offsets = np.array([xdim / 2.0, ydim / 2.0])
+            centers = np.array([x, y])
+            signs = np.array([[1,1], [1,-1], [-1,-1], [-1,1]])
+            corner_offsets = signs * corner_offsets
+            rotation_mat = np.array([[np.cos(a), -np.sin(a)],
+                                     [np.sin(a), np.cos(a)]])
+            points = np.dot(corner_offsets, rotation_mat.T) + centers
+        Polygon.__init__(self, points, angle, color=(150, 150, 150))
+
 
     def generate_man(self, man_type=Pedestrian):
         """
@@ -29,16 +41,10 @@ class Sidewalk(Rectangle):
         Pedestrian
             Generated Pedestrian object
         """
-        man = man_type(0, 0, angle=self.angle)
-        angle = np.radians(-self.angle)
-        rotation_mat = np.array([[np.cos(angle), -np.sin(angle)],
-                                 [np.sin(angle), np.cos(angle)]])
-        x = np.random.uniform(0,
-                              0+self.xdim/2-man.radius)
-        y = np.random.uniform(0-self.ydim/2+man.radius,
-                              0+self.ydim/2-man.radius)
-        x, y = np.dot([x, y], rotation_mat.T)
-        x, y = x+self.x, y+self.y
-        man.x, man.y = x, y
-        return man
 
+        x = np.random.uniform(self.minx,
+                              self.maxx)
+        y = np.random.uniform(self.miny,
+                              self.maxy)
+        man = man_type(x, y, angle=self.angle)
+        return man

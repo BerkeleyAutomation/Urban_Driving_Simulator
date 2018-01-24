@@ -5,19 +5,19 @@ from gym_urbandriving.agents import NullAgent
 from gym_urbandriving.assets import Car, Terrain, Street, Lane, Sidewalk
 
 class CustomState(PositionState):
-    static_objects = [Lane(175, 550, 350, 100, angle=-180),
-                      Lane(175, 650, 350, 100, angle=-180),
+    static_objects = [Lane(175, 550, 350, 100, angle=-np.pi),
+                      Lane(175, 650, 350, 100, angle=-np.pi),
                       Lane(175, 750, 350, 100),
                       Lane(175, 850, 350, 100),
-                      Lane(825, 550, 350, 100, angle=-180),
-                      Lane(825, 650, 350, 100, angle=-180),
+                      Lane(825, 550, 350, 100, angle=-np.pi),
+                      Lane(825, 650, 350, 100, angle=-np.pi),
                       Lane(825, 750, 350, 100),
                       Lane(825, 850, 350, 100),
                       Street(500, 700, 300, 400),
-                      Lane(450, 250, 500, 100, angle=-90),
-                      Lane(550, 250, 500, 100, angle=90),
+                      Lane(450, 250, 500, 100, angle=-(np.pi/2)),
+                      Lane(550, 250, 500, 100, angle=(np.pi/2)),
                       Sidewalk(200, 475, 400, 50),
-                      Sidewalk(800, 475, 400, 50, angle=-180),
+                      Sidewalk(800, 475, 400, 50, angle=-np.pi),
                       Terrain(200, 225, 400, 450),
                       Terrain(800, 225, 400, 450),
                       Terrain(500, 950, 1000, 100)]

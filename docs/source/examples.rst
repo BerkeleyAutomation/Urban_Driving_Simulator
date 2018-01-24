@@ -102,12 +102,12 @@ Lets add the streets to our state now. Streets are composed of ``Lane`` and ``St
 ::
 
    class CustomState(PositionState):
-      static_objects = [Lane(175, 550, 350, 100, angle=-180),
-                        Lane(175, 650, 350, 100, angle=-180),
+      static_objects = [Lane(175, 550, 350, 100, angle=-np.pi),
+                        Lane(175, 650, 350, 100, angle=-np.pi),
                         Lane(175, 750, 350, 100),
                         Lane(175, 850, 350, 100),
-                        Lane(825, 550, 350, 100, angle=-180),
-                        Lane(825, 650, 350, 100, angle=-180),
+                        Lane(825, 550, 350, 100, angle=-np.pi),
+                        Lane(825, 650, 350, 100, angle=-np.pi),
                         Lane(825, 750, 350, 100),
                         Lane(825, 850, 350, 100),
                         Street(500, 700, 300, 400),]
@@ -120,17 +120,17 @@ Notice how the angle of the lanes is manipulated so the road has proper directio
 ::
 
    class CustomState(PositionState):
-      static_objects = [Lane(175, 550, 350, 100, angle=-180),
-                        Lane(175, 650, 350, 100, angle=-180),
+      static_objects = [Lane(175, 550, 350, 100, angle=-np.pi),
+                        Lane(175, 650, 350, 100, angle=-np.pi),
                         Lane(175, 750, 350, 100),
                         Lane(175, 850, 350, 100),
-                        Lane(825, 550, 350, 100, angle=-180),
-                        Lane(825, 650, 350, 100, angle=-180),
+                        Lane(825, 550, 350, 100, angle=-np.pi),
+                        Lane(825, 650, 350, 100, angle=-np.pi),
                         Lane(825, 750, 350, 100),
                         Lane(825, 850, 350, 100),
                         Street(500, 700, 300, 400),
-                        Lane(450, 250, 500, 100, angle=-90),
-                        Lane(550, 250, 500, 100, angle=90),
+                        Lane(450, 250, 500, 100, angle=-(np.pi/2)),
+                        Lane(550, 250, 500, 100, angle=(np.pi/2)),
                         Sidewalk(200, 475, 400, 50),
                         Sidewalk(800, 475, 400, 50)]
 
@@ -141,19 +141,19 @@ We are almost done. All thats left is to fill in the empty blocks with ``Terrain
 ::
 
   class CustomState(PositionState):
-      static_objects = [Lane(175, 550, 350, 100, angle=-180),
-                        Lane(175, 650, 350, 100, angle=-180),
+      static_objects = [Lane(175, 550, 350, 100, angle=-np.pi),
+                        Lane(175, 650, 350, 100, angle=-np.pi),
                         Lane(175, 750, 350, 100),
                         Lane(175, 850, 350, 100),
-                        Lane(825, 550, 350, 100, angle=-180),
-                        Lane(825, 650, 350, 100, angle=-180),
+                        Lane(825, 550, 350, 100, angle=-np.pi),
+                        Lane(825, 650, 350, 100, angle=-np.pi),
                         Lane(825, 750, 350, 100),
                         Lane(825, 850, 350, 100),
                         Street(500, 700, 300, 400),
-                        Lane(450, 250, 500, 100, angle=-90),
-                        Lane(550, 250, 500, 100, angle=90),
+                        Lane(450, 250, 500, 100, angle=-(np.pi/2)),
+                        Lane(550, 250, 500, 100, angle=(np.pi/2)),
                         Sidewalk(200, 475, 400, 50),
-                        Sidewalk(800, 475, 400, 50,angle=-180),
+                        Sidewalk(800, 475, 400, 50,angle=-np.pi),
                         Terrain([(0, 0), (400, 0), (400, 450), (0, 450)]),
                         Terrain([(600, 0), (1000, 0), (1000, 450), (600, 450)]),
                         Terrain([(0, 900), (1000, 900), (1000, 1000), (0, 1000)]),
@@ -221,7 +221,7 @@ Agents that do nothing are not very interesting, so we have provided a simple ag
     def eval_policy(self, state, nsteps=8):
         best_action = None
         best_time = 0
-        best_angle_offset = 90
+        best_angle_offset = (np.pi/2)
 
         for action in self.valid_actions:
             state_copy = deepcopy(state)
@@ -233,7 +233,7 @@ Agents that do nothing are not very interesting, so we have provided a simple ag
                 else:
                     dobj.step(action)
 
-            angle_offset = abs((state_copy.dynamic_objects[self.agent_num].angle-45)%90-45)
+            angle_offset = abs((state_copy.dynamic_objects[self.agent_num].angle-45)%(np.pi/2)-45)
 
             for z in range(nsteps//self.quantum):
                 for y in range(self.quantum):

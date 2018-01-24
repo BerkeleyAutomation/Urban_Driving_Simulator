@@ -8,14 +8,14 @@ class AngledIntersectionState(PositionState):
                       # Terrain(825, 175, 350, 350),
                       # Terrain(175, 825, 350, 350),
                       # Terrain(825, 825, 350, 350),
-                      Lane(200, 450, 400, 100, angle=-180),
+                      Lane(200, 450, 400, 100, angle=-np.pi),
                       Lane(200, 550, 400, 100),
-                      Lane(800, 450, 400, 100, angle=-180),
+                      Lane(800, 450, 400, 100, angle=-np.pi),
                       Lane(800, 550, 400, 100),
-                      Lane(340, 200, 600, 100, angle=-60),
-                      Lane(450, 200, 600, 100, angle=120),
-                      Lane(690, 800, 600, 100, angle=-60),
-                      Lane(800, 800, 600, 100, angle=120),
+                      Lane(340, 200, 600, 100, angle=-np.radians(60)),
+                      Lane(450, 200, 600, 100, angle=np.radians(120)),
+                      Lane(690, 800, 600, 100, angle=-np.radians(60)),
+                      Lane(800, 800, 600, 100, angle=np.radians(120)),
         
                       Street(570, 500, 350, 200),
                       # Sidewalk(200, 375, 400, 50),
@@ -28,24 +28,18 @@ class AngledIntersectionState(PositionState):
                       # Sidewalk(625, 825, 50, 350),
     ]
 
-    def __init__(self, ncars=4, nped=2):
-        self.ncars = ncars
-        self.nped = nped
-        PositionState.__init__(self)
-        self.randomize()
-
     def randomize(self):
         
         self.dynamic_objects = []
         while len(self.dynamic_objects) < self.ncars:
-            lane = [Lane(200, 450, 400, 100, angle=-180),
+            lane = [Lane(200, 450, 400, 100, angle=-np.pi),
                     Lane(200, 550, 400, 100),
-                    Lane(800, 450, 400, 100, angle=-180),
+                    Lane(800, 450, 400, 100, angle=-np.pi),
                     Lane(800, 550, 400, 100),
-                    Lane(340, 200, 600, 100, angle=-60),
-                    Lane(450, 200, 600, 100, angle=120),
-                    Lane(690, 800, 600, 100, angle=-60),
-                    Lane(800, 800, 600, 100, angle=120),
+                    Lane(340, 200, 600, 100, angle=-np.radians(60)),
+                    Lane(450, 200, 600, 100, angle=np.radians(120)),
+                    Lane(690, 800, 600, 100, angle=-np.radians(60)),
+                    Lane(800, 800, 600, 100, angle=np.radians(120)),
             ][np.random.random_integers(0, 3)]
             car = lane.generate_car()
             car.vel = 0
