@@ -171,7 +171,8 @@ class PyGameVisualizer:
         self.render_dynamics(state, valid_area)
         self.render_collisions(state, valid_area)
 
-        self.render_waypoints(waypoints, valid_area)
+        for dobj in state.dynamic_objects:
+            self.render_waypoints(dobj.breadcrumbs, valid_area)
         pygame.display.flip()
 
     def draw_rectangle(self, rect, surface):
@@ -184,7 +185,7 @@ class PyGameVisualizer:
             x_off = min(corners[:,0])
             y_off = min(corners[:,1])
             pos = (x_off, y_off)
-            obj = pygame.transform.rotate(obj, rect.angle)
+            obj = pygame.transform.rotate(obj, np.rad2deg(rect.angle))
         surface.blit(obj, pos)
 
         return

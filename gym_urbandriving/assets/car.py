@@ -37,12 +37,33 @@ class Car(Rectangle):
 
     """
     def __init__(self, x, y, xdim=80, ydim=40, angle=0.0, vel=0.0,
-                 max_vel=5, mass=100.0, dynamics_model="kinematic"):
+                 max_vel=5, mass=100.0, dynamics_model="kinematic", destination=None,
+                 breadcrumbs=[]):
         Rectangle.__init__(self, x, y, xdim, ydim, angle, mass=mass, sprite="grey_car.png")
         self.vel = vel
         self.max_vel = max_vel
         self.dynamics_model = dynamics_model
+        self.destination = destination
+        self.breadcrumbs = breadcrumbs
         self.l_f = self.l_r = self.ydim / 2.0
+
+    def at_goal(self, state):
+        """
+        Returns if this car is at its goal destination, if specified.
+        Goal destination must be either in 'NSEW' or a coordinate pair
+        """
+        if not self.destination:
+            return False
+        elif self.destination == 'N':
+            return self.y < 0
+        elif self.destination == 'S':
+            return self.y > state.dimensions[1]
+        elif self.destination == 'W':
+            return self.x < 0
+        elif self.destination == 'E':
+            return self.x > state.dimensions[0]
+        else:
+            return self.contains_point(self.destination)
 
     def step(self, action):
         """
@@ -59,6 +80,12 @@ class Car(Rectangle):
             self.reeds_shepp_model_step(action)
         else:
             self.point_model_step(action)
+        while self.breadcrumbs:
+            bc = self.breadcrumbs[0][:2]
+            if self.contains_point(bc):
+                self.breadcrumbs.pop(0)
+            else:
+                return
 
     def point_model_step(self, action, info_dict=None):
         """
@@ -78,14 +105,13 @@ class Car(Rectangle):
             action_steer, action_acc = action
 
         self.angle += action_steer
-        self.angle %= 360.0
-        self.angle = self.angle
+        self.angle %= 2*np.pi
         acc = action_acc
         acc = max(min(acc, self.max_vel - self.vel), -self.max_vel)
         t = 1
         dist = self.vel * t + 0.5 * acc * (t ** 2)
-        dx = dist * np.cos(np.radians(self.angle))
-        dy = dist * -np.sin(np.radians(self.angle))
+        dx = dist * np.cos(self.angle)
+        dy = dist * -np.sin(self.angle)
         self.x += dx
         self.y += dy
         self.vel += acc
@@ -133,7 +159,7 @@ class Car(Rectangle):
             action = [0, 0]
         # Unpack actions, convert angles to radians
         delta_f, a = action
-        delta_f, rad_angle = np.radians(10*delta_f), np.radians(self.angle)
+        delta_f, rad_angle = np.radians(10*delta_f), self.angle
 
         # Clamp acceleration if above maximum velocity
         if a > self.max_vel - self.vel:
@@ -148,8 +174,8 @@ class Car(Rectangle):
         x, y, vel, angle = delta_ode_state[-1]
 
         # Update car
-        self.x, self.y, self.vel, self.angle = x, y, vel, np.rad2deg(angle)
-        self.angle %= 360.0
+        self.x, self.y, self.vel, self.angle = x, y, vel, angle
+        self.angle %= 2*np.pi
 
     def reeds_shepp_model_step(self, action):
         """
@@ -216,6 +242,6 @@ class Car(Rectangle):
             return True
 
         if type(other) is Lane:
-            a = abs(self.angle % 360 - other.angle % 360) % 360
-            return a > 90 and a < 270
+            a = abs(self.angle % (2*np.pi) - other.angle % (2*np.pi)) % (2*np.pi)
+            return a > np.pi / 2  and a < 3*np.pi / 2
         return False

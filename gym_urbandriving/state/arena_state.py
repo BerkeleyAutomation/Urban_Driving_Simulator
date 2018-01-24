@@ -5,21 +5,16 @@ import numpy as np
 class ArenaState(PositionState):
     static_objects = [Street(500, 500, 1000, 1000)]
 
-    def __init__(self, ncars=4, nped=0):
-        self.ncars = ncars
-        PositionState.__init__(self)
-        self.randomize()
-
     def randomize(self):
         self.dynamic_objects = []
         while len(self.dynamic_objects) < self.ncars:
-            degrees = np.random.uniform(0, 360)
-            angle = np.radians(-degrees)
+            angle = np.random.uniform(0, 2*np.pi)
             rotation_mat = np.array([[np.cos(angle), -np.sin(angle)],
                                      [np.sin(angle), np.cos(angle)]])
             x, y = np.dot([400, 0], rotation_mat.T)
-            angle_offset = np.random.uniform(-30, 30)
-            car = Car(x+500, y+500, angle=180+degrees+angle_offset)
+            angle_offset = np.random.uniform(0, 2*np.pi)
+
+            car = Car(x+500, y+500, angle=angle)
             car.vel = 0
             if not any([car.collides(obj) for obj in self.static_objects+self.dynamic_objects]):
                 self.dynamic_objects.append(car)
