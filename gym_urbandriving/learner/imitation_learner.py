@@ -23,24 +23,12 @@ class IL():
 
 	def load_data(self):
 		"""
-		return: the String name of the next new potential rollout
-		(i.e. do not overwrite another rollout)
-		"""
-		i = 0
+		Loads the data from the specified path 
 
-		paths = glob.glob(self.file_path+'/rollout_*')
-		self.rollouts = []
-		
-		for path in paths:
-			data_point = np.load(path)
-			self.rollouts.append(data_point)
-
-		return paths
-
-	def load_eval_data(self):
-		"""
-		return: the String name of the next new potential rollout
-		(i.e. do not overwrite another rollout)
+		Returns
+		----------
+		path: list
+			Containing the rollouts
 		"""
 		i = 0
 
@@ -56,7 +44,9 @@ class IL():
 
 	def train_model(self):
 
-		###ADD
+		"""
+		Trains a model on the loaded data, for know its a sklearn model
+		"""
 
 		self.X_train = []
 		self.Y_train = []
@@ -64,6 +54,7 @@ class IL():
 		self.X_test = []
 		self.Y_test = []
 
+		#We are currently using a decision tree, however this can be quite modular
 		self.model = DecisionTreeRegressor()
 
 
@@ -99,6 +90,19 @@ class IL():
 
 
 	def make_state(self,state,goal_state):
+		"""
+        Constructs the state space to be learned on, which is a concatentation of the
+        current state and the goal state
+
+        Parameters
+        ----------
+        state: state of the enviroment
+        goal_state: list of [x,y,velocity, theta] states
+
+        Returns
+        ------------
+        numpy array of teh concatenated state for all agents
+        """
 		s_ = []
 		for i in range(self.num_cars):
 			s_.append(state.dynamic_objects[i].get_state())
@@ -108,14 +112,38 @@ class IL():
 		return np.array(s_).flatten()
 
 	def make_action(self,action):
+		"""
+        Makes an action for sklearn to use
+
+        Parameters
+        ----------
+        action: list of actions
+
+        Returns
+        ------------
+        numpy array of of actions
+        """
 		action = np.array(action)
 
 		return action
 
 	def unmake_action(self,action):
+		"""
+        Converst the output of the model to an action usable by the simulator
+
+        Parameters
+        ----------
+        action: numpy array
+
+        Returns
+        ------------
+        list of each action for the agent
+        """
+
 		action = list(action.reshape(self.num_cars,2))
 
 		for i in range(len(action)):
+			#odd hack, will fix 
 			if action[i][1] < 0.0: 
 				action[i][1] = 0.00001
 
@@ -124,6 +152,13 @@ class IL():
 
 
 	def get_train_error(self):
+		"""
+        Reports the training error of the model
+
+        Returns
+        ------------
+        float specifying L2 error
+        """
 
 		avg_err = 0.0
 
@@ -142,6 +177,13 @@ class IL():
 
 
 	def get_cs(self,evaluations):
+		"""
+        Report the on-policy surrogate loss to measure covariate shift
+
+        Returns
+        ------------
+        float specifying L2 error
+        """
 
 		count = 0.0
 		avg_err = 0.0
@@ -162,6 +204,14 @@ class IL():
 
 
 	def get_test_error(self):
+		"""
+        Reports the test error of the model
+
+        Returns
+        ------------
+        float specifying L2 error
+        """
+
 
 		avg_err = 0.0
 
@@ -185,6 +235,19 @@ class IL():
 
 
 	def eval_model(self,state,goal_state):
+		"""
+        Evaluates model, which is used in execution 
+        
+		Parameters
+        ----------
+        state: state of the enviroment
+        goal_state: list of [x,y,velocity, theta] states
+
+       	Returns
+        ------------
+        list of each action for the agent
+        """
+
 
 		s_ = self.make_state(state,goal_state)
 

@@ -7,6 +7,7 @@ import IPython
 class MultiIntersectionState(PositionState):
     """
     Instance of a :class:`PositionState` describing a four-way intersection
+    It has been augmented to sample states in a way for Imitation Learning Experiments
     
     Parameters
     ----------
@@ -72,16 +73,9 @@ class MultiIntersectionState(PositionState):
            
             lane = lanes[car_index_list[ln_index]]
 
-            # print "INDEX ", car_index_list[ln_index]
-            # print "i ",i
-
-
-            
-            
 
             car = lane.generate_car()
-            # car.x = 69.0
-            # car.y = 545.0
+
             car.vel = 0
             if not any([car.collides(obj) for obj in self.static_objects+self.dynamic_objects]):
                 self.dynamic_objects.append(car)

@@ -38,6 +38,20 @@ def integrator(state, t, acc, delta_f):
 
 class RRTMPlanner:
     def __init__(self, agents, planner=None, time=None, goal= None, prune = None, selection = None):
+        """
+        A Kino-Dynamic Planner for multiple agents. 
+        
+        Parameters
+        ----------
+        agents : list 
+            Agents to be planned over
+        planner : str
+            Type of Planner to use
+        time : float
+            Duration to run Planenr
+        goal, prune, selection: float
+            Parameters of planner, which can be searched over
+        """
         self.agents = agents
         self.num_agents = len(agents)
 
@@ -81,6 +95,21 @@ class RRTMPlanner:
 
 
     def plan(self, state):
+        """
+        Generate a plan for the agents
+        
+        Parameters
+        ----------
+        state : state of the enviroment
+            The plan is generated starting at this state
+
+        Returns:
+        ----------
+            paths: a list of each agents controls to generate the desired trajectory
+            If no trjaectory is found, returns None
+        """
+
+
 
         start_state = state
         # construct the state space we are planning in

@@ -11,15 +11,6 @@ from gym_urbandriving.assets import Car, TrafficLight
 from gym_urbandriving.utils.data_logger import DataLogger
 from gym_urbandriving.learner.imitation_learner import IL
 
-NUM_CARS = 2
-NUM_DATA_POINTS = 1
-
-PLANNERS = ['SST']
-TIME = [1.0]
-
-GOAL_BIAS = [0.05]
-PRUNE_RADIUS = [0.5]
-SELECTION_RADIUS = [0.2]
 
 THRESH = 150
 
@@ -30,7 +21,7 @@ il_learn = IL('test_data')
 
 class Trainer:
 
-    def __init__(self,file_path,time = 3.0, goal_bias = 0.05, planner = 'SST',num_data_points = 10, num_eval_points = 10, time_horizon = 2):
+    def __init__(self,file_path,time = 3.0, goal_bias = 0.05, planner = 'SST',num_data_points = 10, num_eval_points = 10, time_horizon = 2, num_cars = 2):
 
         self.PLANNERS = planner
         self.TIME = time
@@ -40,6 +31,7 @@ class Trainer:
         self.SELECTION_RADIUS = 0.2
         self.NUM_DATA_POINTS = num_data_points
         self.NUM_EVAL_POINTS = num_eval_points
+        self.NUM_CARS = NUM_CARS
 
         self.d_logger = DataLogger(file_path)
         self.il_learn = IL(file_path)
@@ -50,7 +42,7 @@ class Trainer:
         
         final_states = rollouts[-1]['state'].dynamic_objects
 
-        for i in range(NUM_CARS):
+        for i in range(self.NUM_CARS):
            
             goal_state = np.array([g_state[i][0],g_state[i][1]])
             car_state = np.array([final_states[i].x,final_states[i].y])
@@ -66,6 +58,19 @@ class Trainer:
 
 
     def assign_goal_state(self,lane_orders):
+        """
+        Assign goal positions to the agents
+
+        Parameters
+        ----------
+        lane_orders: list of integers
+           A list of the lane indexes each agent is starting 
+
+        Returns
+        -----------
+        sorted_goals: a list of the goal positions to be assigned
+        lane_pick: a list of the correpsonding lanes that the car starts on
+        """
 
         #No two agents can go to the same goal 
         #No goal can be on the same starting spot
@@ -80,6 +85,8 @@ class Trainer:
 
         #Lanes that cannot be assigned 
         forbidden_lanes = []
+
+        #list of the lanes picked
         lane_pick = []
 
         lane_count = 0
@@ -118,12 +125,22 @@ class Trainer:
 
 
     def train_model(self):
+        """
+        Loads the data and trains the model
+        """
 
         self.il_learn.load_data()
         self.il_learn.train_model()
 
 
     def get_stats(self):
+        """
+        Collect statistics of each iteration
+
+        Returns
+        --------
+        stats: A dictonary with each measurment corresponding to some stastistic
+        """
 
         stats = {}
         stats['train_sup'] = self.il_learn.get_train_error()
@@ -139,6 +156,14 @@ class Trainer:
 
 
     def evaluate_policy(self):
+        """
+        Use to measure the learned policy's performance
+
+        Returns
+        --------
+        loss_robot: float, corresponding to the surrogate loss on the robot's distributions
+        success_rate: float, corresponding to the reward of the robot
+        """
 
         evaluations,success_rate = self.collect_policy_rollouts()
 
@@ -148,6 +173,14 @@ class Trainer:
 
 
     def initialize_world(self):
+        """
+        Initiatlize the world of the simulator 
+
+        Returns
+        --------
+        env: an enviroment of the simulator
+        """
+
         # Instantiate a PyGame Visualizer of size 800x800
         vis = uds.PyGameVisualizer((800, 800))
 
@@ -174,6 +207,13 @@ class Trainer:
         return env
 
     def rollout_supervisor(self):
+        """
+        Rollout the supervior, by generating a plan through OMPL and then executing it. 
+
+        Returns
+        --------
+        Returns the rollout and the goal states
+        """
 
         rollout = []
         agents = []
@@ -234,6 +274,13 @@ class Trainer:
 
 
     def rollout_policy(self):
+        """
+        Rolls out the policy by executing the learned behavior
+
+        Returns
+        --------
+        Returns the rollout and the goal states
+        """
 
         rollout = []
         agents = []
@@ -245,7 +292,7 @@ class Trainer:
         goal_states, lane_pick = self.assign_goal_state(env.init_state.lane_order)
         
         
-        for i in range(NUM_CARS):
+        for i in range(self.NUM_CARS):
             agents.append(RRTMAgent(goal_states[i],agent_num = i))
     
         planner = RRTMPlanner(agents,planner = self.PLANNERS,time = self.TIME, goal = self.GOAL_BIAS,prune = self.PRUNE_RADIUS,selection = self.SELECTION_RADIUS)
@@ -289,6 +336,13 @@ class Trainer:
 
 
     def collect_policy_rollouts(self):
+        """
+        Collects a number of policy rollouts and measures success
+
+        Returns
+        ----------
+        The evaulations and the reported success rate
+        """
         policy_success_rate = 0.0
         evaluations = []
         for i in range(self.NUM_EVAL_POINTS):
@@ -304,9 +358,16 @@ class Trainer:
         return evaluations, policy_success_rate
 
     def collect_supervisor_rollouts(self):
+        """
+        Collects a number of policy rollouts and measures success
+
+        Returns
+        ----------
+        The recorded success rate of the planner
+        """
         success_rate = 0.0
 
-        for i in range(NUM_DATA_POINTS):
+        for i in range(self.NUM_DATA_POINTS):
 
             rollout,g_s = self.rollout_supervisor()
             if self.check_success(rollout,g_s):

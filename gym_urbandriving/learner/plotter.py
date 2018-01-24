@@ -14,7 +14,11 @@ plt.style.use('ggplot')
 
 class Plotter():
 
-	def __init__(self, alg_name,file_path):
+	def __init__(self,file_path):
+
+		'''
+		Class to plot performance of methods
+		'''
 
 		self.file_path = file_path
 		self.alg_name = alg_name
@@ -24,6 +28,14 @@ class Plotter():
 
 
 	def save_plots(self,stats):
+		'''
+		Save the plots to measure different aspects of the experiment
+
+		Paramters
+		-----------
+		stats: list of dict
+			Contains the measured statistics 
+		'''
 
 		reward_sup = []
 		reward_robot = []
