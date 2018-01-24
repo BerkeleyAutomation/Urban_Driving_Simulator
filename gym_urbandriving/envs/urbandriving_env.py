@@ -3,6 +3,7 @@ from copy import deepcopy
 from gym_urbandriving.agents import *
 import numpy as np
 import ray
+import IPython 
 
 @ray.remote
 class RayNode:
@@ -68,6 +69,57 @@ class UrbanDrivingEnv(gym.Env):
         if (self.init_state):
             self._reset()
 
+    def _step_test(self, car_actions, agentnum=0):
+        """
+        The step function accepts a control for the 0th agent in the scene. Then, it queries
+        all the background agents to determine their actions. Then, it updates the scene
+        and returns.
+        
+        Parameters
+        ----------
+        action :
+            An action for the agentnum object in the scene.
+        agentnum : int
+            The index for the object which the action is applied for.
+
+        Returns
+        -------
+        PositionState
+            State of the world after this step;
+        float
+            Reward calculated by :func:`self.reward_fn`,
+        bool
+            Whether we have timed out, or there is a collision)
+        dict
+
+        """
+        assert(self.current_state is not None)
+        # Get actions for all objects
+        actions = [None]*len(self.current_state.dynamic_objects)
+        
+        
+        assert(all([type(bgagent) != RayNode for i, bgagent in self.bg_agents.items()]))
+        
+        for i in range(len(car_actions)):
+            actions[i] = car_actions[i]
+        for i, dobj in enumerate(self.current_state.dynamic_objects):
+            dobj.step(actions[i])
+
+        self.current_state.time += 1
+        dynamic_coll, static_coll = self.current_state.get_collisions()
+        state = self.get_state_copy()
+        reward = self.reward_fn(self.current_state)
+        done = (self.current_state.time == self.max_time) or len(dynamic_coll) or len(static_coll)
+
+        predict_accuracy = None
+        # if self.bgagent_type == ModelAgent:
+        #     predict_accuracy = sum([o.score for o in self.bg_agents])/len(self.bg_agents)
+
+        info_dict = {"saved_actions": actions,
+                     "predict_accuracy": predict_accuracy}
+
+        return state, reward, done, info_dict
+
 
     def _step(self, action, agentnum=0):
         """
@@ -97,6 +149,7 @@ class UrbanDrivingEnv(gym.Env):
         # Get actions for all objects
         actions = [None]*len(self.current_state.dynamic_objects)
         actions[agentnum] = action
+     
 
         if self.use_ray:
             assert(all([type(bgagent) == RayNode for i, bgagent in self.bg_agents.items()]))

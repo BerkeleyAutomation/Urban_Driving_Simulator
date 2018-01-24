@@ -56,6 +56,7 @@ class SimpleIntersectionState(PositionState):
             car.destination = goal
             if not any([car.collides(obj) for obj in self.static_objects+self.dynamic_objects]):
                 self.dynamic_objects.append(car)
+
         while len(self.dynamic_objects) < self.ncars+self.nped:
             sidewalk = [Sidewalk(200, 375, 400, 50),
                       Sidewalk(200, 625, 400, 50),
@@ -70,6 +71,7 @@ class SimpleIntersectionState(PositionState):
             man.vel = 2
             if not any([man.collides(obj) for obj in self.static_objects+self.dynamic_objects]):
                 self.dynamic_objects.append(man)
+                
         if self.traffic_lights:
             self.dynamic_objects.append(TrafficLight(600, 440, 0))
             self.dynamic_objects.append(TrafficLight(400, 560, -np.pi))
