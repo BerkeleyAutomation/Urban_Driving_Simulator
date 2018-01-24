@@ -60,7 +60,7 @@ class Lane(Polygon):
 
         Parameters
         ----------
-        car_type : "kinematic" or "point"
+        car_type : "kinematic" or "point" or "reeds_shepp"
             Specifies dynamics model for the car
         Returns
         -------

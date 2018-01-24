@@ -37,7 +37,7 @@ class Car(Rectangle):
 
     """
     def __init__(self, x, y, xdim=80, ydim=40, angle=0.0, vel=0.0,
-                 max_vel=5, mass=100.0, dynamics_model="point", destination=None,
+                 max_vel=5, mass=100.0, dynamics_model="kinematic", destination=None,
                  breadcrumbs=[]):
         Rectangle.__init__(self, x, y, xdim, ydim, angle, mass=mass, sprite="grey_car.png")
         self.vel = vel
@@ -76,6 +76,8 @@ class Car(Rectangle):
         """
         if self.dynamics_model == "kinematic":
             self.kinematic_model_step(action)
+        elif self.dynamics_model == "reeds_shepp":
+            self.reeds_shepp_model_step(action)
         else:
             self.point_model_step(action)
         while self.breadcrumbs:
@@ -123,6 +125,35 @@ class Car(Rectangle):
             action: 1x2 array, steering / acceleration action.
             info_dict: dict, contains information about the environment.
         """
+
+        def integrator(state, t, acc, delta_f):
+            """
+            Calculates numerical values of differential
+            equation variables for dynamics.
+            SciPy ODE integrator calls this function.
+
+            :
+            state: 1x6 array, contains x, y, dx_body, dy_body, rad_angle, rad_dangle
+                of car.
+            t: float, timestep.
+            mu: float, friction coefficient.
+            delta_f: float, steering angle.
+            a_f: float, acceleration.
+
+            Returns:
+            output: list, contains dx, dy, ddx_body, ddy_body, dangle, ddangle.
+            """
+            x, y, vel, rad_angle = state
+
+            # Differential equations
+            beta = np.arctan((self.l_r / (self.l_f + self.l_r)) * np.tan(delta_f))
+            dx = vel * np.cos(rad_angle + beta)
+            dy = vel * -np.sin(rad_angle + beta)
+            dangle = (vel / self.l_r) * np.sin(beta)
+            dvel = acc
+            output = [dx, dy, dvel, dangle]
+            return output
+
         self.shapely_obj = None
         if action is None:
             action = [0, 0]
@@ -139,40 +170,49 @@ class Car(Rectangle):
         ode_state = [self.x, self.y, self.vel, rad_angle]
         aux_state = (a, delta_f)
         t = np.arange(0.0, 1.0, 0.1)
-        delta_ode_state = odeint(self.integrator, ode_state, t, args=aux_state)
+        delta_ode_state = odeint(integrator, ode_state, t, args=aux_state)
         x, y, vel, angle = delta_ode_state[-1]
 
         # Update car
         self.x, self.y, self.vel, self.angle = x, y, vel, angle
         self.angle %= 2*np.pi
 
-    def integrator(self, state, t, acc, delta_f):
+    def reeds_shepp_model_step(self, action):
         """
-        Calculates numerical values of differential
-        equation variables for dynamics.
-        SciPy ODE integrator calls this function.
+        Updates the car for one timestep.
 
-        :
-            state: 1x6 array, contains x, y, dx_body, dy_body, rad_angle, rad_dangle
-                of car.
-            t: float, timestep.
-            mu: float, friction coefficient.
-            delta_f: float, steering angle.
-            a_f: float, acceleration.
-
-        Returns:
-            output: list, contains dx, dy, ddx_body, ddy_body, dangle, ddangle.
+        Args:
+            action: 1x2 array, steering / acceleration action.
+            info_dict: dict, contains information about the environment.
         """
-        x, y, vel, rad_angle = state
+        def integrator(state, t, u1, u2):
+            x, y, vel, rad_angle = state
+            # Differential equations
+            dx = vel * np.cos(rad_angle)
+            dy = vel * -np.sin(rad_angle)
+            dangle = vel * u2
+            dvel = u1
+            output = [dx, dy, dvel, dangle]
+            return output
+        self.shapely_obj = None
+        if action is None:
+            action is [0, 0]
+        u2, u1 = action
+        u2 = u2 * 0.015
+        if u1 > self.max_vel - self.vel:
+            u1 = self.max_vel - self.vel
+        elif u1 < -self.max_vel - self.vel:
+            u1 = - self.max_vel - self.vel
+        ode_state = [self.x, self.y, self.vel, np.radians(self.angle)]
+        aux_state = (u1, u2)
+        t = np.arange(0.0, 1.0, 0.1)
+        delta_ode_state = odeint(integrator, ode_state, t, args=aux_state)
+        x, y, vel, angle = delta_ode_state[-1]
 
-        # Differential equations
-        beta = np.arctan((self.l_r / (self.l_f + self.l_r)) * np.tan(delta_f))
-        dx = vel * np.cos(rad_angle + beta)
-        dy = vel * -np.sin(rad_angle + beta)
-        dangle = (vel / self.l_r) * np.sin(beta)
-        dvel = acc
-        output = [dx, dy, dvel, dangle]
-        return output
+        # Update car
+        self.x, self.y, self.vel, self.angle = x, y, vel, np.rad2deg(angle)
+        self.angle %= 360.0
+
 
     def get_state(self):
         """
@@ -189,12 +229,12 @@ class Car(Rectangle):
 
         Parameters
         ----------
-        other : 
+        other :
             Object to test collision against
 
         Returns
         -------
-        bool 
+        bool
            True if this object can collide with other
         """
         from gym_urbandriving.assets.lane import Lane
