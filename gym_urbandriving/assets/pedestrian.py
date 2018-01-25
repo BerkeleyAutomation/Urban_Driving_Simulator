@@ -45,12 +45,13 @@ class Pedestrian(Circle, DynamicShape):
            Contains information about the environment.
         """
         self.shapely_obj = None
-
         if self.dynamics_model == "kinematic":
             self.x, self.y, self.vel, self.angle = self.kinematic_model_step(action, self.x, self.y, self.vel, self.angle)
+        elif self.dynamics_model == "reeds_shepp":
+            self.x, self.y, self.vel, self.angle = self.reeds_shepp_model_step(action, self.x, self.y, self.vel, self.angle)
         else:
             self.x, self.y, self.vel, self.angle = self.point_model_step(action, self.x, self.y, self.vel, self.angle)
-        
+
     def get_state(self):
         """
         Get state. 

@@ -7,13 +7,13 @@ SPRITE_DIR = "gym_urbandriving/visualizer/sprites/"
 
 
 class Shape(object):
-    SPRITE_DIR = "gym_urbandriving/visualizer/sprites/"
+    breadcrumbs = []
     def __init__(self, x, y, angle, mass, sprite="no_texture.png", static=False):
         self.x = x
         self.y = y
-        self.angle = angle % 360
+        self.angle = angle % (2*np.pi)
         self.mass = mass
-        self.sprite = self.SPRITE_DIR + sprite
+        self.sprite = SPRITE_DIR + sprite
         self.sprite = sprite
         self.static = static
         self.shapely_obj = None
@@ -37,7 +37,6 @@ class Shape(object):
 
     def __deepcopy__(self, memo):
         cls = self.__class__
-        
         result = cls.__new__(cls)
         memo[id(self)] = result
         for k, v in self.__dict__.items():

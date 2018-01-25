@@ -36,12 +36,35 @@ class Car(Rectangle, DynamicShape):
 
     """
     def __init__(self, x, y, xdim=80, ydim=40, angle=0.0, vel=0.0,
-                 max_vel=5, mass=100.0, dynamics_model="point"):
+                 max_vel=5, mass=100.0, dynamics_model="kinematic", destination=None,
+                 breadcrumbs=[]):
         Rectangle.__init__(self, x, y, xdim, ydim, angle, mass=mass, sprite="grey_car.png")
         l_f = l_r = self.ydim / 2.0
         DynamicShape.__init__(self, l_r, l_f, max_vel, dynamics_model)
         self.vel = vel
         self.max_vel = max_vel
+        self.dynamics_model = dynamics_model
+        self.destination = destination
+        self.breadcrumbs = breadcrumbs
+        self.l_f = self.l_r = self.ydim / 2.0
+
+    def at_goal(self, state):
+        """
+        Returns if this car is at its goal destination, if specified.
+        Goal destination must be either in 'NSEW' or a coordinate pair
+        """
+        if not self.destination:
+            return False
+        elif self.destination == 'N':
+            return self.y < 0
+        elif self.destination == 'S':
+            return self.y > state.dimensions[1]
+        elif self.destination == 'W':
+            return self.x < 0
+        elif self.destination == 'E':
+            return self.x > state.dimensions[0]
+        else:
+            return self.contains_point(self.destination)
 
     def step(self, action):
         """
@@ -53,12 +76,20 @@ class Car(Rectangle, DynamicShape):
             The action to take
         """
         self.shapely_obj = None
-
+        
         if self.dynamics_model == "kinematic":
             self.x, self.y, self.vel, self.angle = self.kinematic_model_step(action, self.x, self.y, self.vel, self.angle)
+        elif self.dynamics_model == "reeds_shepp":
+            self.x, self.y, self.vel, self.angle = self.reeds_shepp_model_step(action, self.x, self.y, self.vel, self.angle)
         else:
             self.x, self.y, self.vel, self.angle = self.point_model_step(action, self.x, self.y, self.vel, self.angle)
 
+        while self.breadcrumbs:
+            bc = self.breadcrumbs[0][:2]
+            if self.contains_point(bc):
+                self.breadcrumbs.pop(0)
+            else:
+                return
 
     def get_state(self):
         """
@@ -67,7 +98,7 @@ class Car(Rectangle, DynamicShape):
             state: 1x3 array, contains x, y, angle of car.
             info_dict: dict, contains information about car.
         """
-        return self.x, self.y, self.x_dim, self.y_dim, self.angle
+        return self.x, self.y, self.angle, self.vel
 
     def can_collide(self, other):
         """
@@ -75,12 +106,12 @@ class Car(Rectangle, DynamicShape):
 
         Parameters
         ----------
-        other : 
+        other :
             Object to test collision against
 
         Returns
         -------
-        bool 
+        bool
            True if this object can collide with other
         """
         from gym_urbandriving.assets.lane import Lane
@@ -88,6 +119,6 @@ class Car(Rectangle, DynamicShape):
             return True
 
         if type(other) is Lane:
-            a = abs(self.angle - other.angle) % 360
-            return a > 90 and a < 270
+            a = abs(self.angle % (2*np.pi) - other.angle % (2*np.pi)) % (2*np.pi)
+            return a > np.pi / 2  and a < 3*np.pi / 2
         return False
