@@ -7,7 +7,7 @@ import random
 class SimpleRoundaboutState(PositionState):
     """
     Instance of a :class:`PositionState` describing a four-way intersection
-    
+
     Parameters
     ----------
     ncars : int
@@ -18,33 +18,24 @@ class SimpleRoundaboutState(PositionState):
         Whether or not to generate traffic lights
     """
     static_objects = [Terrain(500, 500, radius=100),
-                      Lane(140, 450, 280, 100, angle=-180),
+                      Lane(140, 450, 280, 100, angle=-np.pi),
                       Lane(140, 550, 280, 100),
-                      Lane(860, 450, 280, 100, angle=-180),
+                      Lane(860, 450, 280, 100, angle=-np.pi),
                       Lane(860, 550, 280, 100),
-                      Lane(450, 140, 280, 100, angle=-90),
-                      Lane(550, 140, 280, 100, angle=90),
-                      Lane(450, 860, 280, 100, angle=-90),
-                      Lane(550, 860, 280, 100, angle=90),
-                      Lane(500, 500, angle=0, curvature=90, inner_r=100, outer_r=250),
-                      Lane(500, 500, angle=90, curvature=90, inner_r=100, outer_r=250),
-                      Lane(500, 500, angle=180, curvature=90, inner_r=100, outer_r=250),
-                      Lane(500, 500, angle=270, curvature=90, inner_r=100, outer_r=250),
+                      Lane(450, 140, 280, 100, angle=-(np.pi/2)),
+                      Lane(550, 140, 280, 100, angle=(np.pi/2)),
+                      Lane(450, 860, 280, 100, angle=-(np.pi/2)),
+                      Lane(550, 860, 280, 100, angle=(np.pi/2)),
+                      Lane(500, 500, angle=0, curvature=(np.pi/2), inner_r=100, outer_r=250),
+                      Lane(500, 500, angle=(np.pi/2), curvature=(np.pi/2), inner_r=100, outer_r=250),
+                      Lane(500, 500, angle=np.pi, curvature=(np.pi/2), inner_r=100, outer_r=250),
+                      Lane(500, 500, angle=270, curvature=(np.pi/2), inner_r=100, outer_r=250),
                       ]
     static_objects += [Terrain(200, 200, 400, 400, excludes=static_objects),
                        Terrain(800, 200, 400, 400, excludes=static_objects),
                        Terrain(200, 800, 400, 400, excludes=static_objects),
                        Terrain(800, 800, 400, 400, excludes=static_objects),
     ]
-        
-
-    def __init__(self, ncars=4, nped=2, traffic_lights=False):
-        self.ncars = ncars
-        self.nped = nped
-        self.traffic_lights = traffic_lights
-
-        PositionState.__init__(self)
-        self.randomize()
 
 
     def randomize(self):

@@ -7,12 +7,12 @@ class SimpleTIntersectionState(PositionState):
     static_objects = [Terrain(175, 175, 350, 350),
                       Terrain(825, 175, 350, 350),
                       Terrain(500, 825, 1000, 350),
-                      Lane(200, 450, 400, 100, angle=-180),
+                      Lane(200, 450, 400, 100, angle=-np.pi),
                       Lane(200, 550, 400, 100),
-                      Lane(800, 450, 400, 100, angle=-180),
+                      Lane(800, 450, 400, 100, angle=-np.pi),
                       Lane(800, 550, 400, 100),
-                      Lane(450, 200, 400, 100, angle=-90),
-                      Lane(550, 200, 400, 100, angle=90),
+                      Lane(450, 200, 400, 100, angle=-(np.pi/2)),
+                      Lane(550, 200, 400, 100, angle=(np.pi/2)),
                       Street(500, 500, 200, 200),
                       Sidewalk(200, 375, 400, 50),
                       Sidewalk(800, 375, 400, 50),
@@ -21,18 +21,12 @@ class SimpleTIntersectionState(PositionState):
                       Sidewalk(625, 175, 50, 350),
     ]
 
-    def __init__(self, ncars=4, nped=2):
-        self.ncars = ncars
-        self.nped = nped
-        PositionState.__init__(self)
-        self.randomize()
-
     def randomize(self):
         self.dynamic_objects = []
         while len(self.dynamic_objects) < self.ncars:
             lane = [Lane(200, 550, 400, 100),
-                    Lane(800, 450, 400, 100, angle=-180),
-                    Lane(450, 200, 400, 100, angle=-90),
+                    Lane(800, 450, 400, 100, angle=-np.pi),
+                    Lane(450, 200, 400, 100, angle=-(np.pi/2)),
             ][np.random.random_integers(0, 2)]
             car = lane.generate_car()
             car.vel = 0

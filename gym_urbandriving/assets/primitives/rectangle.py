@@ -21,7 +21,7 @@ class Rectangle(Shape):
         self._x, self._y = None, None
         self.corners = self.get_corners()
         self.primitive = Rectangle
-        self.orthogonal = self.static and not self.angle % 90
+        self.orthogonal = self.static and not self.angle % (np.pi/2)
         if self.orthogonal:
             self.min_x = min([t[0] for t in self.corners])
             self.max_x = max([t[0] for t in self.corners])
@@ -41,7 +41,7 @@ class Rectangle(Shape):
         self._y = self.y
         self._angle = self.angle
         
-        angle = np.radians(-self.angle)
+        angle = -self.angle
         corner_offsets = np.array([self.xdim / 2.0, self.ydim / 2.0])
         centers = np.array([self.x, self.y])
         signs = np.array([[1,1], [1,-1], [-1,-1], [-1,1]])

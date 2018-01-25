@@ -40,17 +40,24 @@ def f():
 
     # Car 0 will be controlled by our KeyboardAgent
     agent = RRTAgent()
+    #agent_two = RRTAgent(agent_num=1)
+
     action = None
 
     # Simulation loop
     while(True):
         # Determine an action based on the current state.
         # For KeyboardAgent, this just gets keypresses
-        action = agent.eval_policy(state)
         start_time = time.time()
+        action = agent.eval_policy(state)
+        state, reward, done, info_dict = env._step(action)
+
+        #action_two = agent_two.eval_policy(state)
+        #state, reward, done, info_dict = env._step(action_two)
+        
 
         # Simulate the state
-        state, reward, done, info_dict = env._step(action)
+       
         env._render()
         # keep simulator running in spite of collisions or timing out
         done = False

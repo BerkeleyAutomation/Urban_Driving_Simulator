@@ -20,10 +20,10 @@ class Street(Polygon):
     points : 
        If specified, constructs this shape as a polygon
     """
-    def __init__(self, x, y, xdim, ydim, points=[]):
+    def __init__(self, x, y, xdim, ydim, angle=0, points=[]):
         if not points:
-            self.angle = 0
-            a = np.radians(-self.angle)
+            self.angle = angle
+            a = -self.angle
             corner_offsets = np.array([xdim / 2.0, ydim / 2.0])
             centers = np.array([x, y])
             signs = np.array([[1,1], [1,-1], [-1,-1], [-1,1]])
