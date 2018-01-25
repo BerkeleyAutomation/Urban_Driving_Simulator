@@ -7,6 +7,7 @@ from gym_urbandriving.assets.sidewalk import Sidewalk
 from gym_urbandriving.assets.pedestrian import Pedestrian
 
 from gym import spaces
+import numpy as np
 
 class Car(Rectangle, DynamicShape):
     """
