@@ -1,8 +1,9 @@
 import numpy as np
 from gym_urbandriving.assets.primitives.circle import Circle
+from gym_urbandriving.assets.primitives.dynamic_shape import DynamicShape
 from gym_urbandriving.assets.terrain import Terrain
 
-class Pedestrian(Circle):
+class Pedestrian(Circle, DynamicShape):
     """
     Represents a pedestrian as a circle
     
@@ -23,11 +24,11 @@ class Pedestrian(Circle):
     mass : float
         Mass of pedestrian
     """
-    def __init__(self, x, y, radius=17, angle=0.0, vel=0.0, acc=0.0, max_vel=2.0, mass=100.0):
+    def __init__(self, x, y, radius=17, angle=0.0, vel=0.0, acc=0.0, max_vel=2.0, mass=100.0, dynamics_model="point"):
         Circle.__init__(self, x, y, radius, angle, sprite="person.png")
+        DynamicShape.__init__(self, 0, 0, max_vel, dynamics_model)
         self.vel = vel
         self.acc = acc
-        self.max_vel = max_vel
         self.mass = mass
         self.angle = angle
 
@@ -44,24 +45,13 @@ class Pedestrian(Circle):
            Contains information about the environment.
         """
         self.shapely_obj = None
-        if action is None:
-            action_steer, action_acc = 0.0, 0.0
+        if self.dynamics_model == "kinematic":
+            self.x, self.y, self.vel, self.angle = self.kinematic_model_step(action, self.x, self.y, self.vel, self.angle)
+        elif self.dynamics_model == "reeds_shepp":
+            self.x, self.y, self.vel, self.angle = self.reeds_shepp_model_step(action, self.x, self.y, self.vel, self.angle)
         else:
-            action_steer, action_acc = action
-        self.angle += action_steer
-        self.angle &= 2*np.pi
-        self.acc = action_acc
-        self.acc = max(min(self.acc, self.max_vel - self.vel), -self.vel)
+            self.x, self.y, self.vel, self.angle = self.point_model_step(action, self.x, self.y, self.vel, self.angle)
 
-        t = 1
-        dist = self.vel * t + 0.5 * self.acc * (t ** 2)
-        dx = dist * np.cos(self.angle)
-        dy = dist * -np.sin(self.angle)
-        self.x += dx
-        self.y += dy
-        self.vel += self.acc
-        self.vel = max(min(self.vel, self.max_vel), 0.0)
-        
     def get_state(self):
         """
         Get state. 

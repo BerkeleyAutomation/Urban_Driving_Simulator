@@ -5,7 +5,7 @@ import time
 import numpy as np
 
 from gym_urbandriving.agents import KeyboardAgent, AccelAgent, NullAgent, TrafficLightAgent, RRTAgent
-from gym_urbandriving.assets import Car, TrafficLight
+from gym_urbandriving.assets import Car, TrafficLight, Pedestrian
 
 
 """
@@ -29,7 +29,8 @@ def f():
                               visualizer=vis,
                               max_time=500,
                               randomize=True,
-                              agent_mappings={Car:NullAgent,
+                              agent_mappings={Car:RRTAgent,
+                                              Pedestrian:RRTAgent,
                                               TrafficLight:TrafficLightAgent},
                               use_ray=False
     )

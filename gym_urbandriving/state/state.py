@@ -14,7 +14,7 @@ class PositionState:
         self.ncars = ncars
         self.nped = nped
         self.traffic_lights = traffic_lights
-        assert (car_model in {"kinematic", "point"})
+        assert (car_model in {"kinematic", "point", "reeds_shepp"})
         self.car_model = car_model
         self.randomize()
         return
