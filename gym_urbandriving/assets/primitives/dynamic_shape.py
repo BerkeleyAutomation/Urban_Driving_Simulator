@@ -86,8 +86,8 @@ class DynamicShape():
         else:
             action_steer, action_acc = action
 
-        action_steer = max(min(3, action_steer), -3)
-        action_steer, rad_angle = np.radians(10*action_steer), a
+        action_steer = max(min(1, action_steer), -1)
+        action_steer, rad_angle = np.radians(30*action_steer), a
 
         # Clamp acceleration if above maximum velocity
         if action_acc > self.max_vel - v:
