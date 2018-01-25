@@ -90,10 +90,10 @@ class DynamicShape():
         action_steer, rad_angle = np.radians(10*action_steer), a
 
         # Clamp acceleration if above maximum velocity
-        if a > self.max_vel - v:
-            a = self.max_vel - v
-        elif a < -self.max_vel - v:
-            a = - self.max_vel - v
+        if action_acc > self.max_vel - v:
+            action_acc = self.max_vel - v
+        elif action_acc < -self.max_vel - v:
+            action_acc = - self.max_vel - v
 
         # Differential equations
         ode_state = [x, y, v, rad_angle]
