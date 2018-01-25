@@ -33,9 +33,9 @@ def f():
                                               TrafficLight:TrafficLightAgent},
                               use_ray=False
     )
-
-    env._render()
-    state = init_state
+    
+    env._reset()
+    state = env.current_state
 
     # Car 0 will be controlled by our KeyboardAgent
     agent = KeyboardAgent()

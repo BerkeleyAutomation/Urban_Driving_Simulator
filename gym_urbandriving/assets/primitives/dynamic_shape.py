@@ -136,7 +136,7 @@ class DynamicShape():
             u1 = - self.max_vel - v
         ode_state = [x, y, v, a]
         aux_state = (u1, u2)
-        t = np.arange(0.0, 1.0, 0.1)
+        t = np.arange(0.0, 1.1, 0.1)
         delta_ode_state = odeint(integrator, ode_state, t, args=aux_state)
         x, y, vel, angle = delta_ode_state[-1]
 
