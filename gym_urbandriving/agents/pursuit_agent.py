@@ -13,8 +13,6 @@ class PursuitAgent:
     """
     def __init__(self, agent_num=0):
         self.agent_num = agent_num
-        self.target_locs = [(600,450), (475,475), (450,600), (450,900)]
-        self.target_loc_index = 0
         return
         
     def eval_policy(self, state):
@@ -33,17 +31,12 @@ class PursuitAgent:
         """
 
         obj = state.dynamic_objects[self.agent_num]
- 
-        if self.target_loc_index >= len(self.target_locs):
-            return (0,0)
 
-        if np.linalg.norm(np.array([obj.x, obj.y])-np.array(self.target_locs[self.target_loc_index]))<5:
-            self.target_loc_index += 1
-
-        if self.target_loc_index >= len(self.target_locs):
-            return (0,0)
-
-        target = self.target_locs[self.target_loc_index]
+        if len(obj.breadcrumbs)>0:
+            target = obj.breadcrumbs[0][:2]
+        else:
+            target = obj.destination
+            
         ac2 = np.arctan2(obj.y-target[1], target[0]-obj.x)
 
         ang = obj.angle if obj.angle<np.pi else obj.angle-2*np.pi
