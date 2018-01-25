@@ -38,8 +38,8 @@ class DynamicShape():
 
         x += dx
         y += dy
-        vel += acc
-        vel = max(min(v, self.max_vel), -self.max_vel)
+        v += acc
+        v = max(min(v, self.max_vel), -self.max_vel)
 
         return x, y, v, a
 
@@ -99,7 +99,7 @@ class DynamicShape():
         ode_state = [x, y, v, rad_angle]
         aux_state = (action_acc, action_steer)
         t = np.arange(0.0, 1.1, 0.1)
-        delta_ode_state = odeint(self.integrator, ode_state, t, args=aux_state)
+        delta_ode_state = odeint(integrator, ode_state, t, args=aux_state)
         x, y, vel, angle = delta_ode_state[-1]
 
         # Update car
@@ -143,5 +143,5 @@ class DynamicShape():
         # Update car
         x, y, v, a = x, y, vel, angle
         a %= 2*np.pi
-        
+
         return x, y, v, a
