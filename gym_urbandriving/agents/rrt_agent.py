@@ -20,14 +20,10 @@ class MyDecomposition(oc.GridDecomposition):
         s[0] = coord[0]
         s[1] = coord[1]
 
-
-
-
 class RRTAgent:
     def __init__(self, agent_num=0):
         self.agent_num = agent_num
         self.path = []
-
 
     def eval_policy(self, state):
 
@@ -132,6 +128,7 @@ class RRTAgent:
                 for i in range(int(s)):
                     self.path.append((a, b))
         
+
         if len(self.path):
             return self.path.pop(0)
 

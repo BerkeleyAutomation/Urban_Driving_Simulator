@@ -4,7 +4,7 @@ import cProfile
 import time
 import numpy as np
 
-from gym_urbandriving.agents import KeyboardAgent, AccelAgent, NullAgent, TrafficLightAgent
+from gym_urbandriving.agents import KeyboardAgent, AccelAgent, NullAgent, TrafficLightAgent, PursuitAgent
 from gym_urbandriving.assets import Car, TrafficLight
 
 
@@ -19,7 +19,6 @@ def f():
 
     # Create a simple-intersection state, with 4 cars, no pedestrians, and traffic lights
     init_state = uds.state.SimpleIntersectionState(ncars=1, nped=0, traffic_lights=True)
-
     # Create the world environment initialized to the starting state
     # Specify the max time the environment will run to 500
     # Randomize the environment when env._reset() is called
@@ -36,9 +35,11 @@ def f():
     
     env._reset()
     state = env.current_state
+    state.dynamic_objects[0].breadcrumbs = [(500,500)]
+    state.dynamic_objects[0].destination = (450,900)
 
     # Car 0 will be controlled by our KeyboardAgent
-    agent = KeyboardAgent()
+    agent = PursuitAgent()
     action = None
 
     # Simulation loop
