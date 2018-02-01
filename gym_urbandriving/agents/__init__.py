@@ -11,4 +11,4 @@ try:
     from gym_urbandriving.agents.rrt_m_agent import RRTMAgent
     from gym_urbandriving.agents.rrt_multi_planner import RRTMPlanner
 except ImportError:
-    print("OMPL not supported. RRT agants unavailable")
+    print("OMPL not supported. RRT agents unavailable")
