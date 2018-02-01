@@ -33,11 +33,13 @@ class PursuitAgent:
         obj = state.dynamic_objects[self.agent_num]
 
         if len(obj.breadcrumbs)>0:
-            target = obj.breadcrumbs[0][:2]
+            target_loc = obj.breadcrumbs[0][:2]
+            target_vel = obj.breadcrumbs[0][2]
         else:
-            target = obj.destination
+            target_loc = obj.destination
+            target_vel = 5
 
-        ac2 = np.arctan2(obj.y-target[1], target[0]-obj.x)
+        ac2 = np.arctan2(obj.y-target_loc[1], target_loc[0]-obj.x)
 
         ang = obj.angle if obj.angle<np.pi else obj.angle-2*np.pi
         
@@ -51,4 +53,4 @@ class PursuitAgent:
         acc = np.random.uniform(-2,3)
         #print (res,acc)
 
-        return (res, 3)
+        return (res, target_vel-obj.vel)
