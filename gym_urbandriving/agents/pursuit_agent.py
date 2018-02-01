@@ -1,5 +1,6 @@
 import pygame
 import numpy as np
+from gym_urbandriving.utils.PID import PIDController
 
 class PursuitAgent:
     """
@@ -13,7 +14,8 @@ class PursuitAgent:
     """
     def __init__(self, agent_num=0):
         self.agent_num = agent_num
-        return
+        self.PID_acc = PIDController(1.0, .1, 0)
+        self.PID_steer = PIDController(2, 0, 0)
         
     def eval_policy(self, state):
         """
@@ -43,14 +45,14 @@ class PursuitAgent:
 
         ang = obj.angle if obj.angle<np.pi else obj.angle-2*np.pi
         
-        res_angle = ac2-ang
-        if res_angle > np.pi:
-            res_angle -= (np.pi*2)
-        elif res_angle < -np.pi:
-            res_angle += (np.pi*2)
+        e_angle = ac2-ang
+        if e_angle > np.pi:
+            e_angle -= (np.pi*2)
+        elif e_angle < -np.pi:
+            e_angle += (np.pi*2)
 
-        res = np.degrees(res_angle)/30
-        acc = np.random.uniform(-2,3)
-        #print (res,acc)
+        e_vel = target_vel-obj.vel
 
-        return (res, target_vel-obj.vel)
+        action_acc = self.PID_acc.get_control(e_vel)
+        action_steer = self.PID_steer.get_control(e_angle)
+        return (action_steer, action_acc)
