@@ -5,7 +5,7 @@ from ompl import base as ob
 from ompl import control as oc
 from ompl import geometric as og
 from scipy.integrate import odeint
-import IPython
+
 
 # Only SyclopsRRT and SyclopsEST use this, and both those planners fail in a highly constrained environment
 # I suspect its because of the sampleUniform. When planning, I observe that those 2 planners explore many invalid states

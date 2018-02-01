@@ -1,5 +1,5 @@
 numpy
-gym
+gym==0.9.5
 shapely
 image
 pygame>=1.9.3

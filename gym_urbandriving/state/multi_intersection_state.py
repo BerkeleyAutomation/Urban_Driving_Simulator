@@ -2,7 +2,6 @@ from gym_urbandriving.state.state import PositionState
 from gym_urbandriving.assets import Terrain, Lane, Street, Sidewalk,\
     Pedestrian, Car, TrafficLight
 import numpy as np
-import IPython
 
 class MultiIntersectionState(PositionState):
     """
