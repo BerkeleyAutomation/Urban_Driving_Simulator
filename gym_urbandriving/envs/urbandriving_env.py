@@ -3,7 +3,6 @@ from copy import deepcopy
 from gym_urbandriving.agents import *
 import numpy as np
 import ray
-import IPython 
 
 @ray.remote
 class RayNode:

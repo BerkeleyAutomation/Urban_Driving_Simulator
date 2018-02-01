@@ -5,7 +5,6 @@ from ompl import base as ob
 from ompl import control as oc
 from ompl import geometric as og
 from scipy.integrate import odeint
-import IPython
 
 
 class RRTMAgent:
