@@ -85,13 +85,17 @@ class Car(Rectangle, DynamicShape):
         else:
             self.x, self.y, self.vel, self.angle = self.point_model_step(action, self.x, self.y, self.vel, self.angle)
 
+        """
         while self.breadcrumbs:
             bc = self.breadcrumbs[0][:2]
             if self.contains_point(bc):
                 self.breadcrumbs.pop(0)
             else:
                 return
-
+        """
+        if self.breadcrumbs:
+            self.breadcrumbs.pop(0)
+            
     def get_state(self):
         """
         Get state.
