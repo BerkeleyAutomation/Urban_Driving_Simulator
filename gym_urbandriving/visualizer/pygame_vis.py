@@ -6,6 +6,13 @@ import time
 import numpy as np
 import shapely
 
+COLORS = [(255, 0, 0),
+          (0, 255, 0),
+          (0, 0, 255),
+          (255, 255, 0),
+          (255, 0, 255),
+          (0, 255, 255)]
+
 class PyGameVisualizer:
 
     """
@@ -119,7 +126,7 @@ class PyGameVisualizer:
         return
 
 
-    def render_waypoints(self, waypoints, valid_area):
+    def render_waypoints(self, waypoints, valid_area, index=0):
         """
         Renders dynamic objects of the state such as pedestrians and cars.
 
@@ -132,12 +139,18 @@ class PyGameVisualizer:
             Two points in the form [x_1, x_2, y_1, y_2] that define the viewing window of the state.
 
         """
+        index = index % len(COLORS)
         new_surface = pygame.Surface((valid_area[1] - valid_area[0],
                                       valid_area[3] - valid_area[2]),
                                      pygame.SRCALPHA)
-        for w in waypoints:
-            pygame.draw.circle(new_surface, (0, 255, 255), [(int)(w[0]), (int)(w[1])], 5)
-        new_surface = pygame.transform.scale(new_surface, (self.screen_dim))
+      
+        for w in waypoints[1:]:
+            pygame.draw.circle(new_surface, COLORS[index], [(int)(w[0]), (int)(w[1])], 2)
+            #new_surface.fill(COLORS[index], ((int(w[0]), int(w[1])), (1, 1)))
+        if waypoints:
+            #new_surface.fill((255, 255, 255), ((int(w[0]), int(w[1])), (1, 1)))
+            pygame.draw.circle(new_surface, (255, 255, 255), [(int)(waypoints[0][0]), (int)(waypoints[0][1])], 2)
+        new_surface = pygame.transform.sgicale(new_surface, (self.screen_dim))
         self.surface.blit(new_surface, (0, 0), None)
         return
 
@@ -170,9 +183,9 @@ class PyGameVisualizer:
         self.render_statics(state, valid_area)
         self.render_dynamics(state, valid_area)
         self.render_collisions(state, valid_area)
-
-        for dobj in state.dynamic_objects:
-            self.render_waypoints(dobj.breadcrumbs, valid_area)
+        
+        for i, dobj in enumerate(state.dynamic_objects):
+            self.render_waypoints(dobj.trajectory.get_points(), valid_area, i)
         pygame.display.flip()
 
     def draw_rectangle(self, rect, surface):
@@ -187,7 +200,6 @@ class PyGameVisualizer:
             pos = (x_off, y_off)
             obj = pygame.transform.rotate(obj, np.rad2deg(rect.angle))
         surface.blit(obj, pos)
-
         return
 
     def draw_circle(self, circ, surface):

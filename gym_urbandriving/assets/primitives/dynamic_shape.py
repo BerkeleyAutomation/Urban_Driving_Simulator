@@ -105,6 +105,7 @@ class DynamicShape():
         # Update car
         x, y, v, a = x, y, vel, angle
         a %= 2*np.pi
+        assert ( a < 2*np.pi)
         return x, y, v, a
 
 

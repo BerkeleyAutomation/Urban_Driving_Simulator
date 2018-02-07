@@ -65,3 +65,13 @@ class Trajectory(object):
             t = self._trajectory[-1][2] + 1
         tx, ty = transform_point(x, y, w, h)
         self._trajectory = np.append(self._trajectory, [[tx, ty, t]], axis=0)
+
+    def npoints(self):
+        return self._trajectory.shape[0]
+
+    def first(self):
+        return self._trajectory[0]
+    def pop(self):
+        first = self.first()
+        self._trajectory = self._trajectory[1:]
+        return first

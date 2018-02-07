@@ -38,7 +38,7 @@ class Car(Rectangle, DynamicShape):
     """
     def __init__(self, x, y, xdim=80, ydim=40, angle=0.0, vel=0.0,
                  max_vel=5, mass=100.0, dynamics_model="kinematic", destination=None,
-                 breadcrumbs=[]):
+                 trajectory=None):
         Rectangle.__init__(self, x, y, xdim, ydim, angle, mass=mass, sprite="grey_car.png")
         l_f = l_r = self.ydim / 2.0
         DynamicShape.__init__(self, l_r, l_f, max_vel, dynamics_model)
@@ -46,7 +46,7 @@ class Car(Rectangle, DynamicShape):
         self.max_vel = max_vel
         self.dynamics_model = dynamics_model
         self.destination = destination
-        self.breadcrumbs = breadcrumbs
+        self.trajectory = trajectory
         self.l_f = self.l_r = self.ydim / 2.0
 
     def at_goal(self, state):
@@ -85,10 +85,10 @@ class Car(Rectangle, DynamicShape):
         else:
             self.x, self.y, self.vel, self.angle = self.point_model_step(action, self.x, self.y, self.vel, self.angle)
 
-        while self.breadcrumbs:
-            bc = self.breadcrumbs[0][:2]
-            if self.contains_point(bc):
-                self.breadcrumbs.pop(0)
+        while self.trajectory.npoints():
+            x, y, t = self.trajectory.first()
+            if self.contains_point((x, y)):
+                self.trajectory.pop()
             else:
                 return
 
