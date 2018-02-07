@@ -85,7 +85,7 @@ class Car(Rectangle, DynamicShape):
         else:
             self.x, self.y, self.vel, self.angle = self.point_model_step(action, self.x, self.y, self.vel, self.angle)
 
-        while self.trajectory.npoints():
+        while self.trajectory and self.trajectory.npoints():
             x, y, t = self.trajectory.first()
             if self.contains_point((x, y)):
                 self.trajectory.pop()
