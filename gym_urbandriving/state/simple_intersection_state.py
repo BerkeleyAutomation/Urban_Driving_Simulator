@@ -58,15 +58,7 @@ class SimpleIntersectionState(PositionState):
                 self.dynamic_objects.append(car)
 
         while len(self.dynamic_objects) < self.ncars+self.nped:
-            sidewalk = [Sidewalk(200, 375, 400, 50),
-                      Sidewalk(200, 625, 400, 50),
-                      Sidewalk(800, 375, 400, 50, angle=-np.pi),
-                      Sidewalk(800, 625, 400, 50, angle=-np.pi),
-                      Sidewalk(375, 175, 350, 50, angle=-(np.pi/2)),
-                      Sidewalk(625, 175, 350, 50, angle=-(np.pi/2)),
-                      Sidewalk(375, 825, 350, 50, angle=(np.pi/2)),
-                      Sidewalk(625, 825, 350, 50, angle=(np.pi/2))
-            ][np.random.random_integers(0, 7)]
+            sidewalk = self.static_objects[-8:][np.random.random_integers(0, 7)]
             man = sidewalk.generate_man()
             man.vel = 2
             if not any([man.collides(obj) for obj in self.static_objects+self.dynamic_objects]):

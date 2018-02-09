@@ -206,7 +206,7 @@ class PyGameVisualizer:
     def draw_circle(self, circ, surface):
         obj = pygame.image.load(circ.get_sprite())
         obj = pygame.transform.scale(obj, (circ.radius*2, circ.radius*2))
-        obj = pygame.transform.rotate(obj, circ.angle)
+        obj = pygame.transform.rotate(obj, np.rad2deg(circ.angle))
         surface.blit(obj, (circ.x-circ.radius,circ.y-circ.radius))
         return
 
