@@ -185,7 +185,8 @@ class PyGameVisualizer:
         self.render_collisions(state, valid_area)
         
         for i, dobj in enumerate(state.dynamic_objects):
-            self.render_waypoints(dobj.trajectory.get_points(), valid_area, i)
+            if not dobj.trajectory is None:
+                self.render_waypoints(dobj.trajectory.get_points(), valid_area, i)
         pygame.display.flip()
 
     def draw_rectangle(self, rect, surface):
