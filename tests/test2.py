@@ -65,5 +65,6 @@ def f():
     # We have hit 100 timesteps, should be fine. 
     assert True
 
-# Collect profiling data
-cProfile.run('f()', 'temp/stats')
+# For the tests, use if __main__
+if __name__ == '__main__':
+    f()

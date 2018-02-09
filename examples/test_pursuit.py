@@ -8,7 +8,7 @@ from gym_urbandriving.agents import KeyboardAgent, AccelAgent, NullAgent, Traffi
 from gym_urbandriving.assets import Car, TrafficLight
 from gym_urbandriving.utils.data_logger import DataLogger
 
-NUM_ITERS = 128 #NNumber of iterations 
+NUM_ITERS = 128 #Number of iterations 
 
 FILE_PATH = 'test_data/'
 
