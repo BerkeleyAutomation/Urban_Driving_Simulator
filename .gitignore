@@ -9,3 +9,5 @@ stats/
 *.swp
 *.swo
 data/
+temp/
+test_data/
