@@ -7,7 +7,7 @@ SPRITE_DIR = "gym_urbandriving/visualizer/sprites/"
 
 
 class Shape(object):
-    breadcrumbs = []
+    trajectory = None
     def __init__(self, x, y, angle, mass, sprite="no_texture.png", static=False):
         self.x = x
         self.y = y
