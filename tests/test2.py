@@ -1,70 +1,53 @@
 import gym
 import gym_urbandriving as uds
-import cProfile
-import time
+from gym_urbandriving import *
+from gym_urbandriving.agents import *
+from gym_urbandriving.assets import *
 import numpy as np
 
-from gym_urbandriving.agents import KeyboardAgent, AccelAgent, NullAgent, TrafficLightAgent
-from gym_urbandriving.assets import Car, TrafficLight
-
-
 """
- Copy of test.py but time limited. Check to make sure that test.py is not broken and can still run. 
+Test if an Accel Agent will move forward into an intersection but stop before colliding into an non-moving obstacle. 
 """
 
+init_state = uds.state.SimpleIntersectionState(ncars=2, nped=0, traffic_lights=False, car_model="kinematic")
+init_state.dynamic_objects[1].x = 500
+init_state.dynamic_objects[1].y = 500
+init_state.dynamic_objects[1].angle = 0
+init_state.dynamic_objects[1].vel = 0
 
-def f():
-    # Instantiate a PyGame Visualizer of size 800x800
-    vis = uds.PyGameVisualizer((800, 800))
-
-    # Create a simple-intersection state, with 4 cars, no pedestrians, and traffic lights
-    init_state = uds.state.SimpleIntersectionState(ncars=1, nped=0, traffic_lights=True)
-
-    # Create the world environment initialized to the starting state
-    # Specify the max time the environment will run to 500
-    # Randomize the environment when env._reset() is called
-    # Specify what types of agents will control cars and traffic lights
-    # Use ray for multiagent parallelism
-    env = uds.UrbanDrivingEnv(init_state=init_state,
-                              visualizer=vis,
-                              max_time=500,
-                              randomize=True,
+init_state.dynamic_objects[0].x = 450
+init_state.dynamic_objects[0].y = 200
+init_state.dynamic_objects[0].angle = -np.pi/2
+init_state.dynamic_objects[0].vel = 0
+env =  uds.UrbanDrivingEnv(init_state=init_state,
+                              randomize=False,
                               agent_mappings={Car:NullAgent,
-                                              TrafficLight:TrafficLightAgent},
-                              use_ray=False
+                                            },
+                              use_ray=False, 
     )
-    
-    env._reset()
-    state = env.current_state
 
-    # Car 0 will be controlled by our KeyboardAgent
-    agent = KeyboardAgent()
-    action = None
+agent = AccelAgent()
+action = None
+state = env.current_state
 
-    # Simulation loop
-    t = 0
-    while(t < 10):
-        # Determine an action based on the current state.
-        # For KeyboardAgent, this just gets keypresses
-        action = agent.eval_policy(state)
-        start_time = time.time()
+# Simulation loop
+t = 0
+while(t < 100):
+    # Determine an action based on the current state.
+    # For KeyboardAgent, this just gets keypresses
+    action = agent.eval_policy(state)
 
-        # Simulate the state
-        state, reward, done, info_dict = env._step(action)
-        env._render()
-        # keep simulator running in spite of collisions or timing out
-        done = False
-        # If we crash, sleep for a moment, then reset
-        if done:
-            print("done")
-            time.sleep(1)
-            env._reset()
-            state = env.current_state
-        t += 1
+    # Simulate the state
+    state, reward, done, info_dict = env._step(action)
+    env._render()
+    # keep simulator running in spite of collisions or timing out
 
-    # We have hit 100 timesteps, should be fine. 
-    assert True
+    # If we crash, sleep for a moment, then reset
+    if done:
+        assert False
+        exit(1)
+    t += 1
 
-# For the tests, use if __main__
-if __name__ == '__main__':
-    f()
+
+# We have hit 100 timesteps, should be fine. 
+assert env.current_state.dynamic_objects[0].y > 300
