@@ -14,83 +14,83 @@ import numpy.linalg as LA
 
 class IL():
 
-	def __init__(self,file_path, num_cars=2):
+    def __init__(self,file_path, num_cars=2):
 
-		self.data = []
-		self.rollout_info = {}
-		self.file_path = file_path
-		self.num_cars = num_cars
+        self.data = []
+        self.rollout_info = {}
+        self.file_path = file_path
+        self.num_cars = num_cars
 
-	def load_data(self):
-		"""
-		Loads the data from the specified path 
+    def load_data(self):
+        """
+        Loads the data from the specified path 
 
-		Returns
-		----------
-		path: list
-			Containing the rollouts
-		"""
-		i = 0
+        Returns
+        ----------
+        path: list
+            Containing the rollouts
+        """
+        i = 0
 
-		paths = glob.glob(self.file_path+'/rollout_*')
-		self.rollouts = []
-		
-		for path in paths:
-			data_point = np.load(path)
-			self.rollouts.append(data_point)
+        paths = glob.glob(self.file_path+'/rollout_*')
+        self.rollouts = []
+        
+        for path in paths:
+            data_point = np.load(path)
+            self.rollouts.append(data_point)
 
-		return paths
-
-
-	def train_model(self):
-
-		"""
-		Trains a model on the loaded data, for know its a sklearn model
-		"""
-
-		self.X_train = []
-		self.Y_train = []
-
-		self.X_test = []
-		self.Y_test = []
-
-		#We are currently using a decision tree, however this can be quite modular
-		self.model = DecisionTreeRegressor()
+        return paths
 
 
-		for rollout in self.rollouts:
+    def train_model(self):
 
-			if uniform() > 0.2:
-				train = True
-			else:
-				train = False
+        """
+        Trains a model on the loaded data, for know its a sklearn model
+        """
 
-			goal_state = rollout[1]['goal_states']
-			success = rollout[1]['success']
+        self.X_train = []
+        self.Y_train = []
 
-			for datum in rollout[0]:
+        self.X_test = []
+        self.Y_test = []
 
-				state = datum['state']
-				action = self.make_action(datum['action'])
-
-				a_ = action.flatten()
-
-				s_ = self.make_state(state,goal_state)
-
-				if train:
-					self.X_train.append(s_)
-					self.Y_train.append(a_)
-				else:
-					self.X_test.append(s_)
-					self.Y_test.append(a_)
+        #We are currently using a decision tree, however this can be quite modular
+        self.model = DecisionTreeRegressor()
 
 
-		self.model.fit(self.X_train,self.Y_train) 
-		
+        for rollout in self.rollouts:
+
+            if uniform() > 0.2:
+                train = True
+            else:
+                train = False
+
+            goal_state = rollout[1]['goal_states']
+            success = rollout[1]['success']
+
+            for datum in rollout[0]:
+
+                state = datum['state']
+                action = self.make_action(datum['action'])
+
+                a_ = action.flatten()
+
+                s_ = self.make_state(state,goal_state)
+
+                if train:
+                    self.X_train.append(s_)
+                    self.Y_train.append(a_)
+                else:
+                    self.X_test.append(s_)
+                    self.Y_test.append(a_)
 
 
-	def make_state(self,state,goal_state):
-		"""
+        self.model.fit(self.X_train,self.Y_train) 
+        
+
+
+    def make_state(self,state,goal_state):
+        """
         Constructs the state space to be learned on, which is a concatentation of the
         current state and the goal state
 
@@ -103,16 +103,16 @@ class IL():
         ------------
         numpy array of teh concatenated state for all agents
         """
-		s_ = []
-		for i in range(self.num_cars):
-			s_.append(state.dynamic_objects[i].get_state())
-			s_.append(np.array(goal_state[i]))
+        s_ = []
+        for i in range(self.num_cars):
+            s_.append(state.dynamic_objects[i].get_state())
+            s_.append(np.array(goal_state[i]))
 
 
-		return np.array(s_).flatten()
+        return np.array(s_).flatten()
 
-	def make_action(self,action):
-		"""
+    def make_action(self,action):
+        """
         Makes an action for sklearn to use
 
         Parameters
@@ -123,12 +123,12 @@ class IL():
         ------------
         numpy array of of actions
         """
-		action = np.array(action)
+        action = np.array(action)
 
-		return action
+        return action
 
-	def unmake_action(self,action):
-		"""
+    def unmake_action(self,action):
+        """
         Converst the output of the model to an action usable by the simulator
 
         Parameters
@@ -140,19 +140,19 @@ class IL():
         list of each action for the agent
         """
 
-		action = list(action.reshape(self.num_cars,2))
+        action = list(action.reshape(self.num_cars,2))
 
-		for i in range(len(action)):
-			#odd hack, will fix 
-			if action[i][1] < 0.0: 
-				action[i][1] = 0.00001
-
-
-		return action
+        for i in range(len(action)):
+            #odd hack, will fix 
+            if action[i][1] < 0.0: 
+                action[i][1] = 0.00001
 
 
-	def get_train_error(self):
-		"""
+        return action
+
+
+    def get_train_error(self):
+        """
         Reports the training error of the model
 
         Returns
@@ -160,24 +160,24 @@ class IL():
         float specifying L2 error
         """
 
-		avg_err = 0.0
+        avg_err = 0.0
 
-		for i in range(len(self.X_train)):
+        for i in range(len(self.X_train)):
 
-			x = np.array([self.X_train[i]])
-			y = self.Y_train[i]
+            x = np.array([self.X_train[i]])
+            y = self.Y_train[i]
 
-			y_ = self.model.predict(x)
+            y_ = self.model.predict(x)
 
-			err = LA.norm(y-y_)
+            err = LA.norm(y-y_)
 
-			avg_err += err
+            avg_err += err
 
-		return avg_err/float(len(self.X_train))
+        return avg_err/float(len(self.X_train))
 
 
-	def get_cs(self,evaluations):
-		"""
+    def get_cs(self,evaluations):
+        """
         Report the on-policy surrogate loss to measure covariate shift
 
         Returns
@@ -185,26 +185,26 @@ class IL():
         float specifying L2 error
         """
 
-		count = 0.0
-		avg_err = 0.0
+        count = 0.0
+        avg_err = 0.0
 
-		for rollout in evaluations:
-			for datum in rollout:
+        for rollout in evaluations:
+            for datum in rollout:
 
-				robot_action = self.make_action(datum['action'])
-				sup_action = self.make_action(datum['sup_action'])
-				err = LA.norm(robot_action-sup_action)
+                robot_action = self.make_action(datum['action'])
+                sup_action = self.make_action(datum['sup_action'])
+                err = LA.norm(robot_action-sup_action)
 
-				avg_err += err
-				count += 1.0
-
-
-		return avg_err/count
+                avg_err += err
+                count += 1.0
 
 
+        return avg_err/count
 
-	def get_test_error(self):
-		"""
+
+
+    def get_test_error(self):
+        """
         Reports the test error of the model
 
         Returns
@@ -213,48 +213,48 @@ class IL():
         """
 
 
-		avg_err = 0.0
+        avg_err = 0.0
 
-		for i in range(len(self.X_test)):
+        for i in range(len(self.X_test)):
 
-			x = np.array([self.X_test[i]])
-			y = self.Y_test[i]
+            x = np.array([self.X_test[i]])
+            y = self.Y_test[i]
 
-			y_ = self.model.predict(x)
+            y_ = self.model.predict(x)
 
-			err = LA.norm(y-y_)
+            err = LA.norm(y-y_)
 
-			avg_err += err
+            avg_err += err
 
-		if len(self.X_test) == 0:
-			return avg_err
+        if len(self.X_test) == 0:
+            return avg_err
 
-		return avg_err/float(len(self.X_test))
-
-
+        return avg_err/float(len(self.X_test))
 
 
-	def eval_model(self,state,goal_state):
-		"""
+
+
+    def eval_model(self,state,goal_state):
+        """
         Evaluates model, which is used in execution 
         
-		Parameters
+        Parameters
         ----------
         state: state of the enviroment
         goal_state: list of [x,y,velocity, theta] states
 
-       	Returns
+        Returns
         ------------
         list of each action for the agent
         """
 
 
-		s_ = self.make_state(state,goal_state)
+        s_ = self.make_state(state,goal_state)
 
-		s_ = np.array([s_])
-		action = self.model.predict(s_)
+        s_ = np.array([s_])
+        action = self.model.predict(s_)
 
-		return self.unmake_action(action)
+        return self.unmake_action(action)
 
 
 

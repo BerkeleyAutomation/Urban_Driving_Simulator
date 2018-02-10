@@ -43,7 +43,7 @@ stats = []
 
 
 for i in range(NUM_ITERS):
-	#Collect demonstrations 
+    #Collect demonstrations 
     t_exp.collect_supervisor_rollouts()
 
 #Save plots
