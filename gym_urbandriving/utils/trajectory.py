@@ -41,24 +41,72 @@ def from_table(traj_table):
     
 
 class Trajectory(object):
-    def __init__(self, target='car'):
-        self._trajectory = np.zeros((0, 3))
-        self.target = target
-        # Path in 2D space. Shape n, 3, where n is number of points
-        # x, y, t is the other dimension
+    """
+    General trajectory class. 
 
-    def get_points(self):
-        # Return 2d point list
+    Shape n x 7
+        n is number of points
+        7 dimensions: [x, y, velocity, angle, action steer, action angle, t]
+    """
+
+    def __init__(self, target='car', mode='xyvacst'):
+        """
+        Initializes an empty general control. 
+
+        Parameters
+        ----------
+        target : str
+            <?>
+        """
+        self._trajectory = np.zeros((0, 7))
+        self.mode = mode
+
+        self.dimensions_used = []
+        for c in mode:
+            if 'x' == c:
+                self.dimensions_used.append(0)
+            elif 'y' == c:
+                self.dimensions_used.append(1)
+            elif 'v' == c:
+                self.dimensions_used.append(2)
+            elif 'a' == c:
+                self.dimensions_used.append(3)
+            elif 'c' == c:
+                self.dimensions_used.append(4)
+            elif 's' == c:
+                self.dimensions_used.append(5)
+            elif 't' == c:
+                self.dimensions_used.append(6)
+            else:
+                raise ValueError()
+
+    def get_matrix(self):
+        """
+        Returns underlying trajectory matrix. 
+
+        Returns
+        ----------
+        self._trajectory : np array
+        """        
         return self._trajectory
 
-    def add_point(self, x, y, t=-1):
-        if t < 0 and not self._trajectory.shape[0]:
-            t = 0
-        elif t < 0:
-            t = self._trajectory[-1][2] + 1
+    def add_point(self, p):
 
-        self._trajectory = np.append(self._trajectory, [[x, y, t]], axis=0)
+        if 't' in self.mode:
+            t_index = self.mode.index('t')
+            t = p[t_index]
+            if t < 0 and self.is_empty():
+                t = 0
+            elif t < 0:
+                t = self._trajectory[-1][t_index] + 1
 
+        expanded_p = [p[self.dimensions_used.index(i)] if (i in self.dimensions_used) else np.nan for i in range(7)]
+        self._trajectory = np.append(self._trajectory, [expanded_p], axis=0)
+
+    def get_point(self, index):
+        self._trajectory.shape[index][self.dimensions_used]
+
+    # TODO FIX
     def add_camera_point(self, x, y, t=-1, h=720, w=1280):
         if t < 0 and not self._trajectory.shape[0]:
             t = 0
@@ -71,15 +119,15 @@ class Trajectory(object):
         return self._trajectory.shape[0]
 
     def first(self):
-        return self._trajectory[0]
+        return self._trajectory[0][self.dimensions_used]
 
     def last(self):
-        return self._trajectory[-1]
-        
+        return self._trajectory[-1][self.dimensions_used]
+
     def pop(self):
         first = self.first()
         self._trajectory = self._trajectory[1:]
         return first
 
     def is_empty(self):
-        return self._trajectory.shape[0] == 0
+        return not self._trajectory.shape[0]
