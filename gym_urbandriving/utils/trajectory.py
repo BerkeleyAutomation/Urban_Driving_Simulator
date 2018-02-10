@@ -1,5 +1,5 @@
 import numpy as np
-import skimage.transform
+from skimage import transform
 
 # Four corners of the interection, hard-coded in camera space
 corners = np.array([[765, 385],
@@ -12,7 +12,7 @@ st_corners = np.array([[400, 400],
                        [400, 600],
                        [600, 600],
                        [600, 400]])
-tf_mat = skimage.transform.ProjectiveTransform()
+tf_mat = transform.ProjectiveTransform()
 tf_mat.estimate(st_corners, corners)
 
 def transform_point(x, y, w=1280, h=720):
