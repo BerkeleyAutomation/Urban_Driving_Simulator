@@ -34,9 +34,9 @@ class PursuitAgent:
 
         obj = state.dynamic_objects[self.agent_num]
 
-        if len(obj.breadcrumbs)>0:
-            target_loc = obj.breadcrumbs[0][:2]
-            target_vel = obj.breadcrumbs[0][2]
+        if not obj.trajectory.is_empty():
+            target_loc = obj.trajectory.pop()[:2].tolist()
+            target_vel = 5
         else:
             target_loc = obj.destination
             target_vel = 5

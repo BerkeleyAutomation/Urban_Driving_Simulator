@@ -1,4 +1,5 @@
 import numpy as np
+import skimage.transform
 
 # Four corners of the interection, hard-coded in camera space
 corners = np.array([[765, 385],
@@ -41,7 +42,7 @@ def from_table(traj_table):
 
 class Trajectory(object):
     def __init__(self, target='car'):
-        self._trajectory = np.zeros(0, 3)
+        self._trajectory = np.zeros((0, 3))
         self.target = target
         # Path in 2D space. Shape n, 3, where n is number of points
         # x, y, t is the other dimension
@@ -71,7 +72,14 @@ class Trajectory(object):
 
     def first(self):
         return self._trajectory[0]
+
+    def last(self):
+        return self._trajectory[-1]
+        
     def pop(self):
         first = self.first()
         self._trajectory = self._trajectory[1:]
         return first
+
+    def is_empty(self):
+        return self._trajectory.shape[0] == 0

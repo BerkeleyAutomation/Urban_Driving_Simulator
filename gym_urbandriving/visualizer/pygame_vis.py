@@ -2,6 +2,7 @@ from gym_urbandriving.assets.car import Car
 from gym_urbandriving.assets.primitives import Rectangle, Circle, Polygon
 import sys
 import pygame
+import pygame.transform
 import time
 import numpy as np
 import shapely
@@ -145,12 +146,9 @@ class PyGameVisualizer:
                                      pygame.SRCALPHA)
       
         for w in waypoints[1:]:
-            pygame.draw.circle(new_surface, COLORS[index], [(int)(w[0]), (int)(w[1])], 2)
+            pygame.draw.circle(new_surface, COLORS[index], [(int)(w[0]), (int)(w[1])], 3)
             #new_surface.fill(COLORS[index], ((int(w[0]), int(w[1])), (1, 1)))
-        if waypoints:
-            #new_surface.fill((255, 255, 255), ((int(w[0]), int(w[1])), (1, 1)))
-            pygame.draw.circle(new_surface, (255, 255, 255), [(int)(waypoints[0][0]), (int)(waypoints[0][1])], 2)
-        new_surface = pygame.transform.sgicale(new_surface, (self.screen_dim))
+        new_surface = pygame.transform.scale(new_surface, (self.screen_dim))
         self.surface.blit(new_surface, (0, 0), None)
         return
 
