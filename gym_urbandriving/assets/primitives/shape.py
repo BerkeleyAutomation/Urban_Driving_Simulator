@@ -25,7 +25,7 @@ class Shape(object):
         return self.get_shapely_obj().intersects(other.get_shapely_obj())
 
     def contains_point(self, point):
-        return self.get_shapely_obj().contains(shapely.geomtry.Point(point))
+        return self.get_shapely_obj().contains(shapely.geometry.Point(point))
 
     def dist_to(self, other):
         return self.get_shapely_obj().distance(other.get_shapely_obj())

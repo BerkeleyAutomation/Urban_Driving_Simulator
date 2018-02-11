@@ -27,7 +27,7 @@ def run():
     init_state = uds.state.SimpleIntersectionState(ncars=3, nped=0)
 
 
-    env = uds.UrbanDrivingEnv(init_state=None,
+    env = uds.UrbanDrivingEnv(init_state=init_state,
                               visualizer=vis,
                               agent_mappings={Car:AccelAgent},
                               max_time=-1,

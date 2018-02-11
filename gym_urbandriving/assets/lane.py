@@ -29,6 +29,7 @@ class Lane(Polygon):
     inner_r, outer_r : float
        Use with curvature argument to generated curved road segment.
     """
+
     def __init__(self, x=0, y=0, xdim=0, ydim=0, angle=0.0, points=[], curvature=0, inner_r=0, outer_r=0):
         """
         Initializes lane as a Polygon object
