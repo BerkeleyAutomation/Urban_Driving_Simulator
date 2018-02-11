@@ -103,8 +103,8 @@ class Trajectory(object):
         expanded_p = [p[self.dimensions_used.index(i)] if (i in self.dimensions_used) else np.nan for i in range(7)]
         self._trajectory = np.append(self._trajectory, [expanded_p], axis=0)
 
-    def get_point(self, index):
-        self._trajectory.shape[index][self.dimensions_used]
+    def get_points(self):
+        self._trajectory.shape[:][self.dimensions_used]
 
     # TODO FIX
     def add_camera_point(self, x, y, t=-1, h=720, w=1280):

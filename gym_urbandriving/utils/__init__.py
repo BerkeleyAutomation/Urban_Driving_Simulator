@@ -1,1 +1,0 @@
-from gym_urbandriving.utils.trajectory import Trajectory

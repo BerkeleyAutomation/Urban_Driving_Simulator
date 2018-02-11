@@ -1,4 +1,3 @@
-import pygame
 import numpy as np
 from gym_urbandriving.utils.PID import PIDController
 

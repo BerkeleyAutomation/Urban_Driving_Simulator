@@ -165,7 +165,7 @@ class UrbanDrivingEnv(gym.Env):
 
         self.current_state.time += 1
         dynamic_coll, static_coll = self.current_state.get_collisions()
-        state = self.get_state_copy()
+        state = self.current_state
         reward = self.reward_fn(self.current_state)
         done = (self.current_state.time == self.max_time) or len(dynamic_coll) or len(static_coll)
 

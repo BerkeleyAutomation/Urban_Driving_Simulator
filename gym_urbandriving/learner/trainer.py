@@ -6,8 +6,6 @@ import numpy as np
 import numpy.linalg as LA
 import IPython
 
-from gym_urbandriving.agents import KeyboardAgent, AccelAgent, NullAgent, TrafficLightAgent, RRTMAgent, RRTMPlanner
-from gym_urbandriving.assets import Car, TrafficLight
 from gym_urbandriving.utils.data_logger import DataLogger
 from gym_urbandriving.learner.imitation_learner import IL
 
@@ -174,7 +172,7 @@ class Trainer:
 
     def initialize_world(self):
         """
-        Initiatlize the world of the simulator 
+        Initialize the world of the simulator 
 
         Returns
         --------

@@ -1,30 +1,20 @@
-from gym_urbandriving.state.state import PositionState
-from gym_urbandriving.assets import Terrain, Lane, Street, Sidewalk,\
-    Pedestrian, Car, TrafficLight
 import numpy as np
-import IPython
 import os
 import glob
-from sklearn.tree import DecisionTreeRegressor
 from numpy.random import uniform
-import numpy.linalg as LA
 import matplotlib.pyplot as plt
 
 plt.style.use('ggplot')
 
 class Plotter():
-
+    """
+    Class to plot performance of various Imitation Learning Methods
+    """
     def __init__(self,file_path):
-
-        '''
-        Class to plot performance of methods
-        '''
-
         self.file_path = file_path
 
         if not os.path.exists(self.file_path+'/plots'):
             os.makedirs(self.file_path+'/plots')
-
 
     def save_plots(self,stats):
         '''
@@ -55,8 +45,6 @@ class Plotter():
 
             
             train_sup.append(stats[i]['train_sup'])
-
-
 
         plt.plot(reward_sup,label = 'R.S.' )
         plt.plot(reward_robot,label = 'R.R.' )

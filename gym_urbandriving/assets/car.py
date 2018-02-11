@@ -85,13 +85,6 @@ class Car(Rectangle, DynamicShape):
         else:
             self.x, self.y, self.vel, self.angle = self.point_model_step(action, self.x, self.y, self.vel, self.angle)
 
-        while self.trajectory and self.trajectory.npoints():
-            x, y, t = self.trajectory.first()
-            if self.contains_point((x, y)):
-                self.trajectory.pop()
-            else:
-                return
-
     def get_state(self):
         """
         Get state.

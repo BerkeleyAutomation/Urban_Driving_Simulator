@@ -4,8 +4,8 @@ import cProfile
 import time
 import numpy as np
 
-
-from gym_urbandriving.agents import KeyboardAgent, AccelAgent, NullAgent, TrafficLightAgent, RRTMAgent, RRTMPlanner
+from gym_urbandriving.agents import NullAgent, TrafficLightAgent
+from gym_urbandriving.planning import RRTMAgent, RRTMPlanner
 from gym_urbandriving.assets import Car, TrafficLight
 
 NUM_CARS = 2
@@ -46,18 +46,14 @@ def assign_goal_state(lane_orders):
 
         sorted_goal.append(goal_states[random_lane])
 
-
     return sorted_goal
-
-
-
 
 def f():
     # Instantiate a PyGame Visualizer of size 800x800
     vis = uds.PyGameVisualizer((800, 800))
 
     # Create a simple-intersection state, with cars, no pedestrians, and traffic lights
-    init_state = uds.state.MultiIntersectionState(ncars=NUM_CARS, nped=0, traffic_lights=True)
+    init_state = uds.state.SimpleIntersectionState(ncars=NUM_CARS, nped=0, traffic_lights=True)
 
     # Create the world environment initialized to the starting state
     # Specify the max time the environment will run to 500
@@ -76,22 +72,16 @@ def f():
     env._render()
     state = env.get_state_copy()
     agents = []
-    goal_states = assign_goal_state(init_state.lane_order)
+    goal_states = assign_goal_state([0,1])
 
     #NSEW 
 
     for i in range(NUM_CARS):
 
         agents.append(RRTMAgent(goal_states[i],agent_num = i))
-    
-    
-    
-
-    
-    
 
     # Car 0 will be controlled by our KeyboardAgent
-    planner = RRTMPlanner(agents)
+    planner = RRTMPlanner(agents, planner='SST')
     plans  = planner.plan(state)
     #plans.reverse()
 
@@ -118,7 +108,7 @@ def f():
             actions.append(action)
 
         state, reward, done, info_dict = env._step_test(actions)
-        print "CAR X "+ str(state.dynamic_objects[0].x) + "Y " + str(state.dynamic_objects[0].y)
+        print "CAR X "+ str(state.dynamic_objects[0].x) + "    Y " + str(state.dynamic_objects[0].y)
            
         
         # Simulate the state
@@ -134,5 +124,4 @@ def f():
             state = env.current_state
 
 # Collect profiling data
-f()
 cProfile.run('f()', 'temp/stats')
