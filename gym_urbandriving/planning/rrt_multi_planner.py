@@ -6,20 +6,6 @@ from ompl import control as oc
 from ompl import geometric as og
 from scipy.integrate import odeint
 
-# Only SyclopsRRT and SyclopsEST use this, and both those planners fail in a highly constrained environment
-# I suspect its because of the sampleUniform. When planning, I observe that those 2 planners explore many invalid states
-class MyDecomposition(oc.GridDecomposition):
-    def __init__(self, length, bounds):
-        super(MyDecomposition, self).__init__(length, 2, bounds)
-    def project(self, s, coord):
-        coord[0] = s[0]
-        coord[1] = s[1]
-    def sampleFullState(self, sampler, coord, s):
-        sampler.sampleUniform(s)
-        s[0] = coord[0]
-        s[1] = coord[1]
-
-
 # Dynamics model for our car. Ydim of car should be 40 (default)
 def integrator(state, t, acc, delta_f):
     x, y, vel, rad_angle = state
@@ -31,9 +17,6 @@ def integrator(state, t, acc, delta_f):
     dvel = acc
     output = [dx, dy, dvel, dangle]
     return output
-
-
-
 
 class RRTMPlanner:
     def __init__(self, agents, planner=None, time=None, goal= None, prune = None, selection = None):
@@ -203,10 +186,14 @@ class RRTMPlanner:
         else:
             planner = oc.RRT(si)
 
-        planner.setSelectionRadius(self.selection)
-        planner.setPruningRadius(self.prune)
+        if not self.selection is None:
+            planner.setSelectionRadius(self.selection)
+        if not self.prune is None:
+            planner.setPruningRadius(self.prune)
         
-        planner.setGoalBias(self.goal)
+        if not self.goal is None:
+            planner.setGoalBias(self.goal)
+
         ss.setPlanner(planner)
         # (optionally) set propagation step size
         si.setPropagationStepSize(1) # Propagation step size should be 1 to match our model
