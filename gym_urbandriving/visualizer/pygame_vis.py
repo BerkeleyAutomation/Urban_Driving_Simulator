@@ -5,6 +5,7 @@ import pygame
 import time
 import numpy as np
 import shapely
+import IPython
 
 class PyGameVisualizer:
 
@@ -135,6 +136,8 @@ class PyGameVisualizer:
         new_surface = pygame.Surface((valid_area[1] - valid_area[0],
                                       valid_area[3] - valid_area[2]),
                                      pygame.SRCALPHA)
+
+        
         for w in waypoints:
             pygame.draw.circle(new_surface, (0, 255, 255), [(int)(w[0]), (int)(w[1])], 5)
         new_surface = pygame.transform.scale(new_surface, (self.screen_dim))
@@ -170,6 +173,11 @@ class PyGameVisualizer:
         self.render_statics(state, valid_area)
         self.render_dynamics(state, valid_area)
         self.render_collisions(state, valid_area)
+
+        if len(waypoints) > 0:
+            print "GOT HERE "
+            print "WAYPOINTS ",waypoints
+            self.render_waypoints(waypoints, valid_area)
 
         for dobj in state.dynamic_objects:
             self.render_waypoints(dobj.breadcrumbs, valid_area)

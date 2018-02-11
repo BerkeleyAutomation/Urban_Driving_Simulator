@@ -226,6 +226,7 @@ class UrbanDrivingEnv(gym.Env):
         if close:
             return
         if self.visualizer:
+            
             window = [0, self.current_state.dimensions[0],
                       0, self.current_state.dimensions[1]]
             self.visualizer.render(self.current_state, window,
