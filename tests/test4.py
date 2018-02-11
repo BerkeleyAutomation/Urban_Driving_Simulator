@@ -3,7 +3,7 @@ import gym_urbandriving as uds
 from gym_urbandriving import *
 from gym_urbandriving.agents import *
 from gym_urbandriving.assets import *
-from gym_urbandriving.planning import *
+from gym_urbandriving.planning import Trajectory
 import numpy as np
 
 """
