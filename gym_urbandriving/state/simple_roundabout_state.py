@@ -29,7 +29,7 @@ class SimpleRoundaboutState(PositionState):
                       Lane(500, 500, angle=0, curvature=(np.pi/2), inner_r=100, outer_r=250),
                       Lane(500, 500, angle=(np.pi/2), curvature=(np.pi/2), inner_r=100, outer_r=250),
                       Lane(500, 500, angle=np.pi, curvature=(np.pi/2), inner_r=100, outer_r=250),
-                      Lane(500, 500, angle=270, curvature=(np.pi/2), inner_r=100, outer_r=250),
+                      Lane(500, 500, angle=-np.pi/2, curvature=(np.pi/2), inner_r=100, outer_r=250),
                       ]
     static_objects += [Terrain(200, 200, 400, 400, excludes=static_objects),
                        Terrain(800, 200, 400, 400, excludes=static_objects),

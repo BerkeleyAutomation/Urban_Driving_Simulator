@@ -18,7 +18,7 @@ def f():
     vis = uds.PyGameVisualizer((800, 800))
 
     # Create a simple-intersection state, with 4 cars, no pedestrians, and traffic lights
-    init_state = uds.state.SimpleIntersectionState(ncars=1, nped=0, traffic_lights=True)
+    init_state = uds.state.SimpleRoundaboutState(ncars=1, nped=0, traffic_lights=True)
 
     # Create the world environment initialized to the starting state
     # Specify the max time the environment will run to 500

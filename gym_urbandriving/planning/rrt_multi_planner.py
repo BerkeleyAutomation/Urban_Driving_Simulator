@@ -59,12 +59,9 @@ class RRTMPlanner:
 
         Returns:
         ----------
-            paths: a list of each agents controls to generate the desired trajectory
+            paths: a list of Trajectories with mode 'cs' (ie. controls to generate the desired trajectory)
             If no trjaectory is found, returns None
         """
-
-    
-
 
         start_state = state
         # construct the state space we are planning in
@@ -114,7 +111,7 @@ class RRTMPlanner:
             return spaceInformation.satisfiesBounds(state)
 
         def propagate(start, control, duration, state):
-            # Since the environment discretizes the actions, I set the planner to discretize by 1 timestep as well.
+            # State propogator to allow ompl to step to another state given a list of actions
             assert(duration == 1.0)
 
             for i in range(self.num_agents):
