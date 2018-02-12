@@ -3,6 +3,7 @@ import gym_urbandriving as uds
 import cProfile
 import time
 import numpy as np
+from copy import deepcopy
 
 from gym_urbandriving.agents import NullAgent, TrafficLightAgent, ControlAgent
 from gym_urbandriving.planning import RRTMAgent, RRTMPlanner
@@ -46,15 +47,14 @@ def f():
 
     # Car 0 will be controlled by our KeyboardAgent
     planner = RRTMPlanner(agents, planner='SST')
-    plans  = planner.plan(state)
+    plans  = planner.plan(deepcopy(state))
+    for i in range(NUM_CARS):
+        state.dynamic_objects[i].trajectory = plans[i]
+
     #plans.reverse()
 
-    for i  in range(len(plans)):
-        agent = agents[i]
-        plan = plans[i]
-        agent.add_plan(plan)
-
-
+    for c in state.dynamic_objects[:NUM_CARS]:
+        print '[',c.x, c.y, c.vel, c.angle, ']', c.destination
 
     #agent_two = RRTAgent(agent_num=1)
     action = None
@@ -70,7 +70,8 @@ def f():
         for agent in agents:
             action = agent.eval_policy(state)
             actions.append(action)
-
+        print "CAR X "+ str(state.dynamic_objects[0].x) + "    Y " + str(state.dynamic_objects[0].y)
+        print actions[0]
         state, reward, done, info_dict = env._step_test(actions)
         print "CAR X "+ str(state.dynamic_objects[0].x) + "    Y " + str(state.dynamic_objects[0].y)
            

@@ -6,6 +6,9 @@ from ompl import control as oc
 from ompl import geometric as og
 from scipy.integrate import odeint
 
+from gym_urbandriving.planning import Trajectory
+
+
 # Dynamics model for our car. Ydim of car should be 40 (default)
 def integrator(state, t, acc, delta_f):
     x, y, vel, rad_angle = state
@@ -160,8 +163,7 @@ class RRTMPlanner:
         # create a goal state
         for i in range(self.num_agents):
             car_idx = i*4
-            agent = self.agents[i]
-            goal_state = agent.goal_state
+            goal_state = state.dynamic_objects[i].destination
         
             goal()[car_idx] = goal_state[0]
             goal()[car_idx+1] = goal_state[1]
@@ -202,14 +204,13 @@ class RRTMPlanner:
         if not self.time == None:
             solved = ss.solve(self.time) # 30 second time limit
         else: 
-            solved = ss.solve(30.0)
-
-       
+            solved = ss.solve(60.0)
 
         if solved:
             # print the path to screen
             print("Found solution:\n%s" % ss.getSolutionPath())
             path = ss.getSolutionPath().printAsMatrix()
+            print(path)
             path = [l.split(" ") for l in path.splitlines()]
 
             num_controls = 2*self.num_agents+1
@@ -218,13 +219,15 @@ class RRTMPlanner:
             paths = []
             for i in range(self.num_agents):
                 car_idx = i*2
-                agent_path = []
+                agent_path = Trajectory(mode='cs')
+
                 for control in path:
                     for r in range(int(control[-1])):
-                        agent_path.append((control[car_idx],control[car_idx+1]))
+                        agent_path.add_point([control[car_idx],control[car_idx+1]])
                 
                 paths.append(agent_path)
 
+            print paths[0].first()
             return paths
         else:
             return None
