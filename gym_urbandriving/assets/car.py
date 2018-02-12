@@ -65,7 +65,7 @@ class Car(Rectangle, DynamicShape):
         elif self.destination == 'E':
             return self.x > state.dimensions[0]
         else:
-            return self.contains_point(self.destination)
+            return self.contains_point(self.destination[:2])
 
     def step(self, action):
         """

@@ -4,7 +4,7 @@ import cProfile
 import time
 import numpy as np
 
-from gym_urbandriving.agents import NullAgent, TrafficLightAgent
+from gym_urbandriving.agents import NullAgent, TrafficLightAgent, ControlAgent
 from gym_urbandriving.planning import RRTMAgent, RRTMPlanner
 from gym_urbandriving.assets import Car, TrafficLight
 
@@ -13,40 +13,6 @@ NUM_CARS = 2
 """
  Test File, to demonstrate general functionality of environment
 """
-
-def assign_goal_state(lane_orders):
-
-    #No two agents can go to the same goal 
-    #No goal can be on the same starting spot
-    sorted_goal = []
-
-    #Goals organized in NSEW order
-    goal_states = []
-    goal_states.append([550,100,2,90])
-    goal_states.append([450,900,2,270])
-    goal_states.append([900,550,2,0])
-    goal_states.append([100,450,2,180])
-
-    #Lanes that cannot be assigned 
-    forbidden_lanes = []
-
-    for lane in lane_orders:
-
-        #append current lane to constraint set
-        forbidden_lanes.append(lane)
-
-        while True:
-            random_lane = np.random.random_integers(0, 3)
-            if random_lane not in forbidden_lanes:
-                #remove current lane from constraint set
-                forbidden_lanes.pop()
-                #add the assigned lane
-                forbidden_lanes.append(random_lane)
-                break;
-
-        sorted_goal.append(goal_states[random_lane])
-
-    return sorted_goal
 
 def f():
     # Instantiate a PyGame Visualizer of size 800x800
@@ -69,16 +35,14 @@ def f():
                               use_ray=False
     )
 
-    env._render()
-    state = env.get_state_copy()
+    state = env.current_state
     agents = []
-    goal_states = assign_goal_state([0,1])
 
-    #NSEW 
+    for c in state.dynamic_objects[:NUM_CARS]:
+        print '[',c.x, c.y, c.vel, c.angle, ']', c.destination
 
     for i in range(NUM_CARS):
-
-        agents.append(RRTMAgent(goal_states[i],agent_num = i))
+        agents.append(ControlAgent(i))
 
     # Car 0 will be controlled by our KeyboardAgent
     planner = RRTMPlanner(agents, planner='SST')
