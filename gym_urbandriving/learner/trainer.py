@@ -4,11 +4,14 @@ import cProfile
 import time
 import numpy as np
 import numpy.linalg as LA
-import IPython
+from copy import deepcopy
 
 from gym_urbandriving.utils.data_logger import DataLogger
 from gym_urbandriving.learner.imitation_learner import IL
 
+from gym_urbandriving.agents import NullAgent, TrafficLightAgent, ControlAgent
+from gym_urbandriving.planning import RRTMPlanner
+from gym_urbandriving.assets import Car, TrafficLight
 
 THRESH = 150
 
@@ -52,74 +55,6 @@ class Trainer:
                 return False
 
         return True
-
-
-
-    def assign_goal_state(self,lane_orders):
-        """
-        Assign goal positions to the agents
-
-        Parameters
-        ----------
-        lane_orders: list of integers
-           A list of the lane indexes each agent is starting 
-
-        Returns
-        -----------
-        sorted_goals: a list of the goal positions to be assigned
-        lane_pick: a list of the correpsonding lanes that the car starts on
-        """
-
-        #No two agents can go to the same goal 
-        #No goal can be on the same starting spot
-        sorted_goal = []
-
-        #Goals organized in NSEW order
-        goal_states = []
-        goal_states.append([550,100,2,np.deg2rad(90.0)])
-        goal_states.append([450,900,2,np.deg2rad(270.0)])
-        goal_states.append([900,550,2,0])
-        goal_states.append([100,450,2,np.deg2rad(180.0)])
-
-        #Lanes that cannot be assigned 
-        forbidden_lanes = []
-
-        #list of the lanes picked
-        lane_pick = []
-
-        lane_count = 0
-        while True:
-            lane = lane_orders[lane_count]
-
-            #append current lane to constraint set
-            forbidden_lanes.append(lane)
-            count = 0 
-            while True:
-                random_lane = np.random.random_integers(0, 3)
-                
-                if not random_lane in forbidden_lanes:
-                    #remove current lane from constraint set
-                    forbidden_lanes.pop()
-                    #add the assigned lane
-                    forbidden_lanes.append(random_lane)
-                    sorted_goal.append(goal_states[random_lane])
-                    lane_pick.append(random_lane)
-                    lane_count += 1
-
-                    break;
-
-                if len(forbidden_lanes) == 4:
-                    forbidden_lanes = []
-                    sorted_goal = []
-                    lane_pick = []
-                    lane_count = 0
-                    break;
-            
-            if lane_count == self.NUM_CARS:
-                break;
-
-
-        return sorted_goal, lane_pick
 
 
     def train_model(self):
@@ -183,7 +118,7 @@ class Trainer:
         vis = uds.PyGameVisualizer((800, 800))
 
         # Create a simple-intersection state, with cars, no pedestrians, and traffic lights
-        init_state = uds.state.MultiIntersectionState(ncars=self.NUM_CARS, nped=0, traffic_lights=True)
+        init_state = uds.state.SimpleIntersectionState(ncars=self.NUM_CARS, nped=0, traffic_lights=True)
 
         # Create the world environment initialized to the starting state
         # Specify the max time the environment will run to 500
@@ -201,7 +136,6 @@ class Trainer:
         )
 
         env._render()
-
         return env
 
     def rollout_supervisor(self):
@@ -218,33 +152,26 @@ class Trainer:
 
         env = self.initialize_world()
         
-        state = env.get_state_copy()
+        state = env.current_state
 
-        goal_states, lane_pick = self.assign_goal_state(env.init_state.lane_order)
+        goal_states = [c.destination for c in state.dynamic_objects[:self.NUM_CARS]]
         
-        self.d_logger.log_info('lane_order',env.init_state.lane_order)
-        self.d_logger.log_info('lane_pick',env.init_state.lane_order)
         self.d_logger.log_info('goal_states',goal_states)
         
 
         for i in range(self.NUM_CARS):
 
-            agents.append(RRTMAgent(goal_states[i],agent_num = i))
+            agents.append(ControlAgent(agent_num = i))
     
         planner = RRTMPlanner(agents,planner = self.PLANNERS,time = self.TIME, goal = self.GOAL_BIAS,prune = self.PRUNE_RADIUS,selection = self.SELECTION_RADIUS)
-        plans  = planner.plan(state)
-       
-        for i  in range(len(plans)):
-            agent = agents[i]
-            plan = plans[i]
-            agent.add_plan(plan)
+        plans  = planner.plan(deepcopy(state))
+
+        for i in range(self.NUM_CARS):
+            state.dynamic_objects[i].trajectory = plans[i]
 
 
         # Simulation loop
         while(True):
-            # Determine an action based on the current state.
-            # For KeyboardAgent, this just gets keypresses
-            
             i = 0 
 
             actions = []
@@ -266,8 +193,7 @@ class Trainer:
            
             env._render()
            
-            # If we crash, sleep for a moment, then reset
-            if agents[0].is_done():
+            if actions[0] is None:
                 return rollout,goal_states
 
 

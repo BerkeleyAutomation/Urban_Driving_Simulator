@@ -6,7 +6,7 @@ import numpy as np
 from copy import deepcopy
 
 from gym_urbandriving.agents import NullAgent, TrafficLightAgent, ControlAgent
-from gym_urbandriving.planning import RRTMAgent, RRTMPlanner
+from gym_urbandriving.planning import RRTMPlanner
 from gym_urbandriving.assets import Car, TrafficLight
 
 NUM_CARS = 2

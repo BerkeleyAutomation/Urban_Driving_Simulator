@@ -37,8 +37,7 @@ class PursuitAgent:
             target_loc = obj.trajectory.pop()[:2].tolist()
             target_vel = 5
         else:
-            target_loc = obj.destination
-            target_vel = 5
+            return None
 
         ac2 = np.arctan2(obj.y-target_loc[1], target_loc[0]-obj.x)
 
