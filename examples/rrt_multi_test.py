@@ -45,18 +45,12 @@ def f():
     for i in range(NUM_CARS):
         agents.append(ControlAgent(i))
 
-    # Car 0 will be controlled by our KeyboardAgent
     planner = RRTMPlanner(agents, planner='SST')
     plans  = planner.plan(deepcopy(state))
     for i in range(NUM_CARS):
         state.dynamic_objects[i].trajectory = plans[i]
 
-    #plans.reverse()
 
-    for c in state.dynamic_objects[:NUM_CARS]:
-        print '[',c.x, c.y, c.vel, c.angle, ']', c.destination
-
-    #agent_two = RRTAgent(agent_num=1)
     action = None
 
     # Simulation loop
@@ -70,12 +64,8 @@ def f():
         for agent in agents:
             action = agent.eval_policy(state)
             actions.append(action)
-        print "CAR X "+ str(state.dynamic_objects[0].x) + "    Y " + str(state.dynamic_objects[0].y)
-        print actions[0]
         state, reward, done, info_dict = env._step_test(actions)
-        print "CAR X "+ str(state.dynamic_objects[0].x) + "    Y " + str(state.dynamic_objects[0].y)
            
-        
         # Simulate the state
        
         env._render()

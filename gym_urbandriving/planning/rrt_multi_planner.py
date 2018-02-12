@@ -47,37 +47,6 @@ class RRTMPlanner:
         self.prune = prune
         self.selection = selection
 
-    def propagate(self,start, control, duration, state):
-    # Since the environment discretizes the actions, I set the planner to discretize by 1 timestep as well.
-
-    
-        assert(duration == 1.0)
-
-        for i in range(self.num_agents):
-            car_idx = i*4
-            cntr_idx = i*2
-
-            # Rest of these lines are from car kinematic step functions
-            delta_f, a = control[cntr_idx], control[cntr_idx+1]
-            delta_f = max(min(3, delta_f), -3)
-            delta_f, rad_angle = np.radians(10*delta_f), start[car_idx+3]
-
-            vel = start[car_idx+2]
-            if a > 5 - vel:
-                a = 5 - vel
-            elif a < -5 - vel:
-                a = -5 - vel
-
-            ode_state = [start[car_idx], start[car_idx+1], start[car_idx+2], rad_angle]
-            aux_state = (a, delta_f)
-            t = np.arange(0.0, 1.0, 0.1)
-            delta_ode_state = odeint(integrator, ode_state, t, args=aux_state)
-            x, y, vel, new_angle = delta_ode_state[-1]
-            state[car_idx] = x
-            state[car_idx+1] = y
-            state[car_idx+2] = vel
-            state[car_idx+3] = new_angle
-
 
     def plan(self, state):
         """
@@ -94,6 +63,7 @@ class RRTMPlanner:
             If no trjaectory is found, returns None
         """
 
+    
 
 
         start_state = state
@@ -143,10 +113,31 @@ class RRTMPlanner:
                      return False
             return spaceInformation.satisfiesBounds(state)
 
+        def propagate(start, control, duration, state):
+            # Since the environment discretizes the actions, I set the planner to discretize by 1 timestep as well.
+            assert(duration == 1.0)
+
+            for i in range(self.num_agents):
+
+                car_idx = i*4
+                cntr_idx = i*2
+
+                # Rest of these lines are from car kinematic step functions
+                action = (control[cntr_idx], control[cntr_idx+1])
+                obj = start_state.dynamic_objects[i]
+
+                if obj.dynamics_model == "kinematic":
+                    state[car_idx], state[car_idx+1], state[car_idx+2], state[car_idx+3] = \
+                        obj.kinematic_model_step(action, start[car_idx], start[car_idx+1], start[car_idx+2], start[car_idx+3])
+                else:
+                    state[car_idx], state[car_idx+1], state[car_idx+2], state[car_idx+3] = \
+                        obj.point_model_step(action, start[car_idx], start[car_idx+1], start[car_idx+2], start[car_idx+3])
+
+
         # define a simple setup class
         ss = oc.SimpleSetup(cspace)
         ss.setStateValidityChecker(ob.StateValidityCheckerFn(partial(isStateValid, ss.getSpaceInformation())))
-        ss.setStatePropagator(oc.StatePropagatorFn(self.propagate))
+        ss.setStatePropagator(oc.StatePropagatorFn(propagate))
 
         # create a start state
         start = ob.State(space)
@@ -210,7 +201,6 @@ class RRTMPlanner:
             # print the path to screen
             print("Found solution:\n%s" % ss.getSolutionPath())
             path = ss.getSolutionPath().printAsMatrix()
-            print(path)
             path = [l.split(" ") for l in path.splitlines()]
 
             num_controls = 2*self.num_agents+1
@@ -226,8 +216,6 @@ class RRTMPlanner:
                         agent_path.add_point([control[car_idx],control[car_idx+1]])
                 
                 paths.append(agent_path)
-
-            print paths[0].first()
             return paths
         else:
             return None

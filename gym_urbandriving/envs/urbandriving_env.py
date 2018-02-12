@@ -69,29 +69,6 @@ class UrbanDrivingEnv(gym.Env):
             self._reset()
 
     def _step_test(self, car_actions, agentnum=0):
-        """
-        The step function accepts a control for the 0th agent in the scene. Then, it queries
-        all the background agents to determine their actions. Then, it updates the scene
-        and returns.
-        
-        Parameters
-        ----------
-        action :
-            An action for the agentnum object in the scene.
-        agentnum : int
-            The index for the object which the action is applied for.
-
-        Returns
-        -------
-        PositionState
-            State of the world after this step;
-        float
-            Reward calculated by :func:`self.reward_fn`,
-        bool
-            Whether we have timed out, or there is a collision)
-        dict
-
-        """
         assert(self.current_state is not None)
         # Get actions for all objects
         actions = [None]*len(self.current_state.dynamic_objects)
