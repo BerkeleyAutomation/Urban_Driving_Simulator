@@ -195,7 +195,7 @@ class RRTMPlanner:
             solved = ss.solve(60.0)
 
         if solved:
-            # print the path to screen
+            # prints the path to screen
             print("Found solution:\n%s" % ss.getSolutionPath())
             path = ss.getSolutionPath().printAsMatrix()
             path = [l.split(" ") for l in path.splitlines()]

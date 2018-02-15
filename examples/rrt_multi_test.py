@@ -39,9 +39,6 @@ def f():
     state = env.current_state
     agents = []
 
-    for c in state.dynamic_objects[:NUM_CARS]:
-        print '[',c.x, c.y, c.vel, c.angle, ']', c.destination
-
     for i in range(NUM_CARS):
         agents.append(ControlAgent(i))
 

@@ -105,6 +105,5 @@ for ta in DISTANCE_THRESHOLDS:
             total_successes += 1
         total_avg_loss += l
         total_runs += 1
-        #print s, total_successes, total_avg_loss, total_runs
 
-    print float(total_successes) / float(total_runs),  float(total_avg_loss) / float(total_runs), ta
+    print(float(total_successes) / float(total_runs),  float(total_avg_loss) / float(total_runs), ta)

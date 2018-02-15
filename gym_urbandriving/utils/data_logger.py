@@ -28,11 +28,9 @@ class DataLogger():
 
         path = self.file_path+'/rollout_'+str(i)+'.npy'
 
-
         while os.path.isfile(path):
             i += 1
             path = self.file_path + '/rollout_'+str(i) +'.npy'
-            print i
 
         return i
 
