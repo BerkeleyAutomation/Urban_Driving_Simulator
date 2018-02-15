@@ -75,15 +75,20 @@ class IL():
 
                 a_ = action.flatten()
 
+                if None in a_:
+                    continue # one car did not take a valud action
+
                 s_ = self.make_state(state,goal_state)
 
+                print a_.shape
+                print a_
+                print s_.shape
                 if train:
                     self.X_train.append(s_)
                     self.Y_train.append(a_)
                 else:
                     self.X_test.append(s_)
                     self.Y_test.append(a_)
-
 
         self.model.fit(self.X_train,self.Y_train) 
         

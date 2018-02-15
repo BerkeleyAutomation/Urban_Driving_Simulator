@@ -175,53 +175,40 @@ class Trainer:
         for i in range(self.NUM_CARS):
             pos_trajs.append(Trajectory(mode='xyva'))
 
-        sar = {}
-        # get initial state
-        state_copy = env.get_state_copy()
-        sar['state'] = state_copy
-        sar['reward'] = 0
-        sar['action'] = None
-
-        rollout.append(sar)
-
-        for i in range(self.NUM_CARS):
-            obj = state_copy.dynamic_objects[i]
-            pos_trajs[i].add_point([obj.x, obj.y, obj.vel, obj.angle])
-
 
         # Simulation loop
         while(True):
             i = 0 
 
+            # get all actions
             actions = []
             for agent in agents:
                 action = agent.eval_policy(state)
                 actions.append(action)
 
-            sar = {}
-
-            state, reward, done, info_dict = env._step_test(actions)
-
+            # save old state
             state_copy = env.get_state_copy()
+
+            # break if necessary
+            if actions[0] is None:
+                self.d_logger.log_info('pos_trajs', pos_trajs)
+                return rollout,goal_states
+
+            # Simulate the state
+            state, reward, done, info_dict = env._step_test(actions)
+            env._render()
+
+            # Log all information. 
+            sar = {}
             sar['state'] = state_copy
             sar['reward'] = reward
             sar['action'] = actions
-
             rollout.append(sar)
 
             for i in range(self.NUM_CARS):
                 obj = state_copy.dynamic_objects[i]
                 pos_trajs[i].add_point([obj.x, obj.y, obj.vel, obj.angle])
 
-
-            # Simulate the state
-           
-            env._render()
-           
-
-            if actions[0] is None:
-                self.d_logger.log_info('pos_trajs', pos_trajs)
-                return rollout,goal_states
 
 
     def rollout_policy(self):
@@ -238,51 +225,62 @@ class Trainer:
 
         env = self.initialize_world()
         
-        state = env.get_state_copy()
+        state = env.current_state
 
-        goal_states, lane_pick = self.assign_goal_state(env.init_state.lane_order)
+        goal_states = [c.destination for c in state.dynamic_objects[:self.NUM_CARS]]
         
+        self.d_logger.log_info('goal_states',goal_states)
         
+
         for i in range(self.NUM_CARS):
-            agents.append(RRTMAgent(goal_states[i],agent_num = i))
+
+            agents.append(ControlAgent(agent_num = i))
     
         planner = RRTMPlanner(agents,planner = self.PLANNERS,time = self.TIME, goal = self.GOAL_BIAS,prune = self.PRUNE_RADIUS,selection = self.SELECTION_RADIUS)
-        plans  = planner.plan(state)
-       
+        plans  = planner.plan(deepcopy(state))
+
+        for i in range(self.NUM_CARS):
+            state.dynamic_objects[i].trajectory = plans[i]
+
+        self.d_logger.log_info('control_trajs', deepcopy(plans))
+
+        pos_trajs = []
+        for i in range(self.NUM_CARS):
+            pos_trajs.append(Trajectory(mode='xyva'))
+
+
+
         # Simulation loop
         for i in range(self.time_horizon):
-            # Determine an action based on the current state.
-            # For KeyboardAgent, this just gets keypresses
-            
-            i = 0 
+
+            # Get all actions
+            sup_actions = []
+            for agent in agents:
+                action = agent.eval_policy(state)
+                sup_actions.append(action)
 
             actions = self.il_learn.eval_model(state,goal_states)
-            state = env.get_state_copy()
-       
-            plans  = planner.plan(state)
 
-            if plans == None: 
-                return rollout,goal_states
+            # save old state
+            state_copy = env.get_state_copy()
 
-
-            sup_actions = []
-            for i in range(len(agents)):
-                sup_actions.append(plans[i][0])
-
-
-            sar = {}
-
+            # Simulate the state
             state, reward, done, info_dict = env._step_test(actions)
+            env._render()
 
-            sar['state'] = state
+            # Log all information
+            sar = {}
+            sar['state'] = state_copy
             sar['reward'] = reward
             sar['action'] = actions
             sar['sup_action'] = sup_actions
-
             rollout.append(sar)
-           
-            env._render()
 
+            for i in range(self.NUM_CARS):
+                obj = state_copy.dynamic_objects[i]
+                pos_trajs[i].add_point([obj.x, obj.y, obj.vel, obj.angle])
+
+        self.d_logger.log_info('pos_trajs', pos_trajs)
         return rollout,goal_states
 
 

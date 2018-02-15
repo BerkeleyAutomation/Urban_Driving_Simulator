@@ -5,10 +5,6 @@ import time
 import numpy as np
 import numpy.linalg as LA
 
-from gym_urbandriving.agents import KeyboardAgent, AccelAgent, NullAgent, TrafficLightAgent, RRTMAgent, RRTMPlanner
-from gym_urbandriving.assets import Car, TrafficLight
-from gym_urbandriving.utils.data_logger import DataLogger
-from gym_urbandriving.learner.imitation_learner import IL
 from gym_urbandriving.learner.trainer import Trainer
 from gym_urbandriving.learner.plotter import Plotter
 
