@@ -58,7 +58,7 @@ class DataLogger():
 
 
     def load_rollout(self, index):
-        return np.load(self.file_path+'/rollout_' + str(index) + '.npy')
+        return np.load(self.file_path+'/rollout_' + str(index) + '.npy', encoding='latin1', fix_imports = True)
 
 
 
