@@ -48,11 +48,13 @@ def test_rollout(index, thres):
     data_logger = DataLogger(FILE_PATH_ALG)
     loaded_rollout = data_logger.load_rollout(index)
 
+    # Reset the agents to be at the correct initial starting configurations. 
     state.dynamic_objects[0].destination = loaded_rollout[1]['goal_states'][0]
     state.dynamic_objects[0].x = loaded_rollout[0][0]['state'].dynamic_objects[0].x
     state.dynamic_objects[0].y = loaded_rollout[0][0]['state'].dynamic_objects[0].y
     state.dynamic_objects[0].vel = loaded_rollout[0][0]['state'].dynamic_objects[0].vel
     state.dynamic_objects[0].angle = loaded_rollout[0][0]['state'].dynamic_objects[0].angle
+    loaded_rollout[1]['pos_trajs'][0].pop()
     state.dynamic_objects[0].trajectory = loaded_rollout[1]['pos_trajs'][0]
 
     state.dynamic_objects[1].destination = loaded_rollout[1]['goal_states'][0]
@@ -61,7 +63,7 @@ def test_rollout(index, thres):
     state.dynamic_objects[1].vel = loaded_rollout[0][0]['state'].dynamic_objects[0].vel
     state.dynamic_objects[1].angle = loaded_rollout[0][0]['state'].dynamic_objects[0].angle
     state.dynamic_objects[1].trajectory = loaded_rollout[1]['control_trajs'][0]
-    # Car 0 will be controlled by our KeyboardAgent
+
     agents = [PursuitAgent(0), ControlAgent(1)]
     action = None
 
@@ -73,12 +75,10 @@ def test_rollout(index, thres):
         # Determine an action based on the current state.
         # For KeyboardAgent, this just gets keypresses
         actions = []
-        print state.dynamic_objects[1].trajectory.npoints()
         for agent in agents:
             action = agent.eval_policy(state)
             actions.append(action)
         state, reward, done, info_dict = env._step_test(actions)
-
         env._render()
         # keep simulator running in spite of collisions or timing out
 
