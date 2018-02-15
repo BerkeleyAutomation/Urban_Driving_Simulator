@@ -1,6 +1,5 @@
 import gym
 import gym_urbandriving as uds
-import cProfile
 import time
 import numpy as np
 
@@ -10,17 +9,17 @@ from gym_urbandriving.utils.data_logger import DataLogger
 
 NUM_ITERS = 1 #Number of iterations 
 
-FILE_PATH = 'test_data/'
-
-#Specifc experiment 
-ALG_NAME = 'KIN_DYN_TRAJS'
-FILE_PATH_ALG =  FILE_PATH + ALG_NAME 
+FILE_PATH_ALG =  "tests/"
 
 DISTANCE_THRESHOLDS = [2,5,10,20,40]
+"""
+Testable equivalent of test_pursuit, but only runs on one saved trajectory and uses a fixed threshold of 5. 
+Makes sure the pursuit agent still works. 
+"""
+
 
 def test_rollout(index, thres):
     # Instantiate a PyGame Visualizer of size 800x800
-    vis = uds.PyGameVisualizer((800, 800))
 
     # Create a simple-intersection state, with 4 cars, no pedestrians, and traffic lights
     init_state = uds.state.SimpleIntersectionState(ncars=2, nped=0, traffic_lights=True)
@@ -30,7 +29,7 @@ def test_rollout(index, thres):
     # Specify what types of agents will control cars and traffic lights
     # Use ray for multiagent parallelism
     env = uds.UrbanDrivingEnv(init_state=init_state,
-                              visualizer=vis,
+                              visualizer=None,
                               max_time=500,
                               randomize=True,
                               agent_mappings={Car:NullAgent,
@@ -94,17 +93,5 @@ def test_rollout(index, thres):
         if done:
             return loss/t, success
 
-# Collect profiling data
-for ta in DISTANCE_THRESHOLDS:
-    total_successes = 0
-    total_runs = 0
-    total_avg_loss = 0
-    for i in range(NUM_ITERS):
-        l, s = test_rollout(i, ta) 
-        if s:
-            total_successes += 1
-        total_avg_loss += l
-        total_runs += 1
-        #print s, total_successes, total_avg_loss, total_runs
-
-    print float(total_successes) / float(total_runs),  float(total_avg_loss) / float(total_runs), ta
+_, s = test_rollout(0, 5) 
+assert(s)
