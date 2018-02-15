@@ -37,7 +37,7 @@ def test_rollout(index, thres):
                               visualizer=vis,
                               max_time=500,
                               randomize=True,
-                              agent_mappings={Car:ControlAgent,
+                              agent_mappings={Car:NullAgent,
                                               TrafficLight:TrafficLightAgent},
                               use_ray=False
     )
@@ -48,18 +48,21 @@ def test_rollout(index, thres):
     data_logger = DataLogger(FILE_PATH_ALG)
     loaded_rollout = data_logger.load_rollout(index)
 
-    print loaded_rollout
-    print len(loaded_rollout)
-    print len(loaded_rollout[0])
-    print len(loaded_rollout[1])
-    print loaded_rollout[0][0]
-    print loaded_rollout[1]
-
-
+    state.dynamic_objects[0].destination = loaded_rollout[1]['goal_states'][0]
+    state.dynamic_objects[0].x = loaded_rollout[0][0]['state'].dynamic_objects[0].x
+    state.dynamic_objects[0].y = loaded_rollout[0][0]['state'].dynamic_objects[0].y
+    state.dynamic_objects[0].vel = loaded_rollout[0][0]['state'].dynamic_objects[0].vel
+    state.dynamic_objects[0].angle = loaded_rollout[0][0]['state'].dynamic_objects[0].angle
     state.dynamic_objects[0].trajectory = loaded_rollout[1]['pos_trajs'][0]
+
+    state.dynamic_objects[1].destination = loaded_rollout[1]['goal_states'][0]
+    state.dynamic_objects[1].x = loaded_rollout[0][0]['state'].dynamic_objects[0].x
+    state.dynamic_objects[1].y = loaded_rollout[0][0]['state'].dynamic_objects[0].y
+    state.dynamic_objects[1].vel = loaded_rollout[0][0]['state'].dynamic_objects[0].vel
+    state.dynamic_objects[1].angle = loaded_rollout[0][0]['state'].dynamic_objects[0].angle
     state.dynamic_objects[1].trajectory = loaded_rollout[1]['control_trajs'][0]
     # Car 0 will be controlled by our KeyboardAgent
-    agent = PursuitAgent()
+    agents = [PursuitAgent(0), ControlAgent(1)]
     action = None
 
     # Simulation loop
@@ -69,11 +72,12 @@ def test_rollout(index, thres):
     while(True):
         # Determine an action based on the current state.
         # For KeyboardAgent, this just gets keypresses
-        action = agent.eval_policy(state)
-        start_time = time.time()
-
-        # Simulate the state
-        state, reward, done, info_dict = env._step(action)
+        actions = []
+        print state.dynamic_objects[1].trajectory.npoints()
+        for agent in agents:
+            action = agent.eval_policy(state)
+            actions.append(action)
+        state, reward, done, info_dict = env._step_test(actions)
 
         env._render()
         # keep simulator running in spite of collisions or timing out

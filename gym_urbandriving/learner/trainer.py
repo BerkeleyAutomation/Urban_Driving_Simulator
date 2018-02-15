@@ -169,11 +169,25 @@ class Trainer:
         for i in range(self.NUM_CARS):
             state.dynamic_objects[i].trajectory = plans[i]
 
-        self.d_logger.log_info('control_trajs', plans)
+        self.d_logger.log_info('control_trajs', deepcopy(plans))
 
         pos_trajs = []
         for i in range(self.NUM_CARS):
             pos_trajs.append(Trajectory(mode='xyva'))
+
+        sar = {}
+        # get initial state
+        state_copy = env.get_state_copy()
+        sar['state'] = state_copy
+        sar['reward'] = 0
+        sar['action'] = None
+
+        rollout.append(sar)
+
+        for i in range(self.NUM_CARS):
+            obj = state_copy.dynamic_objects[i]
+            pos_trajs[i].add_point([obj.x, obj.y, obj.vel, obj.angle])
+
 
         # Simulation loop
         while(True):
@@ -188,14 +202,15 @@ class Trainer:
 
             state, reward, done, info_dict = env._step_test(actions)
 
-            sar['state'] = state
+            state_copy = env.get_state_copy()
+            sar['state'] = state_copy
             sar['reward'] = reward
             sar['action'] = actions
 
             rollout.append(sar)
 
             for i in range(self.NUM_CARS):
-                obj = state.dynamic_objects[i]
+                obj = state_copy.dynamic_objects[i]
                 pos_trajs[i].add_point([obj.x, obj.y, obj.vel, obj.angle])
 
 

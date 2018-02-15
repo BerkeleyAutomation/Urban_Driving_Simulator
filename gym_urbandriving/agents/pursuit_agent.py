@@ -34,10 +34,12 @@ class PursuitAgent:
         obj = state.dynamic_objects[self.agent_num]
 
         if not obj.trajectory.is_empty():
-            target_loc = obj.trajectory.pop()[:2].tolist()
-            target_vel = 5
+            p = obj.trajectory.pop()
+            target_loc = p[:2].tolist()
+            target_vel = p[3]
         else:
-            return None
+            target_loc = obj.destination
+            target_vel = 5
 
         ac2 = np.arctan2(obj.y-target_loc[1], target_loc[0]-obj.x)
 

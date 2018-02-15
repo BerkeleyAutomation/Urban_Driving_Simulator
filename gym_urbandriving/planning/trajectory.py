@@ -105,6 +105,9 @@ class Trajectory(object):
     def get_point(self, index):
         self._trajectory.shape[index][self.dimensions_used]
 
+    def get_renderable_points(self):
+        return [[self._trajectory[i][self.mode.index('x')],self._trajectory[i][self.mode.index('y')]] for i in range(self.npoints())]
+
     # TODO FIX
     def add_camera_point(self, x, y, t=-1, h=720, w=1280):
         if t < 0 and not self._trajectory.shape[0]:
