@@ -4,11 +4,11 @@ import cProfile
 import time
 import numpy as np
 
-from gym_urbandriving.agents import KeyboardAgent, AccelAgent, NullAgent, TrafficLightAgent, PursuitAgent
+from gym_urbandriving.agents import NullAgent, TrafficLightAgent, PursuitAgent, ControlAgent
 from gym_urbandriving.assets import Car, TrafficLight
 from gym_urbandriving.utils.data_logger import DataLogger
 
-NUM_ITERS = 128 #Number of iterations 
+NUM_ITERS = 1 #Number of iterations 
 
 FILE_PATH = 'test_data/'
 
@@ -37,7 +37,7 @@ def test_rollout(index, thres):
                               visualizer=vis,
                               max_time=500,
                               randomize=True,
-                              agent_mappings={Car:NullAgent,
+                              agent_mappings={Car:ControlAgent,
                                               TrafficLight:TrafficLightAgent},
                               use_ray=False
     )
@@ -48,13 +48,16 @@ def test_rollout(index, thres):
     data_logger = DataLogger(FILE_PATH_ALG)
     loaded_rollout = data_logger.load_rollout(index)
 
-    state.dynamic_objects[0].breadcrumbs = [(d['state'].dynamic_objects[0].x, d['state'].dynamic_objects[0].y, d['state'].dynamic_objects[0].vel) for d in loaded_rollout[0]][::1]
-    state.dynamic_objects[0].destination = (450,900)
-    state.dynamic_objects[0].x = loaded_rollout[0][0]['state'].dynamic_objects[0].x
-    state.dynamic_objects[0].y = loaded_rollout[0][0]['state'].dynamic_objects[0].y
-    state.dynamic_objects[0].vel = loaded_rollout[0][0]['state'].dynamic_objects[0].vel
-    state.dynamic_objects[0].angle = loaded_rollout[0][0]['state'].dynamic_objects[0].angle
+    print loaded_rollout
+    print len(loaded_rollout)
+    print len(loaded_rollout[0])
+    print len(loaded_rollout[1])
+    print loaded_rollout[0][0]
+    print loaded_rollout[1]
 
+
+    state.dynamic_objects[0].trajectory = loaded_rollout[1]['pos_trajs'][0]
+    state.dynamic_objects[1].trajectory = loaded_rollout[1]['control_trajs'][0]
     # Car 0 will be controlled by our KeyboardAgent
     agent = PursuitAgent()
     action = None
@@ -72,20 +75,9 @@ def test_rollout(index, thres):
         # Simulate the state
         state, reward, done, info_dict = env._step(action)
 
-        env.current_state.dynamic_objects[1].x = loaded_rollout[0][t]['state'].dynamic_objects[0].x
-        env.current_state.dynamic_objects[1].y = loaded_rollout[0][t]['state'].dynamic_objects[0].y
-        env.current_state.dynamic_objects[1].vel = loaded_rollout[0][t]['state'].dynamic_objects[0].vel
-        env.current_state.dynamic_objects[1].angle = loaded_rollout[0][t]['state'].dynamic_objects[0].angle
-
         env._render()
         # keep simulator running in spite of collisions or timing out
 
-        diff_angle = (env.current_state.dynamic_objects[0].angle-env.current_state.dynamic_objects[1].angle)
-
-        while diff_angle < -np.pi:
-            diff_angle += (np.pi*2)
-        while diff_angle > np.pi:
-            diff_angle -= (np.pi*2)
 
         one_step_loss = np.sqrt((env.current_state.dynamic_objects[0].x-env.current_state.dynamic_objects[1].x)**2
                                 +(env.current_state.dynamic_objects[0].y-env.current_state.dynamic_objects[1].y)**2)

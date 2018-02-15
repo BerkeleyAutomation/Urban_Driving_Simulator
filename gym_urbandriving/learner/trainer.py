@@ -10,7 +10,7 @@ from gym_urbandriving.utils.data_logger import DataLogger
 from gym_urbandriving.learner.imitation_learner import IL
 
 from gym_urbandriving.agents import NullAgent, TrafficLightAgent, ControlAgent
-from gym_urbandriving.planning import RRTMPlanner
+from gym_urbandriving.planning import Trajectory, RRTMPlanner
 from gym_urbandriving.assets import Car, TrafficLight
 
 THRESH = 150
@@ -169,6 +169,11 @@ class Trainer:
         for i in range(self.NUM_CARS):
             state.dynamic_objects[i].trajectory = plans[i]
 
+        self.d_logger.log_info('control_trajs', plans)
+
+        pos_trajs = []
+        for i in range(self.NUM_CARS):
+            pos_trajs.append(Trajectory(mode='xyva'))
 
         # Simulation loop
         while(True):
@@ -189,11 +194,18 @@ class Trainer:
 
             rollout.append(sar)
 
+            for i in range(self.NUM_CARS):
+                obj = state.dynamic_objects[i]
+                pos_trajs[i].add_point([obj.x, obj.y, obj.vel, obj.angle])
+
+
             # Simulate the state
            
             env._render()
            
+
             if actions[0] is None:
+                self.d_logger.log_info('pos_trajs', pos_trajs)
                 return rollout,goal_states
 
 
