@@ -8,5 +8,6 @@ setup(name='gym_urbandriving',
                         "shapely",
                         "numpy",
                         "pygame",
-                        "ray"]
+                        "ray",
+                        "scikit-image"]
 )

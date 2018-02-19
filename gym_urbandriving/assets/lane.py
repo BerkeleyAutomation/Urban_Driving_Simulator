@@ -69,10 +69,10 @@ class Lane(Polygon):
             Generated Car object
         """
 
-        x = np.random.uniform(self.minx,
-                              self.maxx)
-        y = np.random.uniform(self.miny,
-                              self.maxy)
+        x = np.random.uniform(self.minx+.5,
+                              self.maxx-.5)
+        y = np.random.uniform(self.miny+.5,
+                              self.maxy-.5)
         car = Car(x, y, angle=self.angle+np.random.uniform(-0.1, 0.1),
                   dynamics_model=car_model)
         return car

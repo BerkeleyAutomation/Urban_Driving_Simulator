@@ -28,11 +28,9 @@ class DataLogger():
 
         path = self.file_path+'/rollout_'+str(i)+'.npy'
 
-
         while os.path.isfile(path):
             i += 1
             path = self.file_path + '/rollout_'+str(i) +'.npy'
-            print i
 
         return i
 
@@ -60,7 +58,7 @@ class DataLogger():
 
 
     def load_rollout(self, index):
-        return np.load(self.file_path+'/rollout_' + str(index) + '.npy')
+        return np.load(self.file_path+'/rollout_' + str(index) + '.npy', encoding='latin1', fix_imports = True)
 
 
 

@@ -1,16 +1,4 @@
-import gym
-import gym_urbandriving as uds
-import cProfile
-import time
-import numpy as np
-import numpy.linalg as LA
-
-from gym_urbandriving.agents import KeyboardAgent, AccelAgent, NullAgent, TrafficLightAgent, RRTMAgent, RRTMPlanner
-from gym_urbandriving.assets import Car, TrafficLight
-from gym_urbandriving.utils.data_logger import DataLogger
-from gym_urbandriving.learner.imitation_learner import IL
 from gym_urbandriving.learner.trainer import Trainer
-from gym_urbandriving.learner.plotter import Plotter
 
 ###A script to test behavior cloning 
 
@@ -37,17 +25,9 @@ t_exp = Trainer(FILE_PATH_ALG,
                 time = PLANNING_TIME,
                 num_cars = NUM_CARS)
 
-#Plotter class
-plotter = Plotter(FILE_PATH_ALG)
-stats = []
-
-
 for i in range(NUM_ITERS):
-	#Collect demonstrations 
+    #Collect demonstrations 
     t_exp.collect_supervisor_rollouts()
-
-#Save plots
-plotter.save_plots(stats)
 
 
 

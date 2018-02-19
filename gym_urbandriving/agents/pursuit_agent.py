@@ -1,10 +1,10 @@
-import pygame
 import numpy as np
 from gym_urbandriving.utils.PID import PIDController
 
 class PursuitAgent:
     """
-    Agent which interprets user keyboard inputs
+    Agent which uses PID to implement a pursuit control policy
+    Uses a trajectory with x,y,v,-
 
     Attributes
     ----------
@@ -14,12 +14,12 @@ class PursuitAgent:
     """
     def __init__(self, agent_num=0):
         self.agent_num = agent_num
-        self.PID_acc = PIDController(1.0, .1, 0)
-        self.PID_steer = PIDController(2, 0, 0)
+        self.PID_acc = PIDController(1.0, 0, 0)
+        self.PID_steer = PIDController(2.0, 0, 0)
         
     def eval_policy(self, state):
         """
-        Returns action based on keyboard input
+        Returns action based next state in trajectory. 
 
         Parameters
         ----------
@@ -34,9 +34,10 @@ class PursuitAgent:
 
         obj = state.dynamic_objects[self.agent_num]
 
-        if len(obj.breadcrumbs)>0:
-            target_loc = obj.breadcrumbs[0][:2]
-            target_vel = obj.breadcrumbs[0][2]
+        if not obj.trajectory.is_empty():
+            p = obj.trajectory.pop()
+            target_loc = p[:2].tolist()
+            target_vel = p[2]
         else:
             target_loc = obj.destination
             target_vel = 5
@@ -55,4 +56,5 @@ class PursuitAgent:
 
         action_acc = self.PID_acc.get_control(e_vel)
         action_steer = self.PID_steer.get_control(e_angle)
+
         return (action_steer, action_acc)
