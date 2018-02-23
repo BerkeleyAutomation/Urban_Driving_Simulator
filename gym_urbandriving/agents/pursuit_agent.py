@@ -34,10 +34,15 @@ class PursuitAgent:
 
         obj = state.dynamic_objects[self.agent_num]
 
-        if not obj.trajectory.is_empty():
-            p = obj.trajectory.pop()
+        if not obj.trajectory.is_empty():    
+            p = obj.trajectory.first()
             target_loc = p[:2].tolist()
             target_vel = p[2]
+
+            while (((obj.y-p[1])**2+(p[0]-obj.x)**2)<100):
+                p = obj.trajectory.pop()
+                target_loc = p[:2].tolist()
+                target_vel = p[2]
         else:
             target_loc = obj.destination
             target_vel = 5
@@ -52,9 +57,13 @@ class PursuitAgent:
         elif e_angle < -np.pi:
             e_angle += (np.pi*2)
 
+
         e_vel = target_vel-obj.vel
+        e_vel_ = np.sqrt((obj.y-target_loc[1])**2+(target_loc[0]-obj.x)**2) - obj.vel
+
 
         action_acc = self.PID_acc.get_control(e_vel)
         action_steer = self.PID_steer.get_control(e_angle)
+
 
         return (action_steer, action_acc)
