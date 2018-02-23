@@ -49,7 +49,7 @@ class Trajectory(object):
         7 dimensions: [x, y, velocity, angle, action steer, action angle, t]
     """
 
-    def __init__(self, target='car', mode='xyvacst'):
+    def __init__(self, target='car', mode='xyvacst', fsm=0):
         """
         Initializes an empty general control. 
 
@@ -79,6 +79,7 @@ class Trajectory(object):
                 self.dimensions_used.append(6)
             else:
                 raise ValueError()
+        self.fsm = fsm
 
     def get_matrix(self):
         """

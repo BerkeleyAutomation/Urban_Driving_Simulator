@@ -2,6 +2,8 @@ from gym_urbandriving.state.state import PositionState
 from gym_urbandriving.assets import Terrain, Lane, Street, Sidewalk,\
     Pedestrian, Car, TrafficLight
 import numpy as np
+import random
+from copy import deepcopy
 
 class SimpleIntersectionState(PositionState):
     """
@@ -56,7 +58,6 @@ class SimpleIntersectionState(PositionState):
             if not any([car.collides(obj) for obj in self.static_objects+self.dynamic_objects]):
                 self.dynamic_objects.append(car)
                 self.dynamic_objects_lane_indices.append(start)
-
         self.assign_goal_states(self.dynamic_objects_lane_indices)
 
         while len(self.dynamic_objects) < self.ncars+self.nped:
@@ -83,11 +84,18 @@ class SimpleIntersectionState(PositionState):
 
         #Goals organized in NSEW order
         goal_states = []
-        goal_states.append([550,100,2,90])
-        goal_states.append([450,900,2,270])
+        goal_states.append([550,100,2,np.pi/2])
+        goal_states.append([450,900,2,-np.pi/2])
         goal_states.append([900,550,2,0])
-        goal_states.append([100,450,2,180])
+        goal_states.append([100,450,2,np.pi])
 
+
+        for i in range(len(lane_orders)):
+          gs = deepcopy(goal_states)
+          del gs[lane_orders[i]]
+          self.dynamic_objects[i].destination = random.choice(gs)
+
+        """
         #Lanes that cannot be assigned 
         forbidden_lanes = []
 
@@ -109,4 +117,4 @@ class SimpleIntersectionState(PositionState):
 
         for i in range(len(sorted_goal)):
           self.dynamic_objects[i].destination = sorted_goal[i]
-
+        """
