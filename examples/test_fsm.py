@@ -21,7 +21,7 @@ def position_function(res_path, num_points, v0, v1, timestep):
     dist = num_points*v0*(np.e**((v1-v0)*float(timestep)/(num_points))-1)/(v1-v0)
     frac = dist%1
     index = (int)(dist)
-    if index == num_points-1:
+    if index >= num_points-1:
         return [res_path[-1][0], res_path[-1][1]]
     return [res_path[index][0]*(1-frac) + res_path[index+1][0]*(frac), res_path[index][1]*(1-frac) + res_path[index+1][1]*(frac)]
 
@@ -57,7 +57,7 @@ def f():
     agent = KeyboardAgent()
     """
 
-    pos_functions = [] #(pos function, time offset)
+    pos_functions_args = [] #(res_path, num_points, v0, v1, time offset)
     planner = CasteljauPlanner()
 
     all_targets = [[450,375,-np.pi/2],
@@ -80,7 +80,7 @@ def f():
             traj.add_point(p)
 
         obj.trajectory = traj
-        pos_functions.append([lambda t: position_function(deepcopy(path_to_follow), len(deepcopy(path_to_follow)), obj.vel, 4, t), 0])
+        pos_functions_args.append([deepcopy(path_to_follow), len(path_to_follow), obj.vel, 4, 0])
 
     agents = []
 
@@ -136,21 +136,19 @@ def f():
                 if obj.trajectory.fsm == 0:
                     target = sorted(all_targets, key = lambda p: (p[0]-obj.destination[0])**2+(p[1]-obj.destination[1])**2)[0]
                     path_to_follow = planner.plan(prev[0], prev[1], obj.vel, prev[2], target[0],target[1],4,target[2])
-                    pos_function = lambda t: position_function(deepcopy(path_to_follow), len(deepcopy(path_to_follow)), obj.vel, 4, t)
+                    pos_args = [deepcopy(path_to_follow), len(path_to_follow), obj.vel, 4, sim_time]
                 elif obj.trajectory.fsm == 1:
                     target = [obj.destination[0], obj.destination[1], obj.destination[3]]
                     path_to_follow = planner.plan(prev[0], prev[1], obj.vel, prev[2], target[0],target[1],2,target[2])
-                    pos_function = lambda t: position_function(deepcopy(path_to_follow), len(deepcopy(path_to_follow)), obj.vel, 2, t)
+                    pos_args = [deepcopy(path_to_follow), len(path_to_follow), obj.vel, 2, sim_time]
                 else:
                     obj.vel = 0
-                    path_to_follow, pos_functions = [], lambda x:x
 
                 for p in path_to_follow:
                     traj.add_point(p)
 
                     obj.trajectory = traj
-                pos_functions[i] = [pos_function, sim_time]
-
+                pos_functions_args[index] = pos_args
 
         actions = []
         for agent in agents:
@@ -166,7 +164,7 @@ def f():
         for index in range(NUM_CARS):
             obj = state.dynamic_objects[index]
             print "actual", obj.x, obj.y
-            print "predicted", pos_functions[i][0](sim_time-pos_functions[i][1])
+            print "predicted", position_function(pos_functions_args[index][0], pos_functions_args[index][1], pos_functions_args[index][2], pos_functions_args[index][3], sim_time - pos_functions_args[index][4])
 
         # If we crash, sleep for a moment, then reset
         if done:
