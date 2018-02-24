@@ -143,6 +143,7 @@ def f():
                     pos_args = [deepcopy(path_to_follow), len(path_to_follow), obj.vel, 2, sim_time]
                 else:
                     obj.vel = 0
+                    path_to_follow = [[obj.x, obj.y, obj.vel, obj.angle]]
 
                 for p in path_to_follow:
                     traj.add_point(p)
@@ -155,7 +156,23 @@ def f():
             action = agent.eval_policy(state)
             actions.append(action)
         state, reward, done, info_dict = env._step_test(actions)
-
+        
+        for check_time in range(sim_time, sim_time + 20):
+            positions = []
+            for index in range(NUM_CARS):
+                positions.append(position_function(pos_functions_args[index][0], pos_functions_args[index][1], pos_functions_args[index][2], pos_functions_args[index][3], check_time - pos_functions_args[index][4]))
+            for i in range(NUM_CARS):
+                for j in range(i+1, NUM_CARS):
+                    if ((positions[i][0]-positions[j][0])**2 + (positions[i][1]-positions[j][1])**2)<400:
+                        print "collision detected at ", check_time
+                        obj = state.dynamic_objects[j]
+                        new_positions = []
+                        while not obj.trajectory.is_empty():
+                            p = obj.trajectory.pop()
+                            if ((p[0]-positions[j][0])**2 + (p[1]-positions[j][1])**2)<1:
+                                print "stopping point", p
+                                break
+        print sim_time
         env._render()
         # keep simulator running in spite of collisions or timing out
         done = False
@@ -163,8 +180,8 @@ def f():
 
         for index in range(NUM_CARS):
             obj = state.dynamic_objects[index]
-            print "actual", obj.x, obj.y
-            print "predicted", position_function(pos_functions_args[index][0], pos_functions_args[index][1], pos_functions_args[index][2], pos_functions_args[index][3], sim_time - pos_functions_args[index][4])
+            #print "actual", obj.x, obj.y
+            #print "predicted", position_function(pos_functions_args[index][0], pos_functions_args[index][1], pos_functions_args[index][2], pos_functions_args[index][3], sim_time - pos_functions_args[index][4])
 
         # If we crash, sleep for a moment, then reset
         if done:
