@@ -87,7 +87,7 @@ class UrbanDrivingEnv(gym.Env):
         reward = self.reward_fn(self.current_state)
         done = (self.current_state.time == self.max_time) or len(dynamic_coll) or len(static_coll)
 
-        info_dict = {"saved_actions": actions}
+        info_dict = {"saved_actions": actions, "static_coll" : static_coll, "dynamic_coll" : dynamic_coll}
 
         return state, reward, done, info_dict
 

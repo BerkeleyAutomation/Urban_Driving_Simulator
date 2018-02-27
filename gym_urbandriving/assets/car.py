@@ -5,6 +5,7 @@ from gym_urbandriving.assets.primitives.dynamic_shape import DynamicShape
 from gym_urbandriving.assets.terrain import Terrain
 from gym_urbandriving.assets.sidewalk import Sidewalk
 from gym_urbandriving.assets.pedestrian import Pedestrian
+from gym_urbandriving.assets.traffic_light import TrafficLight
 
 from gym import spaces
 import numpy as np
@@ -110,6 +111,9 @@ class Car(Rectangle, DynamicShape):
         """
         from gym_urbandriving.assets.lane import Lane
         if type(other) in {Terrain, Sidewalk, Car, Pedestrian}:
+            return True
+
+        if type(other) in {TrafficLight} and other.color == 'red':
             return True
 
         if type(other) is Lane:
