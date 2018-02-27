@@ -6,7 +6,7 @@ import numpy as np
 import math
 import random
 
-from gym_urbandriving.agents import KeyboardAgent, AccelAgent, NullAgent, TrafficLightAgent, PursuitAgent
+from gym_urbandriving.agents import KeyboardAgent, AccelAgent, NullAgent, TrafficLightAgent, PursuitAgent, ControlAgent
 from gym_urbandriving.planning import Trajectory, CasteljauPlanner
 from gym_urbandriving.assets import Car, TrafficLight
 
@@ -16,7 +16,7 @@ from copy import deepcopy
  Test File, to demonstrate general functionality of environment
 """
 
-NUM_CARS = 5
+NUM_CARS = 4
 
 def position_function(res_path, num_points, v0, v1, timestep):
     if abs(v0-v1<.0001):
@@ -74,7 +74,7 @@ def f():
                    [375,550,0.0]]
 
     for obj in state.dynamic_objects[:NUM_CARS]:
-        obj.vel = 5
+        obj.vel = 4
         closest_point = sorted(all_targets, key = lambda p: (p[0]-obj.x)**2+(p[1]-obj.y)**2 )[0]
         mid_target = sorted(all_targets, key = lambda p: (p[0]-obj.destination[0])**2+(p[1]-obj.destination[1])**2)[0]
         traj = Trajectory(mode = 'xyv', fsm=0)
@@ -106,7 +106,7 @@ def f():
     #max_e = 0
     # Simulation loop
     env = uds.UrbanDrivingEnv(init_state=deepcopy(state),
-                              visualizer=None,
+                              visualizer=vis,
                               max_time=500,
                               randomize=False,
                               agent_mappings={Car:NullAgent,
@@ -116,8 +116,8 @@ def f():
     env._reset()
     state = env.current_state
 
-    start_stop = []
-    for sim_time in range(500):
+    action_trajs = [Trajectory(mode = 'cs') for _ in range(NUM_CARS)]
+    for sim_time in range(400):
         """
         if obj.trajectory.npoints() <= 0:
             if obj.x<300:
@@ -154,7 +154,6 @@ def f():
 
         """
 
-        collision_dict = {}
         for x in range(NUM_CARS):
             state_copy = deepcopy(state)
             testing_env = uds.UrbanDrivingEnv(init_state=state_copy,
@@ -165,7 +164,7 @@ def f():
                                                       TrafficLight:TrafficLightAgent},
                                       use_ray=False
             )
-
+            state_copy = testing_env.current_state
             if state_copy.dynamic_objects[x].trajectory.stopped:
                 state_copy.dynamic_objects[x].trajectory.restart()
                 for t in range(10): 
@@ -177,12 +176,12 @@ def f():
                     done = state_copy.collides_any(x)
                     if done:
                         break
-                if not done and random.random()>.25:
+                if not done:
                     state.dynamic_objects[x].trajectory.restart()
 
-            if not state_copy.dynamic_objects[x].trajectory.stopped:
-                state_copy.dynamic_objects[x].trajectory.modify_to_stop()
-                for t in range(15): 
+            elif not state_copy.dynamic_objects[x].trajectory.stopped:
+                #state_copy.dynamic_objects[x].trajectory.modify_to_stop()
+                for t in range(10): 
                     actions = []
                     for agent in agents:
                         action = agent.eval_policy(state_copy)
@@ -191,45 +190,49 @@ def f():
                     done = state_copy.collides_any(x)
                     if done:
                         break
-                if done and random.random()>.25:
+                if done:
                     state.dynamic_objects[x].trajectory.modify_to_stop()
-
-        start_stop.append([obj.trajectory.stopped for obj in state.dynamic_objects[:NUM_CARS]])
-        #print "collision detected", positions[i], positions[j]
-        #state.dynamic_objects[j].trajectory.modify_to_stop()
-        #print [state.dynamic_objects[j].trajectory.get_point(x) for x in range(15)]
     
         actions = []
         for agent in agents:
             action = agent.eval_policy(state)
             actions.append(action)
+        for i in range(NUM_CARS):
+            action_trajs[i].add_point(actions[i])
         state, reward, done, info_dict = env._step_test(actions)
+        #print actions[:NUM_CARS]
+        #print [obj.vel for obj in state.dynamic_objects[:NUM_CARS]]
+        env._render()
         print sim_time
 
         #for index in range(NUM_CARS):
             #obj = state.dynamic_objects[index]
             #print "actual", obj.x, obj.y
             #print "predicted", position_function(pos_functions_args[index][0], pos_functions_args[index][1], pos_functions_args[index][2], pos_functions_args[index][3], sim_time - pos_functions_args[index][4])
- 
-    state = visualizing_env.current_state
-    for sim_time in range(500):
-        if sim_time>0:
-            prev = start_stop[sim_time-1]
-            now = start_stop[sim_time]
-            for i in range(NUM_CARS):
-                prev_s, now_s = prev[i], now[i]
-                if prev_s and not now_s:
-                    state.dynamic_objects[i].trajectory.restart()
-                elif not prev_s and now_s:
-                    state.dynamic_objects[i].trajectory.modify_to_stop()
 
+        
+    state = visualizing_env.current_state
+    
+    agents = []
+    for i in range(NUM_CARS):
+        agents.append(ControlAgent(i))
+        obj = state.dynamic_objects[i]
+        obj.trajectory = action_trajs[i]
+    for i in range(NUM_CARS, NUM_CARS+4):
+        agents.append(TrafficLightAgent(i))
+
+
+    for sim_time in range(400):
         actions = []
         for agent in agents:
             action = agent.eval_policy(state)
             actions.append(action)
+        
         state, reward, done, info_dict = visualizing_env._step_test(actions)
         visualizing_env._render()
 
 # Collect profiling data
-cProfile.run('f()', 'temp/stats')
+#cProfile.run('f()', 'temp/stats')
+while (True):
+    f()
 

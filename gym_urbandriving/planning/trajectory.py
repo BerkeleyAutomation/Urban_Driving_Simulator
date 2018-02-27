@@ -111,9 +111,6 @@ class Trajectory(object):
         return [[self._trajectory[i][self.mode.index('x')],self._trajectory[i][self.mode.index('y')]] for i in range(self.npoints())]
 
     def modify_to_stop(self):
-        if self.stopped:
-            return
-
         v_index = self.mode.index('v')
         #for i in range(14):
         #    self._trajectory[i][v_index] = 16-float(i+1)/4
@@ -124,16 +121,10 @@ class Trajectory(object):
         self.stopped = True
 
     def restart(self):
-        if not self.stopped:
-            return
-
         v_index = self.mode.index('v')
-        for i in range(min(14,self.npoints())):
-            self._trajectory[i][v_index] = float(i+1)/4
-        for i in range(min(14,self.npoints()),self.npoints()):
+        for i in range(self.npoints()):
             self._trajectory[i][v_index] = 4
         self.stopped = False
-
 
     def get_points_list(self, start, end):
         res = []
