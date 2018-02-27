@@ -86,6 +86,10 @@ class Car(Rectangle, DynamicShape):
         else:
             self.x, self.y, self.vel, self.angle = self.point_model_step(action, self.x, self.y, self.vel, self.angle)
 
+    def set_pos(self, x, y, vel, angle):
+        self.shapely_obj = None
+        self.x, self.y, self.vel, self.angle = x, y, vel, angle
+
     def get_state(self):
         """
         Get state.
