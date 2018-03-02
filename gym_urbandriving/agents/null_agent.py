@@ -1,4 +1,4 @@
-class NullAgent:
+class NullAgent(object):
     """
     Agent which does nothing
     """

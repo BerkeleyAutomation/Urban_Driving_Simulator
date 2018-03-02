@@ -4,3 +4,4 @@ from gym_urbandriving.agents.null_agent import NullAgent
 from gym_urbandriving.agents.traffic_light_agent import TrafficLightAgent
 from gym_urbandriving.agents.pursuit_agent import PursuitAgent
 from gym_urbandriving.agents.control_agent import ControlAgent
+from gym_urbandriving.agents.planning_pursuit_agent import PlanningPursuitAgent

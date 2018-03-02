@@ -1,7 +1,8 @@
 import numpy as np
 from gym_urbandriving.utils.PID import PIDController
+from gym_urbandriving.agents import NullAgent
 
-class PursuitAgent:
+class PursuitAgent(NullAgent):
     """
     Agent which uses PID to implement a pursuit control policy
     Uses a trajectory with x,y,v,-
