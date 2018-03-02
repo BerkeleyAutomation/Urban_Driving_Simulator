@@ -7,7 +7,8 @@ import math
 import random
 
 from gym_urbandriving.agents import KeyboardAgent, AccelAgent, NullAgent, TrafficLightAgent, PursuitAgent, ControlAgent, PlanningPursuitAgent
-from gym_urbandriving.planning import Trajectory, CasteljauPlanner
+from gym_urbandriving.planning import Trajectory, CasteljauPlanner, GeometricPlanner
+
 from gym_urbandriving.assets import Car, TrafficLight
 
 from copy import deepcopy
@@ -40,7 +41,7 @@ def f():
                                               TrafficLight:TrafficLightAgent},
                               use_ray=False
     )
-    
+
     visualizing_env._reset()
     state = visualizing_env.current_state
 
@@ -52,38 +53,51 @@ def f():
 
     pos_functions_args = [] #(res_path, num_points, v0, v1, time offset)
     planner = CasteljauPlanner()
-
+    geoplanner = GeometricPlanner(deepcopy(state), planning_time=10.0)
     all_targets = [[450,375,-np.pi/2],
-                   [550,375,np.pi/2], 
+                   [550,375,np.pi/2],
                    [625,450,-np.pi],
                    [625,550,0.0],
                    [450,625,-np.pi/2],
-                   [550,625,np.pi/2], 
+                   [550,625,np.pi/2],
                    [375,450,-np.pi],
                    [375,550,0.0]]
 
     for obj in state.dynamic_objects[:NUM_CARS]:
+        orig_obj = obj
+        obj = deepcopy(obj)
         obj.vel = 4
         closest_point = sorted(all_targets, key = lambda p: (p[0]-obj.x)**2+(p[1]-obj.y)**2 )[0]
         mid_target = sorted(all_targets, key = lambda p: (p[0]-obj.destination[0])**2+(p[1]-obj.destination[1])**2)[0]
         traj = Trajectory(mode = 'xyv', fsm=0)
 
-        path_to_follow = planner.plan(obj.x,obj.y, obj.vel,obj.angle, closest_point[0],closest_point[1],4,closest_point[2])
+        #path_to_follow = planner.plan(obj.x,obj.y, obj.vel,obj.angle, closest_point[0],closest_point[1],4,closest_point[2])
+        path_to_follow = geoplanner.plan(obj, closest_point[0], closest_point[1], 4, closest_point[2])
         for p in path_to_follow:
             traj.add_point(p)
         path_to_follow = planner.plan(closest_point[0],closest_point[1],4,closest_point[2], mid_target[0],mid_target[1],4,mid_target[2])
+        print(closest_point)
+        obj.set_pos(closest_point[0], closest_point[1], 4, closest_point[2])
+        #orig_obj.set_pos(closest_point[0], closest_point[1], 4, closest_point[2])
+        #visualizing_env._render()
+        #input()
+        path_to_follow = geoplanner.plan(obj, mid_target[0],mid_target[1],4,mid_target[2])
         for p in path_to_follow:
             traj.add_point(p)
+            
         path_to_follow = planner.plan(mid_target[0],mid_target[1],4,mid_target[2], obj.destination[0],obj.destination[1],4,obj.destination[3])
+        obj.set_pos(mid_target[0], mid_target[1], 4, mid_target[2])
+        path_to_follow = geoplanner.plan(obj, obj.destination[0], obj.destination[1], 4, obj.destination[3])
         for p in path_to_follow:
             traj.add_point(p)
 
-        obj.trajectory = traj
-        obj.vel = 0
-        obj.trajectory.restart()
+        orig_obj.trajectory = traj
+        orig_obj.vel = 0
+        orig_obj.trajectory.restart()
 
 
     sim_time = 0
+
     action_trajs = [Trajectory(mode = 'cs') for _ in range(NUM_CARS)]
 
     #max_e = 0
@@ -112,8 +126,9 @@ def f():
         for i in range(NUM_CARS):
             action_trajs[i].add_point(info_dict['saved_actions'][i])
 
+
     state = visualizing_env.current_state
-    
+
     agents = []
     for i in range(NUM_CARS):
         agents.append(ControlAgent(i))
@@ -121,6 +136,7 @@ def f():
         obj.trajectory = action_trajs[i]
     for i in range(NUM_CARS, NUM_CARS+4):
         agents.append(TrafficLightAgent(i))
+
 
 
     for sim_time in range(DEMO_LEN):
@@ -133,4 +149,3 @@ def f():
 #cProfile.run('f()', 'temp/stats')
 while (True):
     f()
-

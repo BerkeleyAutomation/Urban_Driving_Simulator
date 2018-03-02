@@ -88,6 +88,7 @@ class Car(Rectangle, DynamicShape):
 
     def set_pos(self, x, y, vel, angle):
         self.shapely_obj = None
+        angle = (angle + 2*np.pi) % (2*np.pi)
         self.x, self.y, self.vel, self.angle = x, y, vel, angle
 
     def get_state(self):

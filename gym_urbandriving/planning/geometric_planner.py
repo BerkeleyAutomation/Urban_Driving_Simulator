@@ -7,9 +7,11 @@ from copy import deepcopy
 
 class ValidityChecker(ob.StateValidityChecker):
     def __init__(self, si, state, controlled_obj):
-        self.state = state
+        self.state = deepcopy(state)
         self.obj = controlled_obj
         self.state.dynamic_objects = [self.obj]
+        print(self.state.dynamic_objects)
+        print(self.state.static_objects)
         super(ValidityChecker, self).__init__(si)
     def isValid(self, s):
         x = s[0]
@@ -21,7 +23,7 @@ class ValidityChecker(ob.StateValidityChecker):
 
 class MotionValidityChecker(ob.MotionValidator):
     def __init__(self, si, state, controlled_obj):
-        self.state = state
+        self.state = deepcopy(state)
         self.obj = controlled_obj
         self.state.dynamic_objects = [self.obj]
         super(MotionValidityChecker, self).__init__(si)
@@ -43,10 +45,14 @@ class MotionValidityChecker(ob.MotionValidator):
         return float(ad) < float(np.pi/4)
 
 class GeometricPlanner:
-    def __init__(self, state, inter_point_d=1.0):
+    def __init__(self, state, inter_point_d=1.0, planning_time=1.0):
         self.state = deepcopy(state)
+        self.state.dynamic_objects = []
+        self.planning_time = planning_time
         self.inter_point_d = inter_point_d
     def plan(self, controlled_object, x1, y1, v1, a1):
+        a1 = (a1 + 2*np.pi) % (2 * np.pi)
+
         car = deepcopy(controlled_object)
 
         space = ob.RealVectorStateSpace(3)
@@ -104,7 +110,7 @@ class GeometricPlanner:
         optimizingPlanner.setProblemDefinition(pdef)
         optimizingPlanner.setup()
 
-        solved = optimizingPlanner.solve(1.0)
+        solved = optimizingPlanner.solve(self.planning_time)
         sol = pdef.getSolutionPath()
 
         if not sol:
@@ -118,5 +124,5 @@ class GeometricPlanner:
         v0 = car.vel
         num_points = len(s)
         for i in range(num_points):
-            s[i].append(v0*(1-float(i)/float(num_points))+v1*(float(i)/float(num_points)))
+            [i].append(v0*(1-float(i)/float(num_points))+v1*(float(i)/float(num_points)))
         return s
