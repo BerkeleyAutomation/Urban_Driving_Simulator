@@ -59,7 +59,7 @@ class PlanningPursuitAgent(PursuitAgent):
                     action = agent.eval_policy(state_copy)
                     actions.append(action)
                 state_copy, reward, done, info_dict = testing_env._step_test(actions)
-                done = state_copy.collides_any(self.agent_num)
+                done = state_copy.collides_any_dynamic(self.agent_num)
                 if done:
                     break
             if not done:
@@ -72,7 +72,7 @@ class PlanningPursuitAgent(PursuitAgent):
                     action = agent.eval_policy(state_copy)
                     actions.append(action)
                 state_copy, reward, done, info_dict = testing_env._step_test(actions)
-                done = state_copy.collides_any(self.agent_num)
+                done = state_copy.collides_any_dynamic(self.agent_num)
                 if done:
                     break
             if done:
