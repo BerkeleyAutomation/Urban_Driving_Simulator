@@ -10,8 +10,8 @@ class ValidityChecker(ob.StateValidityChecker):
         self.state = deepcopy(state)
         self.obj = controlled_obj
         self.state.dynamic_objects = [self.obj]
-        print(self.state.dynamic_objects)
-        print(self.state.static_objects)
+        #print(self.state.dynamic_objects)
+        #print(self.state.static_objects)
         super(ValidityChecker, self).__init__(si)
     def isValid(self, s):
         x = s[0]
@@ -103,7 +103,7 @@ class GeometricPlanner:
         pathObj.motionCost = objMotionCost
         pathObj.setCostThreshold(1)
 
-        pdef.setOptimizationObjective(pathObj)
+    #pdef.setOptimizationObjective(pathObj)
 
         optimizingPlanner = og.RRTstar(si)
         optimizingPlanner.setRange(self.inter_point_d)
@@ -115,9 +115,9 @@ class GeometricPlanner:
 
         if not sol:
             return None
-        print(sol.cost(pathObj).value())
+        #print(sol.cost(pathObj).value())
         sol = sol.printAsMatrix()
-        print(sol)
+        #print(sol)
 
         s = [[float(j) for j in i.split(" ")[:-1]] for i in sol.splitlines()][:-1]
 

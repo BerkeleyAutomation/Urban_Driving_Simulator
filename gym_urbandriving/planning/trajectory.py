@@ -126,11 +126,13 @@ class Trajectory(object):
             self._trajectory[i][v_index] = 4
         self.stopped = False
 
-    def get_points_list(self, start, end):
+    def get_points_list(self, start=0, end=None):
+        if not end:
+            end  = self.npoints()
         res = []
         for i in range(start, end):
             res.append(self._trajectory[i][self.dimensions_used].tolist())
-        return res
+        return np.array(res)
 
     # TODO FIX
     def add_camera_point(self, x, y, t=-1, h=720, w=1280):

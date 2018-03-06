@@ -1,6 +1,7 @@
 import gym
 from copy import deepcopy
 import numpy as np
+from gym_urbandriving.assets import TrafficLight
 
 class PositionState:
     """
@@ -68,6 +69,13 @@ class PositionState:
                 return True
         for coll in static_collisions:
             if agentnum == coll[0]:
+                return True
+        return False
+    
+    def collides_any_dynamic(self, agentnum):
+        dynamic_collisions, static_collisions = self.get_collisions()
+        for coll in dynamic_collisions:
+            if agentnum in coll:
                 return True
         return False
 

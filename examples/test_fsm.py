@@ -5,6 +5,9 @@ import time
 import numpy as np
 import math
 import random
+import scipy as sc
+import scipy.interpolate
+from scipy.interpolate import UnivariateSpline
 
 from gym_urbandriving.agents import KeyboardAgent, AccelAgent, NullAgent, TrafficLightAgent, PursuitAgent, ControlAgent
 from gym_urbandriving.planning import Trajectory, CasteljauPlanner, GeometricPlanner
@@ -16,7 +19,7 @@ from copy import deepcopy
  Test File, to demonstrate general functionality of environment
 """
 
-NUM_CARS = 4
+NUM_CARS = 10
 
 def position_function(res_path, num_points, v0, v1, timestep):
     if abs(v0-v1<.0001):
@@ -63,7 +66,7 @@ def f():
 
     pos_functions_args = [] #(res_path, num_points, v0, v1, time offset)
     planner = CasteljauPlanner()
-    geoplanner = GeometricPlanner(deepcopy(state), planning_time=10.0)
+    geoplanner = GeometricPlanner(deepcopy(state), inter_point_d=40.0, planning_time=0.1)
     all_targets = [[450,375,-np.pi/2],
                    [550,375,np.pi/2],
                    [625,450,-np.pi],
@@ -73,6 +76,9 @@ def f():
                    [375,450,-np.pi],
                    [375,550,0.0]]
 
+    import timeit
+
+    start_t = timeit.default_timer()
     for obj in state.dynamic_objects[:NUM_CARS]:
         orig_obj = obj
         obj = deepcopy(obj)
@@ -81,16 +87,13 @@ def f():
         mid_target = sorted(all_targets, key = lambda p: (p[0]-obj.destination[0])**2+(p[1]-obj.destination[1])**2)[0]
         traj = Trajectory(mode = 'xyv', fsm=0)
 
-        #path_to_follow = planner.plan(obj.x,obj.y, obj.vel,obj.angle, closest_point[0],closest_point[1],4,closest_point[2])
+        path_to_follow = planner.plan(obj.x,obj.y, obj.vel,obj.angle, closest_point[0],closest_point[1],4,closest_point[2])
         path_to_follow = geoplanner.plan(obj, closest_point[0], closest_point[1], 4, closest_point[2])
         for p in path_to_follow:
             traj.add_point(p)
         path_to_follow = planner.plan(closest_point[0],closest_point[1],4,closest_point[2], mid_target[0],mid_target[1],4,mid_target[2])
-        print(closest_point)
+        #print(closest_point)
         obj.set_pos(closest_point[0], closest_point[1], 4, closest_point[2])
-        #orig_obj.set_pos(closest_point[0], closest_point[1], 4, closest_point[2])
-        #visualizing_env._render()
-        #input()
         path_to_follow = geoplanner.plan(obj, mid_target[0],mid_target[1],4,mid_target[2])
         for p in path_to_follow:
             traj.add_point(p)
@@ -104,6 +107,38 @@ def f():
         orig_obj.trajectory = traj
         orig_obj.vel = 0
         orig_obj.trajectory.restart()
+        
+        print orig_obj.trajectory.get_points_list()
+        npoints = orig_obj.trajectory.npoints()
+        points = orig_obj.trajectory.get_points_list()
+        xp, yp = points[:,0], points[:,1]
+
+        splx = np.poly1d(np.polyfit(np.arange(npoints), xp, deg=4))
+        sply = np.poly1d(np.polyfit(np.arange(npoints), yp, deg=4))
+        splx = sc.interpolate.interp1d(np.arange(npoints), xp, 'cubic')
+        sply = sc.interpolate.interp1d(np.arange(npoints), yp, 'cubic')
+        #splx = UnivariateSpline(np.arange(npoints), points[:,0])
+        #sply = UnivariateSpline(np.arange(npoints), points[:,1])
+        #splx.set_smoothing_factor(0.9)
+        #sply.set_smoothing_factor(0.9)
+
+
+        xn = splx(np.linspace(0,npoints-1,200))
+        yn = sply(np.linspace(0,npoints-1,200))
+        xn = sc.ndimage.filters.gaussian_filter1d(xn, 20)
+        yn = sc.ndimage.filters.gaussian_filter1d(yn, 20)
+
+        #sc.interpolate.splprep([newx, newy], s=0)
+        newtraj = Trajectory(mode = 'xyv', fsm=0)
+        for x, y in zip(xn, yn):
+            newtraj.add_point((x, y, 4))
+        newtraj.restart()
+        orig_obj.trajectory = newtraj
+        print orig_obj.trajectory.get_points_list()
+        
+        
+    end_t = timeit.default_timer()
+    print end_t - start_t
 
 
     agents = []
@@ -129,7 +164,8 @@ def f():
     state = env.current_state
 
     action_trajs = [Trajectory(mode = 'cs') for _ in range(NUM_CARS)]
-    for sim_time in range(400):
+    start = timeit.default_timer()
+    for sim_time in range(200):
         """
         if obj.trajectory.npoints() <= 0:
             if obj.x<300:
@@ -185,7 +221,7 @@ def f():
                         action = agent.eval_policy(state_copy)
                         actions.append(action)
                     state_copy, reward, done, info_dict = testing_env._step_test(actions)
-                    done = state_copy.collides_any(x)
+                    done = state_copy.collides_any_dynamic(x)
                     if done:
                         break
                 if not done:
@@ -199,7 +235,7 @@ def f():
                         action = agent.eval_policy(state_copy)
                         actions.append(action)
                     state_copy, reward, done, info_dict = testing_env._step_test(actions)
-                    done = state_copy.collides_any(x)
+                    done = state_copy.collides_any_dynamic(x)
                     if done:
                         break
                 if done:
@@ -214,8 +250,11 @@ def f():
         state, reward, done, info_dict = env._step_test(actions)
         #print actions[:NUM_CARS]
         #print [obj.vel for obj in state.dynamic_objects[:NUM_CARS]]
-        env._render()
+        #env._render()
+        #input()
         print sim_time
+        print sim_time / (timeit.default_timer() - start)
+#        input()
 
         #for index in range(NUM_CARS):
             #obj = state.dynamic_objects[index]

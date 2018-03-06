@@ -24,4 +24,4 @@ class Terrain(Polygon):
             p = obj.exterior.coords
             points = np.asarray(p)
         
-        Polygon.__init__(self, points, color=(0, 120, 0))
+        Polygon.__init__(self, points, color=(255, 255, 255))
