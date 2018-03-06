@@ -50,7 +50,6 @@ def f():
 
         # Simulate the state
         state, reward, done, info_dict = env._step(action)
-        print info_dict["dyn_coll"]
         env._render()
         # keep simulator running in spite of collisions or timing out
         done = False
