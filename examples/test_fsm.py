@@ -41,7 +41,7 @@ def f():
                               visualizer=vis,
                               max_time=500,
                               randomize=False,
-                              agent_mappings={Car:NullAgent,
+                              agent_mappings={Car:ControlAgent,
                                               TrafficLight:TrafficLightAgent},
                               use_ray=False
     )
@@ -170,6 +170,7 @@ def f():
 
 
     state = visualizing_env.current_state
+    agent = ControlAgent(0)
 
     agents = []
     for i in range(NUM_CARS):
