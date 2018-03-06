@@ -49,7 +49,7 @@ class Trajectory(object):
         7 dimensions: [x, y, velocity, angle, action steer, action angle, t]
     """
 
-    def __init__(self, target='car', mode='xyvacst'):
+    def __init__(self, target='car', mode='xyvacst', fsm=0):
         """
         Initializes an empty general control. 
 
@@ -79,6 +79,8 @@ class Trajectory(object):
                 self.dimensions_used.append(6)
             else:
                 raise ValueError()
+        self.fsm = fsm
+        self.stopped = True
 
     def get_matrix(self):
         """
@@ -103,10 +105,34 @@ class Trajectory(object):
         self._trajectory = np.append(self._trajectory, [expanded_p], axis=0)
 
     def get_point(self, index):
-        self._trajectory.shape[index][self.dimensions_used]
+        return self._trajectory[index][self.dimensions_used]
 
     def get_renderable_points(self):
         return [[self._trajectory[i][self.mode.index('x')],self._trajectory[i][self.mode.index('y')]] for i in range(self.npoints())]
+
+    def modify_to_stop(self):
+        v_index = self.mode.index('v')
+        #for i in range(14):
+        #    self._trajectory[i][v_index] = 16-float(i+1)/4
+        #for i in range(14,20):
+        #    self._trajectory[i][v_index] = 0
+        for i in range(self.npoints()):
+             self._trajectory[i][v_index] = 0
+        self.stopped = True
+
+    def restart(self):
+        v_index = self.mode.index('v')
+        for i in range(self.npoints()):
+            self._trajectory[i][v_index] = 4
+        self.stopped = False
+
+    def get_points_list(self, start=0, end=None):
+        if not end:
+            end  = self.npoints()
+        res = []
+        for i in range(start, end):
+            res.append(self._trajectory[i][self.dimensions_used].tolist())
+        return np.array(res)
 
     # TODO FIX
     def add_camera_point(self, x, y, t=-1, h=720, w=1280):

@@ -1,6 +1,6 @@
 from gym_urbandriving.state.state import PositionState
 from gym_urbandriving.assets import Terrain, Lane, Street, Sidewalk,\
-    Pedestrian, Car
+    Pedestrian, Car, TrafficLight
 import numpy as np
 
 class WideIntersectionState(PositionState):
@@ -65,3 +65,14 @@ class WideIntersectionState(PositionState):
             man.vel = 2
             if not any([man.collides(obj) for obj in self.static_objects+self.dynamic_objects]):
                 self.dynamic_objects.append(man)
+
+        if self.traffic_lights:
+            self.dynamic_objects.append(TrafficLight(700, 450, 0))
+            self.dynamic_objects.append(TrafficLight(700, 350, 0))
+            self.dynamic_objects.append(TrafficLight(300, 550, -np.pi))
+            self.dynamic_objects.append(TrafficLight(300, 650, -np.pi))
+
+            self.dynamic_objects.append(TrafficLight(550, 700, -(np.pi/2), initial_color="red"))
+            self.dynamic_objects.append(TrafficLight(650, 700, -(np.pi/2), initial_color="red"))
+            self.dynamic_objects.append(TrafficLight(450, 300, (np.pi/2), initial_color="red"))
+            self.dynamic_objects.append(TrafficLight(350, 300, (np.pi/2), initial_color="red"))

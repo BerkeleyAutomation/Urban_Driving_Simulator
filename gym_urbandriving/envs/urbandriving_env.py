@@ -87,7 +87,7 @@ class UrbanDrivingEnv(gym.Env):
         reward = self.reward_fn(self.current_state)
         done = (self.current_state.time == self.max_time) or len(dynamic_coll) or len(static_coll)
 
-        info_dict = {"saved_actions": actions}
+        info_dict = {"saved_actions": actions, "static_coll" : static_coll, "dynamic_coll" : dynamic_coll}
 
         return state, reward, done, info_dict
 
@@ -124,7 +124,7 @@ class UrbanDrivingEnv(gym.Env):
 
         if self.use_ray:
             assert(all([type(bgagent) == RayNode for i, bgagent in self.bg_agents.items()]))
-            stateid = ray.put(self.get_state_copy())
+            stateid = ray.put(self.current_state)
             actionids = {}
             for i, agent in self.bg_agents.items():
                 if i is not agentnum:
@@ -136,7 +136,7 @@ class UrbanDrivingEnv(gym.Env):
             assert(all([type(bgagent) != RayNode for i, bgagent in self.bg_agents.items()]))
             for i, agent in self.bg_agents.items():
                 if i is not agentnum:
-                    actions[i] = agent.eval_policy(self.get_state_copy())
+                    actions[i] = agent.eval_policy(self.current_state)
         for i, dobj in enumerate(self.current_state.dynamic_objects):
             dobj.step(actions[i])
 

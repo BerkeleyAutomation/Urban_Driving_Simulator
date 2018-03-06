@@ -5,6 +5,7 @@ from gym_urbandriving.assets.primitives.dynamic_shape import DynamicShape
 from gym_urbandriving.assets.terrain import Terrain
 from gym_urbandriving.assets.sidewalk import Sidewalk
 from gym_urbandriving.assets.pedestrian import Pedestrian
+from gym_urbandriving.assets.traffic_light import TrafficLight
 
 from gym import spaces
 import numpy as np
@@ -39,7 +40,7 @@ class Car(Rectangle, DynamicShape):
     def __init__(self, x, y, xdim=80, ydim=40, angle=0.0, vel=0.0,
                  max_vel=5, mass=100.0, dynamics_model="kinematic", destination=None,
                  trajectory=None):
-        Rectangle.__init__(self, x, y, xdim, ydim, angle, mass=mass, sprite="grey_car.png")
+        Rectangle.__init__(self, x, y, xdim, ydim, angle, mass=mass, sprite="blue_car.png")
         l_f = l_r = self.ydim / 2.0
         DynamicShape.__init__(self, l_r, l_f, max_vel, dynamics_model)
         self.vel = vel
@@ -85,6 +86,11 @@ class Car(Rectangle, DynamicShape):
         else:
             self.x, self.y, self.vel, self.angle = self.point_model_step(action, self.x, self.y, self.vel, self.angle)
 
+    def set_pos(self, x, y, vel, angle):
+        self.shapely_obj = None
+        angle = (angle + 2*np.pi) % (2*np.pi)
+        self.x, self.y, self.vel, self.angle = x, y, vel, angle
+
     def get_state(self):
         """
         Get state.
@@ -110,6 +116,9 @@ class Car(Rectangle, DynamicShape):
         """
         from gym_urbandriving.assets.lane import Lane
         if type(other) in {Terrain, Sidewalk, Car, Pedestrian}:
+            return True
+
+        if type(other) in {TrafficLight} and other.color == 'red':
             return True
 
         if type(other) is Lane:
