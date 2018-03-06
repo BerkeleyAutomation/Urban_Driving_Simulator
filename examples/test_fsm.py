@@ -9,8 +9,9 @@ import scipy as sc
 import scipy.interpolate
 from scipy.interpolate import UnivariateSpline
 
-from gym_urbandriving.agents import KeyboardAgent, AccelAgent, NullAgent, TrafficLightAgent, PursuitAgent, ControlAgent
+from gym_urbandriving.agents import KeyboardAgent, AccelAgent, NullAgent, TrafficLightAgent, PursuitAgent, ControlAgent, PlanningPursuitAgent
 from gym_urbandriving.planning import Trajectory, CasteljauPlanner, GeometricPlanner
+
 from gym_urbandriving.assets import Car, TrafficLight
 
 from copy import deepcopy
@@ -19,18 +20,8 @@ from copy import deepcopy
  Test File, to demonstrate general functionality of environment
 """
 
-NUM_CARS = 10
-
-def position_function(res_path, num_points, v0, v1, timestep):
-    if abs(v0-v1<.0001):
-        dist = v0*timestep
-    else:
-        dist = num_points*v0*(np.e**((v1-v0)*float(timestep)/(num_points))-1)/(v1-v0)
-    frac = dist%1
-    index = (int)(dist)
-    if index >= num_points-1:
-        return [res_path[-1][0], res_path[-1][1]]
-    return [res_path[index][0]*(1-frac) + res_path[index+1][0]*(frac), res_path[index][1]*(1-frac) + res_path[index+1][1]*(frac)]
+NUM_CARS = 4
+DEMO_LEN = 300
 
 
 def f():
@@ -141,14 +132,9 @@ def f():
     print end_t - start_t
 
 
-    agents = []
-
-    for i in range(NUM_CARS):
-        agents.append(PursuitAgent(i))
-    for i in range(NUM_CARS, NUM_CARS+4):
-        agents.append(TrafficLightAgent(i))
-
     sim_time = 0
+
+    action_trajs = [Trajectory(mode = 'cs') for _ in range(NUM_CARS)]
 
     #max_e = 0
     # Simulation loop
@@ -156,110 +142,31 @@ def f():
                               visualizer=vis,
                               max_time=500,
                               randomize=False,
-                              agent_mappings={Car:NullAgent,
+                              agent_mappings={Car:PlanningPursuitAgent,
                                               TrafficLight:TrafficLightAgent},
                               use_ray=False
     )
     env._reset()
     state = env.current_state
 
+
     action_trajs = [Trajectory(mode = 'cs') for _ in range(NUM_CARS)]
     start = timeit.default_timer()
-    for sim_time in range(200):
-        """
-        if obj.trajectory.npoints() <= 0:
-            if obj.x<300:
-                for p in transform(obj.x, obj.y, obj.angle, maintain):
-                    traj.add_point(p)
-            elif obj.x<375 and light=='red' and obj.vel>4:
-                for p in transform(obj.x, obj.y, obj.angle, decc):
-                    traj.add_point(p)
-            elif obj.x<375 and light=='red' and obj.vel<=4:
-                obj.vel = 0
-                for p in transform(obj.x, obj.y, obj.angle, stop):
-                    traj.add_point(p)
-            elif obj.x<375 and light=='green' and obj.vel>4:
-                obj.vel = 0
-                for p in transform(obj.x, obj.y, obj.angle, maintain):
-                    traj.add_point(p)
-            elif obj.x<375 and light=='green' and obj.vel<=4:
-                obj.vel = 0
-                for p in transform(obj.x, obj.y, obj.angle, acc):
-                    traj.add_point(p)
-            elif obj.y<600:
-                for p in transform(obj.x, obj.y, obj.angle, right_full):
-                    traj.add_point(p)
-            elif obj.y<750:
-                for p in transform(obj.x, obj.y, -np.pi/2, maintain):
-                    traj.add_point(p)
-            elif obj.vel > 4:
-                for p in transform(obj.x, obj.y, obj.angle, slow_decc):
-                    traj.add_point(p)
-            else:
-                obj.vel = 0
-                for p in transform(obj.x, obj.y, obj.angle, stop):
-                    traj.add_point(p)
+   
 
-        """
+    agent = PlanningPursuitAgent(0)
+    action = None
 
-        for x in range(NUM_CARS):
-            state_copy = deepcopy(state)
-            testing_env = uds.UrbanDrivingEnv(init_state=state_copy,
-                                      visualizer=None,
-                                      max_time=500,
-                                      randomize=False,
-                                      agent_mappings={Car:NullAgent,
-                                                      TrafficLight:TrafficLightAgent},
-                                      use_ray=False
-            )
-            state_copy = testing_env.current_state
-            if state_copy.dynamic_objects[x].trajectory.stopped:
-                state_copy.dynamic_objects[x].trajectory.restart()
-                for t in range(10):
-                    actions = []
-                    for agent in agents:
-                        action = agent.eval_policy(state_copy)
-                        actions.append(action)
-                    state_copy, reward, done, info_dict = testing_env._step_test(actions)
-                    done = state_copy.collides_any_dynamic(x)
-                    if done:
-                        break
-                if not done:
-                    state.dynamic_objects[x].trajectory.restart()
 
-            elif not state_copy.dynamic_objects[x].trajectory.stopped:
-                #state_copy.dynamic_objects[x].trajectory.modify_to_stop()
-                for t in range(10):
-                    actions = []
-                    for agent in agents:
-                        action = agent.eval_policy(state_copy)
-                        actions.append(action)
-                    state_copy, reward, done, info_dict = testing_env._step_test(actions)
-                    done = state_copy.collides_any_dynamic(x)
-                    if done:
-                        break
-                if done:
-                    state.dynamic_objects[x].trajectory.modify_to_stop()
+    for sim_time in range(DEMO_LEN):
 
-        actions = []
-        for agent in agents:
-            action = agent.eval_policy(state)
-            actions.append(action)
+        action = agent.eval_policy(state)
+
+        # Simulate the state
+        state, reward, done, info_dict = env._step(action)
+        env._render()
         for i in range(NUM_CARS):
-            action_trajs[i].add_point(actions[i])
-        state, reward, done, info_dict = env._step_test(actions)
-        #print actions[:NUM_CARS]
-        #print [obj.vel for obj in state.dynamic_objects[:NUM_CARS]]
-        #env._render()
-        #input()
-        print sim_time
-        print sim_time / (timeit.default_timer() - start)
-#        input()
-
-        #for index in range(NUM_CARS):
-            #obj = state.dynamic_objects[index]
-            #print "actual", obj.x, obj.y
-            #print "predicted", position_function(pos_functions_args[index][0], pos_functions_args[index][1], pos_functions_args[index][2], pos_functions_args[index][3], sim_time - pos_functions_args[index][4])
+            action_trajs[i].add_point(info_dict['saved_actions'][i])
 
 
     state = visualizing_env.current_state
@@ -273,13 +180,11 @@ def f():
         agents.append(TrafficLightAgent(i))
 
 
-    for sim_time in range(400):
-        actions = []
-        for agent in agents:
-            action = agent.eval_policy(state)
-            actions.append(action)
 
-        state, reward, done, info_dict = visualizing_env._step_test(actions)
+    for sim_time in range(DEMO_LEN):
+        action = agent.eval_policy(state)
+        # Simulate the state
+        state, reward, done, info_dict = visualizing_env._step(action)
         visualizing_env._render()
 
 # Collect profiling data
