@@ -15,7 +15,7 @@ class VelocityMPCPlanner:
             if type(obj) in {Car}:
                 agents.append(PursuitAgent(i))
             elif type(obj) in {TrafficLight}:
-                agents.append(TrafficLightAgent(i))
+                agents.append(NullAgent(i))
             else:
                 agents.append(NullAgent(i))
 
@@ -25,7 +25,7 @@ class VelocityMPCPlanner:
                                   max_time=500,
                                   randomize=False,
                                   agent_mappings={Car:NullAgent,
-                                                  TrafficLight:TrafficLightAgent},
+                                                  TrafficLight:NullAgent},
                                   use_ray=False
         )
         state_copy = testing_env.current_state

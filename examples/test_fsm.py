@@ -20,7 +20,7 @@ from copy import deepcopy
 NUM_CARS = 4
 NUM_PEDS = 0
 NUM_LIGHTS = 4
-DEMO_LEN = 30
+DEMO_LEN = 300
 
 
 def f():
