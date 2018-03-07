@@ -7,7 +7,7 @@ import math
 import random
 
 from gym_urbandriving.agents import KeyboardAgent, AccelAgent, NullAgent, TrafficLightAgent, PursuitAgent, ControlAgent, PlanningPursuitAgent
-from gym_urbandriving.planning import Trajectory, CasteljauPlanner, GeometricPlanner
+from gym_urbandriving.planning import Trajectory, CasteljauPlanner, GeometricPlanner, VelocityMPCPlanner
 
 from gym_urbandriving.assets import Car, TrafficLight
 
@@ -18,7 +18,9 @@ from copy import deepcopy
 """
 
 NUM_CARS = 4
-DEMO_LEN = 300
+NUM_PEDS = 0
+NUM_LIGHTS = 4
+DEMO_LEN = 30
 
 
 def f():
@@ -70,7 +72,7 @@ def f():
                               visualizer=vis,
                               max_time=500,
                               randomize=False,
-                              agent_mappings={Car:PlanningPursuitAgent,
+                              agent_mappings={Car:NullAgent,
                                               TrafficLight:TrafficLightAgent},
                               use_ray=False
     )
@@ -82,16 +84,25 @@ def f():
 
     action_trajs = [Trajectory(mode = 'cs') for _ in range(NUM_CARS)]   
 
-    agent = PlanningPursuitAgent(0)
-    action = None
+
+    agents = []
+    for i in range(0, NUM_CARS+NUM_PEDS): # TODO FIX FOR PEDS
+        agents.append(PursuitAgent(i))
+    for i in range(NUM_CARS + NUM_PEDS, NUM_CARS + NUM_PEDS + NUM_LIGHTS):
+        agents.append(TrafficLightAgent(i))
 
 
     for sim_time in range(DEMO_LEN):
+        actions = [] 
 
-        action = agent.eval_policy(state)
+        for agent_num in range(NUM_CARS+NUM_PEDS):
+            target_vel = VelocityMPCPlanner().plan(deepcopy(state), agent_num)
+            state.dynamic_objects[agent_num].trajectory.set_vel(target_vel)
 
+        for agent in agents:
+            actions.append(agent.eval_policy(state))
         # Simulate the state
-        state, reward, done, info_dict = env._step(action)
+        state, reward, done, info_dict = env._step_test(actions)
         env._render()
         for i in range(NUM_CARS):
             action_trajs[i].add_point(info_dict['saved_actions'][i])

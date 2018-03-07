@@ -111,6 +111,8 @@ class Trajectory(object):
         return [[self._trajectory[i][self.mode.index('x')],self._trajectory[i][self.mode.index('y')]] for i in range(self.npoints())]
 
     def set_vel(self, target_vel):
+        if target_vel == None:
+            return
         v_index = self.mode.index('v')
         for i in range(self.npoints()):
             self._trajectory[i][v_index] = target_vel

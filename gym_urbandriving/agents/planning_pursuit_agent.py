@@ -28,12 +28,7 @@ class PlanningPursuitAgent(PursuitAgent):
         """
 
         target_vel = VelocityMPCPlanner().plan(deepcopy(state), self.agent_num)
-        if target_vel == 4:
-            state.dynamic_objects[self.agent_num].trajectory.set_vel(4)
-        elif target_vel == 0:
-            state.dynamic_objects[self.agent_num].trajectory.set_vel(0)
-        else:
-            pass
+        state.dynamic_objects[self.agent_num].trajectory.set_vel(target_vel)
 
         return super(PlanningPursuitAgent, self).eval_policy(state)
 
