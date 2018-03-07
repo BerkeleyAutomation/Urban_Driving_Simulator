@@ -5,9 +5,6 @@ import time
 import numpy as np
 import math
 import random
-import scipy as sc
-import scipy.interpolate
-from scipy.interpolate import UnivariateSpline
 
 from gym_urbandriving.agents import KeyboardAgent, AccelAgent, NullAgent, TrafficLightAgent, PursuitAgent, ControlAgent, PlanningPursuitAgent
 from gym_urbandriving.planning import Trajectory, CasteljauPlanner, GeometricPlanner
@@ -49,15 +46,6 @@ def f():
     visualizing_env._reset()
     state = visualizing_env.current_state
 
-    # Car 0 will be controlled by our KeyboardAgent
-
-    """
-    agent = KeyboardAgent()
-    """
-
-    pos_functions_args = [] #(res_path, num_points, v0, v1, time offset)
-    planner = CasteljauPlanner()
-    geoplanner = GeometricPlanner(deepcopy(state), inter_point_d=40.0, planning_time=0.1)
     all_targets = [[450,375,-np.pi/2],
                    [550,375,np.pi/2],
                    [625,450,-np.pi],
@@ -67,70 +55,10 @@ def f():
                    [375,450,-np.pi],
                    [375,550,0.0]]
 
-    import timeit
+    geoplanner = GeometricPlanner(deepcopy(state), inter_point_d=40.0, planning_time=0.1, optional_targets = all_targets, num_cars = NUM_CARS)
 
-    start_t = timeit.default_timer()
-    for obj in state.dynamic_objects[:NUM_CARS]:
-        orig_obj = obj
-        obj = deepcopy(obj)
-        obj.vel = 4
-        closest_point = sorted(all_targets, key = lambda p: (p[0]-obj.x)**2+(p[1]-obj.y)**2 )[0]
-        mid_target = sorted(all_targets, key = lambda p: (p[0]-obj.destination[0])**2+(p[1]-obj.destination[1])**2)[0]
-        traj = Trajectory(mode = 'xyv', fsm=0)
-
-        path_to_follow = planner.plan(obj.x,obj.y, obj.vel,obj.angle, closest_point[0],closest_point[1],4,closest_point[2])
-        path_to_follow = geoplanner.plan(obj, closest_point[0], closest_point[1], 4, closest_point[2])
-        for p in path_to_follow:
-            traj.add_point(p)
-        path_to_follow = planner.plan(closest_point[0],closest_point[1],4,closest_point[2], mid_target[0],mid_target[1],4,mid_target[2])
-        #print(closest_point)
-        obj.set_pos(closest_point[0], closest_point[1], 4, closest_point[2])
-        path_to_follow = geoplanner.plan(obj, mid_target[0],mid_target[1],4,mid_target[2])
-        for p in path_to_follow:
-            traj.add_point(p)
-            
-        path_to_follow = planner.plan(mid_target[0],mid_target[1],4,mid_target[2], obj.destination[0],obj.destination[1],4,obj.destination[3])
-        obj.set_pos(mid_target[0], mid_target[1], 4, mid_target[2])
-        path_to_follow = geoplanner.plan(obj, obj.destination[0], obj.destination[1], 4, obj.destination[3])
-        for p in path_to_follow:
-            traj.add_point(p)
-
-        orig_obj.trajectory = traj
-        orig_obj.vel = 0
-        orig_obj.trajectory.restart()
+    geo_trajs = geoplanner.plan_all_agents(state)
         
-        print orig_obj.trajectory.get_points_list()
-        npoints = orig_obj.trajectory.npoints()
-        points = orig_obj.trajectory.get_points_list()
-        xp, yp = points[:,0], points[:,1]
-
-        splx = np.poly1d(np.polyfit(np.arange(npoints), xp, deg=4))
-        sply = np.poly1d(np.polyfit(np.arange(npoints), yp, deg=4))
-        splx = sc.interpolate.interp1d(np.arange(npoints), xp, 'cubic')
-        sply = sc.interpolate.interp1d(np.arange(npoints), yp, 'cubic')
-        #splx = UnivariateSpline(np.arange(npoints), points[:,0])
-        #sply = UnivariateSpline(np.arange(npoints), points[:,1])
-        #splx.set_smoothing_factor(0.9)
-        #sply.set_smoothing_factor(0.9)
-
-
-        xn = splx(np.linspace(0,npoints-1,200))
-        yn = sply(np.linspace(0,npoints-1,200))
-        xn = sc.ndimage.filters.gaussian_filter1d(xn, 20)
-        yn = sc.ndimage.filters.gaussian_filter1d(yn, 20)
-
-        #sc.interpolate.splprep([newx, newy], s=0)
-        newtraj = Trajectory(mode = 'xyv', fsm=0)
-        for x, y in zip(xn, yn):
-            newtraj.add_point((x, y, 4))
-        newtraj.restart()
-        orig_obj.trajectory = newtraj
-        print orig_obj.trajectory.get_points_list()
-        
-        
-    end_t = timeit.default_timer()
-    print end_t - start_t
-
 
     sim_time = 0
 
@@ -146,13 +74,13 @@ def f():
                                               TrafficLight:TrafficLightAgent},
                               use_ray=False
     )
+
+
     env._reset()
     state = env.current_state
 
 
-    action_trajs = [Trajectory(mode = 'cs') for _ in range(NUM_CARS)]
-    start = timeit.default_timer()
-   
+    action_trajs = [Trajectory(mode = 'cs') for _ in range(NUM_CARS)]   
 
     agent = PlanningPursuitAgent(0)
     action = None
