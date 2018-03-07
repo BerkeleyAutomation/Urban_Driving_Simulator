@@ -239,25 +239,30 @@ class Trainer:
         
 
         for i in range(self.NUM_CARS):
+            agents.append(PursuitAgent(i))
+        for i in range(self.NUM_CARS , self.NUM_CARS + self.NUM_LIGHTS):
+            agents.append(TrafficLightAgent(i))
 
-            agents.append(ControlAgent(agent_num = i))
-    
-        planner = RRTMPlanner(agents,planner = self.PLANNERS,time = self.TIME, goal = self.GOAL_BIAS,prune = self.PRUNE_RADIUS,selection = self.SELECTION_RADIUS)
-        plans  = planner.plan(deepcopy(state))
+        all_targets = [[450,375,-np.pi/2],
+                       [550,375,np.pi/2],
+                       [625,450,-np.pi],
+                       [625,550,0.0],
+                       [450,625,-np.pi/2],
+                       [550,625,np.pi/2],
+                       [375,450,-np.pi],
+                       [375,550,0.0]]
+        geoplanner = GeometricPlanner(deepcopy(state), inter_point_d=40.0, planning_time=0.1, optional_targets = all_targets, num_cars = self.NUM_CARS)
+        geo_trajs = geoplanner.plan_all_agents(state)
 
-        for i in range(self.NUM_CARS):
-            state.dynamic_objects[i].trajectory = plans[i]
-
-        self.d_logger.log_info('control_trajs', deepcopy(plans))
-
-        pos_trajs = []
-        for i in range(self.NUM_CARS):
-            pos_trajs.append(Trajectory(mode='xyva'))
-
-
+        pos_trajs = [Trajectory(mode='xyva') for _ in range(self.NUM_CARS)]
+        action_trajs = [Trajectory(mode = 'cs') for _ in range(self.NUM_CARS)]
 
         # Simulation loop
-        for i in range(self.time_horizon):
+        for sim_time in range(self.DEMO_LEN):
+
+            for agent_num in range(self.NUM_CARS):
+                target_vel = VelocityMPCPlanner().plan(deepcopy(state), agent_num)
+                state.dynamic_objects[agent_num].trajectory.set_vel(target_vel)
 
             # Get all actions
             sup_actions = []
@@ -265,7 +270,9 @@ class Trainer:
                 action = agent.eval_policy(state)
                 sup_actions.append(action)
 
-            actions = self.il_learn.eval_model(state,goal_states)
+            actions = [self.il_learn.eval_model(state,goal_states[i]) for i in range(self.NUM_CARS)]
+            for i in range(self.NUM_CARS, self.NUM_CARS+ self.NUM_LIGHTS):
+                actions.append(agents[i].eval_policy())
 
             # save old state
             state_copy = env.get_state_copy()
@@ -285,10 +292,12 @@ class Trainer:
             for i in range(self.NUM_CARS):
                 obj = state_copy.dynamic_objects[i]
                 pos_trajs[i].add_point([obj.x, obj.y, obj.vel, obj.angle])
+                action_trajs[i].add_point(actions[i])
 
         self.d_logger.log_info('pos_trajs', pos_trajs)
+        self.d_logger.log_info('control_trajs', action_trajs)
+        self.d_logger.log_info('pos_trajs', pos_trajs)
         return rollout,goal_states
-
 
     def collect_policy_rollouts(self):
         """
