@@ -5,8 +5,8 @@ from copy import deepcopy
 import gym_urbandriving as uds
 
 class VelocityMPCPlanner:
-    def __init__(self):
-        pass
+    def __init__(self, lookahead=10):
+        self.lookahead = lookahead
 
 
     def plan(self, state, agent_num):
@@ -31,7 +31,7 @@ class VelocityMPCPlanner:
         state_copy = testing_env.current_state
         if state_copy.dynamic_objects[agent_num].trajectory.stopped:
             state_copy.dynamic_objects[agent_num].trajectory.set_vel(4)
-            for t in range(10):
+            for t in range(self.lookahead):
                 actions = []
                 for agent in agents:
                     action = agent.eval_policy(state_copy)
@@ -44,7 +44,7 @@ class VelocityMPCPlanner:
                 return 4
 
         elif not state_copy.dynamic_objects[agent_num].trajectory.stopped:
-            for t in range(10):
+            for t in range(self.lookahead):
                 actions = []
                 for agent in agents:
                     action = agent.eval_policy(state_copy)
