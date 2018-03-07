@@ -82,7 +82,7 @@ class GeometricPlanner:
 
             orig_obj.trajectory = traj
             orig_obj.vel = 0
-            orig_obj.trajectory.restart()
+            orig_obj.trajectory.set_vel(4)
             
             print orig_obj.trajectory.get_points_list()
             npoints = orig_obj.trajectory.npoints()
@@ -108,7 +108,7 @@ class GeometricPlanner:
             newtraj = Trajectory(mode = 'xyv', fsm=0)
             for x, y in zip(xn, yn):
                 newtraj.add_point((x, y, 4))
-            newtraj.restart()
+            newtraj.set_vel(4)
             orig_obj.trajectory = newtraj
 
     def plan(self, controlled_object, x1, y1, v1, a1):

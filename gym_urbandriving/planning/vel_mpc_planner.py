@@ -30,7 +30,7 @@ class VelocityMPCPlanner:
         )
         state_copy = testing_env.current_state
         if state_copy.dynamic_objects[agent_num].trajectory.stopped:
-            state_copy.dynamic_objects[agent_num].trajectory.restart()
+            state_copy.dynamic_objects[agent_num].trajectory.set_vel(4)
             for t in range(10):
                 actions = []
                 for agent in agents:
@@ -42,7 +42,6 @@ class VelocityMPCPlanner:
                     break
             if not done:
                 return 4
-                state.dynamic_objects[agent_num].trajectory.restart()
 
         elif not state_copy.dynamic_objects[agent_num].trajectory.stopped:
             for t in range(10):
@@ -56,5 +55,4 @@ class VelocityMPCPlanner:
                     break
             if done:
                 return 0
-                state.dynamic_objects[self.agent_num].trajectory.modify_to_stop()
         return None

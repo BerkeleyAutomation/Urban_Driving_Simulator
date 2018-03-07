@@ -25,20 +25,13 @@ class PlanningPursuitAgent(PursuitAgent):
         ----------
         state : PositionState
             State of the world, unused
-
-        Returns
-        -------
-        action
-            Keyboard action
         """
-
-
 
         target_vel = VelocityMPCPlanner().plan(deepcopy(state), self.agent_num)
         if target_vel == 4:
-            state.dynamic_objects[self.agent_num].trajectory.restart()
+            state.dynamic_objects[self.agent_num].trajectory.set_vel(4)
         elif target_vel == 0:
-            state.dynamic_objects[self.agent_num].trajectory.modify_to_stop()
+            state.dynamic_objects[self.agent_num].trajectory.set_vel(0)
         else:
             pass
 
