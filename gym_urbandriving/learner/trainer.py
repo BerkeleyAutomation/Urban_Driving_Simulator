@@ -9,8 +9,8 @@ from copy import deepcopy
 from gym_urbandriving.utils.data_logger import DataLogger
 from gym_urbandriving.learner.imitation_learner import IL
 
-from gym_urbandriving.agents import NullAgent, TrafficLightAgent, ControlAgent
-from gym_urbandriving.planning import Trajectory, RRTMPlanner
+from gym_urbandriving.agents import NullAgent, TrafficLightAgent, ControlAgent, PursuitAgent
+from gym_urbandriving.planning import Trajectory, RRTMPlanner, GeometricPlanner, VelocityMPCPlanner
 from gym_urbandriving.assets import Car, TrafficLight
 
 THRESH = 150
@@ -22,7 +22,7 @@ il_learn = IL('test_data')
 
 class Trainer:
 
-    def __init__(self,file_path,time = 3.0, goal_bias = 0.05, planner = 'SST',num_data_points = 10, num_eval_points = 10, time_horizon = 2, num_cars = 2):
+    def __init__(self,file_path,time = 3.0, goal_bias = 0.05, planner = 'SST',num_data_points = 10, num_eval_points = 10, time_horizon = 2, num_cars = 2, num_lights=4):
 
         self.PLANNERS = planner
         self.TIME = time
@@ -33,6 +33,8 @@ class Trainer:
         self.NUM_DATA_POINTS = num_data_points
         self.NUM_EVAL_POINTS = num_eval_points
         self.NUM_CARS = num_cars
+        self.NUM_LIGHTS = num_lights
+        self.DEMO_LEN = 300
 
         self.d_logger = DataLogger(file_path)
         self.il_learn = IL(file_path)
@@ -49,7 +51,6 @@ class Trainer:
             car_state = np.array([final_states[i].x,final_states[i].y])
 
             norm = LA.norm(goal_state - car_state)
-
 
             if norm > THRESH:
                 return False
@@ -128,7 +129,7 @@ class Trainer:
 
         env = uds.UrbanDrivingEnv(init_state=init_state,
                                   visualizer=vis,
-                                  max_time=500,
+                                  max_time=self.DEMO_LEN,
                                   randomize=True,
                                   agent_mappings={Car:NullAgent,
                                                   TrafficLight:TrafficLightAgent},
@@ -160,39 +161,40 @@ class Trainer:
         
 
         for i in range(self.NUM_CARS):
+            agents.append(PursuitAgent(i))
+        for i in range(self.NUM_CARS , self.NUM_CARS + self.NUM_LIGHTS):
+            agents.append(TrafficLightAgent(i))
 
-            agents.append(ControlAgent(agent_num = i))
-    
-        planner = RRTMPlanner(agents,planner = self.PLANNERS,time = self.TIME, goal = self.GOAL_BIAS,prune = self.PRUNE_RADIUS,selection = self.SELECTION_RADIUS)
-        plans  = planner.plan(deepcopy(state))
+        all_targets = [[450,375,-np.pi/2],
+                       [550,375,np.pi/2],
+                       [625,450,-np.pi],
+                       [625,550,0.0],
+                       [450,625,-np.pi/2],
+                       [550,625,np.pi/2],
+                       [375,450,-np.pi],
+                       [375,550,0.0]]
+        geoplanner = GeometricPlanner(deepcopy(state), inter_point_d=40.0, planning_time=0.1, optional_targets = all_targets, num_cars = self.NUM_CARS)
+        geo_trajs = geoplanner.plan_all_agents(state)
 
-        for i in range(self.NUM_CARS):
-            state.dynamic_objects[i].trajectory = plans[i]
-
-        self.d_logger.log_info('control_trajs', deepcopy(plans))
-
-        pos_trajs = []
-        for i in range(self.NUM_CARS):
-            pos_trajs.append(Trajectory(mode='xyva'))
+        pos_trajs = [Trajectory(mode='xyva') for _ in range(self.NUM_CARS)]
+        action_trajs = [Trajectory(mode = 'cs') for _ in range(self.NUM_CARS)]
 
 
         # Simulation loop
-        while(True):
-            i = 0 
-
+        for sim_time in range(self.DEMO_LEN):
             # get all actions
-            actions = []
-            for agent in agents:
-                action = agent.eval_policy(state)
-                actions.append(action)
+            actions = [] 
 
+            for agent_num in range(self.NUM_CARS):
+                target_vel = VelocityMPCPlanner().plan(deepcopy(state), agent_num)
+                state.dynamic_objects[agent_num].trajectory.set_vel(target_vel)
+
+            for agent in agents:
+                actions.append(agent.eval_policy(state))
             # save old state
             state_copy = env.get_state_copy()
 
             # break if necessary
-            if actions[0] is None:
-                self.d_logger.log_info('pos_trajs', pos_trajs)
-                return rollout,goal_states
 
             # Simulate the state
             state, reward, done, info_dict = env._step_test(actions)
@@ -208,7 +210,11 @@ class Trainer:
             for i in range(self.NUM_CARS):
                 obj = state_copy.dynamic_objects[i]
                 pos_trajs[i].add_point([obj.x, obj.y, obj.vel, obj.angle])
+                action_trajs[i].add_point(actions[i])
 
+        self.d_logger.log_info('control_trajs', action_trajs)
+        self.d_logger.log_info('pos_trajs', pos_trajs)
+        return rollout,goal_states
 
 
     def rollout_policy(self):

@@ -8,7 +8,7 @@ NUM_EVAL_POINTS = 1 #NUMBER OF TRAJECTORIES TO SAMPLE FROM THE LEANRED POLICY (i
 NUM_ITERS = 1 #NNumber of iterations 
 TIME_HORIZON = 100 #Time horizon for the learned policy
 PLANNING_TIME = 50 #planning time limit for the supervisor 
-NUM_CARS = 1
+NUM_CARS = 2
 #Path to save data
 
 FILE_PATH = 'test_data/'
