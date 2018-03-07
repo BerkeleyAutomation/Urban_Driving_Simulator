@@ -5,7 +5,7 @@ import numpy as np
 import IPython
 import os
 import glob
-from sklearn.tree import DecisionTreeRegressor
+from sklearn.tree import DecisionTreeClassifier
 from numpy.random import uniform
 import numpy.linalg as LA
 
@@ -55,7 +55,7 @@ class IL():
         self.Y_test = []
 
         #We are currently using a decision tree, however this can be quite modular
-        self.model = DecisionTreeRegressor()
+        self.model = DecisionTreeClassifier()
 
 
         for rollout in self.rollouts:
@@ -67,34 +67,37 @@ class IL():
 
             goal_state = rollout[1]['goal_states']
             success = rollout[1]['success']
+            num_cars = rollout[1]['num_cars']
 
             for datum in rollout[0]:
 
                 state = datum['state']
-                action = self.make_action(datum['action'])
+                actions = self.make_action(datum['target_velocities'])
 
-                a_ = action.flatten()
+                
 
-                if None in a_:
+                if None in actions:
                     continue # one car did not take a valud action
 
-                s_ = self.make_state(state,goal_state)
+                states = self.make_state(num_cars,state,goal_state)
 
-                print a_.shape
-                print a_
-                print s_.shape
+              
                 if train:
-                    self.X_train.append(s_)
-                    self.Y_train.append(a_)
+                    for s_ in states:
+                        self.X_train.append(s_)
+                    for a_ in actions:
+                        self.Y_train.append(a_)
                 else:
-                    self.X_test.append(s_)
-                    self.Y_test.append(a_)
+                    for s_ in states:
+                        self.X_test.append(s_)
+                    for a_ in actions:
+                        self.Y_test.append(a_)
 
         self.model.fit(self.X_train,self.Y_train) 
         
 
 
-    def make_state(self,state,goal_state):
+    def make_state(self,num_cars,state,goal_state):
         """
         Constructs the state space to be learned on, which is a concatentation of the
         current state and the goal state
@@ -109,12 +112,14 @@ class IL():
         numpy array of teh concatenated state for all agents
         """
         s_ = []
-        for i in range(self.num_cars):
-            s_.append(state.dynamic_objects[i].get_state())
-            s_.append(np.array(goal_state[i]))
+        for i in range(num_cars):
+            s = np.array(state.dynamic_objects[i].get_state())
+
+            s_.append(s)
+            
 
 
-        return np.array(s_).flatten()
+        return s_
 
     def make_action(self,action):
         """
@@ -128,11 +133,17 @@ class IL():
         ------------
         numpy array of of actions
         """
-        action = np.array(action)
+        binary_list = []
+        for a in action:
+            if a == 4:
+                binary_list.append(1)
+            else:
+                binary_list.append(0)
 
-        return action
 
-    def unmake_action(self,action):
+        return binary_list
+
+    def unmake_action(self,actions):
         """
         Converst the output of the model to an action usable by the simulator
 
@@ -144,16 +155,15 @@ class IL():
         ------------
         list of each action for the agent
         """
+        velocities = []
+        for i in range(len(actions)):
 
-        action = list(action.reshape(self.num_cars,2))
+            if np.abs(actions[i] - 4) < 1e-5:
+                velocities.append(4)
+            else:
+                velocities.append(0)
 
-        for i in range(len(action)):
-            #odd hack, will fix 
-            if action[i][1] < 0.0: 
-                action[i][1] = 0.00001
-
-
-        return action
+        return velocities
 
 
     def get_train_error(self):
@@ -174,9 +184,8 @@ class IL():
 
             y_ = self.model.predict(x)
 
-            err = LA.norm(y-y_)
-
-            avg_err += err
+            if not y_ == y:
+                avg_err += 1.0
 
         return avg_err/float(len(self.X_train))
 
@@ -196,11 +205,17 @@ class IL():
         for rollout in evaluations:
             for datum in rollout:
 
-                robot_action = self.make_action(datum['action'])
-                sup_action = self.make_action(datum['sup_action'])
-                err = LA.norm(robot_action-sup_action)
+                robot_action = self.make_action(datum['target_velocities_learner'])
+                sup_action = self.make_action(datum['target_velocities_sup'])
+                
+                for i in range(len(robot_action)):
+                    r_a_ = robot_action[i]
+                    s_a_ = sup_action[i]
 
-                avg_err += err
+                    if not r_a_ == s_a_:
+                        avg_err += 1.0
+
+                
                 count += 1.0
 
 
@@ -227,9 +242,9 @@ class IL():
 
             y_ = self.model.predict(x)
 
-            err = LA.norm(y-y_)
-
-            avg_err += err
+            if not y_ == y:
+                avg_err += 1.0
+            
 
         if len(self.X_test) == 0:
             return avg_err
@@ -239,7 +254,7 @@ class IL():
 
 
 
-    def eval_model(self,state,goal_state):
+    def eval_model(self,num_cars, state,goal_state):
         """
         Evaluates model, which is used in execution 
         
@@ -254,12 +269,15 @@ class IL():
         """
 
 
-        s_ = self.make_state(state,goal_state)
+        states = self.make_state(num_cars,state,goal_state)
 
-        s_ = np.array([s_])
-        action = self.model.predict(s_)
+        actions = []
 
-        return self.unmake_action(action)
+        for s_ in states:
+            actions.append(self.model.predict(np.array([s_])))
+
+
+        return self.unmake_action(actions)
 
 
 

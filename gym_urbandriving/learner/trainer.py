@@ -22,7 +22,7 @@ il_learn = IL('test_data')
 
 class Trainer:
 
-    def __init__(self,file_path,time = 3.0, goal_bias = 0.05, planner = 'SST',num_data_points = 10, num_eval_points = 10, time_horizon = 2, num_cars = 2, num_lights=4):
+    def __init__(self,file_path,time = 3.0, goal_bias = 0.05, planner = 'SST',num_data_points = 10, num_eval_points = 10, time_horizon = 2, num_cars = 2, num_lights=4,max_agents = 7):
 
         self.PLANNERS = planner
         self.TIME = time
@@ -35,6 +35,8 @@ class Trainer:
         self.NUM_CARS = num_cars
         self.NUM_LIGHTS = num_lights
         self.DEMO_LEN = 300
+
+        self.MAX_AGENTS = max_agents
 
         self.d_logger = DataLogger(file_path)
         self.il_learn = IL(file_path)
@@ -104,6 +106,19 @@ class Trainer:
         loss_robot = self.il_learn.get_cs(evaluations)
 
         return loss_robot,success_rate
+
+
+    def inject_noise(self,target_vel):
+
+        draw = np.random.uniform()
+
+        if draw > 0.2:
+            return target_vel
+        else:
+            if target_vel == 4:
+                return 0
+            elif target_vel == 0:
+                return 4
 
 
     def initialize_world(self):
@@ -176,13 +191,16 @@ class Trainer:
         for sim_time in range(self.DEMO_LEN):
             # get all actions
             actions = [] 
+            target_velocities = []
 
             for agent_num in range(self.NUM_CARS):
                 target_vel = VelocityMPCPlanner().plan(deepcopy(state), agent_num)
                 state.dynamic_objects[agent_num].trajectory.set_vel(target_vel)
+                target_velocities.append(target_vel)
 
             for agent in agents:
                 actions.append(agent.eval_policy(state))
+
             # save old state
             state_copy = env.get_state_copy()
 
@@ -197,6 +215,8 @@ class Trainer:
             sar['state'] = state_copy
             sar['reward'] = reward
             sar['action'] = actions
+            sar['target_velocities'] = target_velocities
+
             rollout.append(sar)
 
             for i in range(self.NUM_CARS):
@@ -244,20 +264,21 @@ class Trainer:
         # Simulation loop
         for sim_time in range(self.DEMO_LEN):
 
+
+            target_velocities_learner = self.il_learn.eval_model(self.NUM_CARS,state,goal_states)
+            target_velocities_sup = []
             for agent_num in range(self.NUM_CARS):
-                target_vel = VelocityMPCPlanner().plan(deepcopy(state), agent_num)
-                state.dynamic_objects[agent_num].trajectory.set_vel(target_vel)
+                state.dynamic_objects[agent_num].trajectory.set_vel(target_velocities_learner[agent_num])
+                target_velocities_sup.append(VelocityMPCPlanner().plan(deepcopy(state), agent_num))
+
 
             # Get all actions
-            sup_actions = []
+           
+            actions = []
+
             for agent in agents:
-                action = agent.eval_policy(state)
-                sup_actions.append(action)
-
-            actions = [self.il_learn.eval_model(state,goal_states[i]) for i in range(self.NUM_CARS)]
-            for i in range(self.NUM_CARS, self.NUM_CARS+ self.NUM_LIGHTS):
-                actions.append(agents[i].eval_policy())
-
+                actions.append(agent.eval_policy(state))
+                
             # save old state
             state_copy = env.get_state_copy()
 
@@ -270,7 +291,9 @@ class Trainer:
             sar['state'] = state_copy
             sar['reward'] = reward
             sar['action'] = actions
-            sar['sup_action'] = sup_actions
+            sar['target_velocities_learner'] = target_velocities_learner
+            sar['target_velocities_sup'] = target_velocities_sup
+
             rollout.append(sar)
 
             for i in range(self.NUM_CARS):
@@ -295,9 +318,12 @@ class Trainer:
         evaluations = []
         for i in range(self.NUM_EVAL_POINTS):
 
+            #Randomely Sample Number of Cars
+            self.NUM_CARS = np.random.randint(2,self.MAX_AGENTS)
+
             rollout,g_s = self.rollout_policy()
             if self.check_success(rollout,g_s):
-                success_rate += 1.0
+                policy_success_rate += 1.0
             evaluations.append(rollout)
             
       
@@ -317,11 +343,15 @@ class Trainer:
 
         for i in range(self.NUM_DATA_POINTS):
 
+            #Randomly Sample number of cars
+            self.NUM_CARS = np.random.randint(2,self.MAX_AGENTS)
+
             rollout,g_s = self.rollout_supervisor()
             if self.check_success(rollout,g_s):
                 success_rate += 1.0
             
             self.d_logger.log_info('success', self.check_success(rollout,g_s))
+            self.d_logger.log_info('num_cars', self.NUM_CARS)
             self.d_logger.save_rollout(rollout)
 
       
