@@ -48,16 +48,9 @@ def f():
     visualizing_env._reset()
     state = visualizing_env.current_state
 
-    all_targets = [[450,375,-np.pi/2],
-                   [550,375,np.pi/2],
-                   [625,450,-np.pi],
-                   [625,550,0.0],
-                   [450,625,-np.pi/2],
-                   [550,625,np.pi/2],
-                   [375,450,-np.pi],
-                   [375,550,0.0]]
 
-    geoplanner = GeometricPlanner(deepcopy(state), inter_point_d=40.0, planning_time=0.1, optional_targets = all_targets, num_cars = NUM_CARS)
+
+    geoplanner = GeometricPlanner(deepcopy(state), inter_point_d=40.0, planning_time=0.1, num_cars = NUM_CARS)
 
     geo_trajs = geoplanner.plan_all_agents(state)
         

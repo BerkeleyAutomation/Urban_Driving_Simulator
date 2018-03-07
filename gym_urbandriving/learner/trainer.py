@@ -165,15 +165,7 @@ class Trainer:
         for i in range(self.NUM_CARS , self.NUM_CARS + self.NUM_LIGHTS):
             agents.append(TrafficLightAgent(i))
 
-        all_targets = [[450,375,-np.pi/2],
-                       [550,375,np.pi/2],
-                       [625,450,-np.pi],
-                       [625,550,0.0],
-                       [450,625,-np.pi/2],
-                       [550,625,np.pi/2],
-                       [375,450,-np.pi],
-                       [375,550,0.0]]
-        geoplanner = GeometricPlanner(deepcopy(state), inter_point_d=40.0, planning_time=0.1, optional_targets = all_targets, num_cars = self.NUM_CARS)
+        geoplanner = GeometricPlanner(deepcopy(state), inter_point_d=40.0, planning_time=0.1, num_cars = self.NUM_CARS)
         geo_trajs = geoplanner.plan_all_agents(state)
 
         pos_trajs = [Trajectory(mode='xyva') for _ in range(self.NUM_CARS)]
@@ -243,15 +235,7 @@ class Trainer:
         for i in range(self.NUM_CARS , self.NUM_CARS + self.NUM_LIGHTS):
             agents.append(TrafficLightAgent(i))
 
-        all_targets = [[450,375,-np.pi/2],
-                       [550,375,np.pi/2],
-                       [625,450,-np.pi],
-                       [625,550,0.0],
-                       [450,625,-np.pi/2],
-                       [550,625,np.pi/2],
-                       [375,450,-np.pi],
-                       [375,550,0.0]]
-        geoplanner = GeometricPlanner(deepcopy(state), inter_point_d=40.0, planning_time=0.1, optional_targets = all_targets, num_cars = self.NUM_CARS)
+        geoplanner = GeometricPlanner(deepcopy(state), inter_point_d=40.0, planning_time=0.1, num_cars = self.NUM_CARS)
         geo_trajs = geoplanner.plan_all_agents(state)
 
         pos_trajs = [Trajectory(mode='xyva') for _ in range(self.NUM_CARS)]

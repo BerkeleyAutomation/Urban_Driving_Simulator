@@ -54,7 +54,15 @@ class GeometricPlanner:
         self.state.dynamic_objects = []
         self.planning_time = planning_time
         self.inter_point_d = inter_point_d
-        self.optional_targets = optional_targets
+        self.optional_targets = [[450,375,-np.pi/2],
+                       [550,375,np.pi/2],
+                       [625,450,-np.pi],
+                       [625,550,0.0],
+                       [450,625,-np.pi/2],
+                       [550,625,np.pi/2],
+                       [375,450,-np.pi],
+                       [375,550,0.0]]
+
         self.num_cars = num_cars
 
     def plan_all_agents(self, state):
