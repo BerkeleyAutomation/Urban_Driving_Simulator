@@ -5,6 +5,7 @@ import pygame
 import time
 import numpy as np
 import shapely
+import cv2
 import IPython
 
 class PyGameVisualizer:
@@ -144,6 +145,17 @@ class PyGameVisualizer:
         self.surface.blit(new_surface, (0, 0), None)
         return
 
+
+    def render_transparent_surface(self,img):
+        img = cv2.resize(img, (0,0), fx=0.8, fy=0.8)
+        cv2.imwrite('surface_img.png',255*img)
+        image = pygame.image.load("surface_img.png")
+
+        image = image.convert()
+
+        image.set_alpha(128)
+        self.surface.blit(image,(0,0))
+
     def render_traffic_trajectories(self, waypoints, valid_area):
         """
         Renders dynamic objects of the state such as pedestrians and cars.
@@ -161,7 +173,6 @@ class PyGameVisualizer:
                                       valid_area[3] - valid_area[2]),
                                      pygame.SRCALPHA)
 
-        
         for w in waypoints:
             point, color = w
             pygame.draw.circle(new_surface, color, [(int)(point[0]), (int)(point[1])], 5)
@@ -172,7 +183,7 @@ class PyGameVisualizer:
 
 
     def render(self, state, valid_area,
-               rerender_statics=False, waypoints=[],traffic_trajectories = []):
+               rerender_statics=False, waypoints=[],traffic_trajectories = [], transparent_surface = None):
         """
         Renders the state and waypoints with lazy re-rerendering of static objects as needed.
 
@@ -206,6 +217,8 @@ class PyGameVisualizer:
 
         for dobj in state.dynamic_objects:
             self.render_waypoints(dobj.breadcrumbs, valid_area)
+
+
         pygame.display.flip()
 
     def draw_rectangle(self, rect, surface):

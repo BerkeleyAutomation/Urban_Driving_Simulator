@@ -90,7 +90,7 @@ class Lane(Polygon):
           return "LEFT"
 
       if self.angle%np.pi > 1e-5:
-        x_dif = point[1] - ((self.minx +self.maxx)/2.0)
+        x_dif = point[0] - ((self.minx +self.maxx)/2.0)
 
         if x_dif > 0:
           return "LEFT"
