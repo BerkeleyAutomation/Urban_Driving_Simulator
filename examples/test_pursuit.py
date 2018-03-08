@@ -4,8 +4,8 @@ import cProfile
 import time
 import numpy as np
 
-from gym_urbandriving.agents import NullAgent, TrafficLightAgent, PursuitAgent, ControlAgent
-from gym_urbandriving.assets import Car, TrafficLight
+from gym_urbandriving.agents import NullAgent, TrafficLightAgent, PursuitAgent, ControlAgent, CrosswalkLightAgent
+from gym_urbandriving.assets import Car, TrafficLight, CrosswalkLight
 from gym_urbandriving.utils.data_logger import DataLogger
 
 NUM_ITERS = 1 #Number of iterations 
@@ -34,7 +34,8 @@ def test_rollout(index, thres):
                               max_time=500,
                               randomize=True,
                               agent_mappings={Car:NullAgent,
-                                              TrafficLight:TrafficLightAgent},
+                                              TrafficLight:TrafficLightAgent, 
+                                              CrosswalkLight:CrosswalkLightAgent},
                               use_ray=False
     )
     

@@ -30,7 +30,8 @@ init_state.dynamic_objects[0].trajectory = traj
 env =  uds.UrbanDrivingEnv(init_state=init_state,
                               randomize=False,
                               agent_mappings={Car:NullAgent,
-                                              TrafficLight:TrafficLightAgent},
+                                              TrafficLight:TrafficLightAgent, 
+                                              CrosswalkLight:CrosswalkLightAgent},
                               use_ray=False
     )
 

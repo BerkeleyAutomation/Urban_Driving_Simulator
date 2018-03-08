@@ -5,8 +5,8 @@ import time
 import numpy as np
 import numpy.linalg as LA
 
-from gym_urbandriving.agents import KeyboardAgent, AccelAgent, NullAgent, TrafficLightAgent, RRTMAgent, RRTMPlanner
-from gym_urbandriving.assets import Car, TrafficLight
+from gym_urbandriving.agents import KeyboardAgent, AccelAgent, NullAgent, TrafficLightAgent, CrosswalkLightAgent, RRTMAgent, RRTMPlanner
+from gym_urbandriving.assets import Car, TrafficLight, CrosswalkLight
 from gym_urbandriving.utils.data_logger import DataLogger
 
 NUM_CARS = 2
@@ -142,7 +142,8 @@ def f(planner,time,goal,prune,select):
                               max_time=500,
                               randomize=True,
                               agent_mappings={Car:NullAgent,
-                                              TrafficLight:TrafficLightAgent},
+                                              TrafficLight:TrafficLightAgent, 
+                                              CrosswalkLight:CrosswalkLightAgent},
                               use_ray=False
     )
 
