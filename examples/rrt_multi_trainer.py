@@ -105,7 +105,6 @@ def test_goal_state():
         lane_orders = [3,1]
 
         sorted_goal,lane_pick = assign_goal_state(lane_orders)
-        print lane_pick
 
         for i in range(NUM_CARS):
 
@@ -113,7 +112,7 @@ def test_goal_state():
 
                 IPython.embed()
 
-    print "NO FALSE ASSIGNMENTS "
+    print("NO FALSE ASSIGNMENTS ")
 
     return
 
@@ -212,8 +211,6 @@ def f(planner,time,goal,prune,select):
         if agents[0].is_done():
             return rollout,goal_states
 
-    
-
 
 def collect_data():
     rollouts = []
@@ -250,11 +247,6 @@ def collect_data():
 
                         data_point['success_rate'] = success_rate/float(NUM_DATA_POINTS)
                         stats.append(data_point)
-
-
-    print stats
-
-
 
 
 

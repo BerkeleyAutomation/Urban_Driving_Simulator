@@ -69,29 +69,6 @@ class UrbanDrivingEnv(gym.Env):
             self._reset()
 
     def _step_test(self, car_actions, agentnum=0):
-        """
-        The step function accepts a control for the 0th agent in the scene. Then, it queries
-        all the background agents to determine their actions. Then, it updates the scene
-        and returns.
-        
-        Parameters
-        ----------
-        action :
-            An action for the agentnum object in the scene.
-        agentnum : int
-            The index for the object which the action is applied for.
-
-        Returns
-        -------
-        PositionState
-            State of the world after this step;
-        float
-            Reward calculated by :func:`self.reward_fn`,
-        bool
-            Whether we have timed out, or there is a collision)
-        dict
-
-        """
         assert(self.current_state is not None)
         # Get actions for all objects
         actions = [None]*len(self.current_state.dynamic_objects)
@@ -106,16 +83,11 @@ class UrbanDrivingEnv(gym.Env):
 
         self.current_state.time += 1
         dynamic_coll, static_coll = self.current_state.get_collisions()
-        state = self.get_state_copy()
+        state = self.current_state
         reward = self.reward_fn(self.current_state)
         done = (self.current_state.time == self.max_time) or len(dynamic_coll) or len(static_coll)
 
-        predict_accuracy = None
-        # if self.bgagent_type == ModelAgent:
-        #     predict_accuracy = sum([o.score for o in self.bg_agents])/len(self.bg_agents)
-
-        info_dict = {"saved_actions": actions,
-                     "predict_accuracy": predict_accuracy}
+        info_dict = {"saved_actions": actions, "static_coll" : static_coll, "dynamic_coll" : dynamic_coll}
 
         return state, reward, done, info_dict
 
@@ -152,7 +124,7 @@ class UrbanDrivingEnv(gym.Env):
 
         if self.use_ray:
             assert(all([type(bgagent) == RayNode for i, bgagent in self.bg_agents.items()]))
-            stateid = ray.put(self.get_state_copy())
+            stateid = ray.put(self.current_state)
             actionids = {}
             for i, agent in self.bg_agents.items():
                 if i is not agentnum:
@@ -164,22 +136,17 @@ class UrbanDrivingEnv(gym.Env):
             assert(all([type(bgagent) != RayNode for i, bgagent in self.bg_agents.items()]))
             for i, agent in self.bg_agents.items():
                 if i is not agentnum:
-                    actions[i] = agent.eval_policy(self.get_state_copy())
+                    actions[i] = agent.eval_policy(self.current_state)
         for i, dobj in enumerate(self.current_state.dynamic_objects):
             dobj.step(actions[i])
 
         self.current_state.time += 1
         dynamic_coll, static_coll = self.current_state.get_collisions()
-        state = self.get_state_copy()
+        state = self.current_state
         reward = self.reward_fn(self.current_state)
         done = (self.current_state.time == self.max_time) or len(dynamic_coll) or len(static_coll)
 
-        predict_accuracy = None
-        # if self.bgagent_type == ModelAgent:
-        #     predict_accuracy = sum([o.score for o in self.bg_agents])/len(self.bg_agents)
-
-        info_dict = {"saved_actions": actions,
-                     "predict_accuracy": predict_accuracy}
+        info_dict = {"saved_actions": actions}
 
         return state, reward, done, info_dict
 

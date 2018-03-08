@@ -1,10 +1,11 @@
-import pygame
 import numpy as np
 from gym_urbandriving.utils.PID import PIDController
+from gym_urbandriving.agents import NullAgent
 
-class PursuitAgent:
+class PursuitAgent(NullAgent):
     """
-    Agent which interprets user keyboard inputs
+    Agent which uses PID to implement a pursuit control policy
+    Uses a trajectory with x,y,v,-
 
     Attributes
     ----------
@@ -14,12 +15,12 @@ class PursuitAgent:
     """
     def __init__(self, agent_num=0):
         self.agent_num = agent_num
-        self.PID_acc = PIDController(1.0, .1, 0)
-        self.PID_steer = PIDController(2, 0, 0)
+        self.PID_acc = PIDController(1.0, 0, 0)
+        self.PID_steer = PIDController(2.0, 0, 0)
         
     def eval_policy(self, state):
         """
-        Returns action based on keyboard input
+        Returns action based next state in trajectory. 
 
         Parameters
         ----------
@@ -34,12 +35,19 @@ class PursuitAgent:
 
         obj = state.dynamic_objects[self.agent_num]
 
-        if len(obj.breadcrumbs)>0:
-            target_loc = obj.breadcrumbs[0][:2]
-            target_vel = obj.breadcrumbs[0][2]
+        if not obj.trajectory.is_empty():    
+            p = obj.trajectory.first()
+            target_loc = p[:2].tolist()
+            target_vel = p[2]
+
+            #while (((obj.y-p[1])**2+(p[0]-obj.x)**2)<400 and not obj.trajectory.is_empty()):
+            while obj.contains_point((p[0], p[1])) and not obj.trajectory.is_empty():
+                p = obj.trajectory.pop()
+                target_loc = p[:2].tolist()
+                target_vel = p[2]
         else:
             target_loc = obj.destination
-            target_vel = 5
+            target_vel = 0
 
         ac2 = np.arctan2(obj.y-target_loc[1], target_loc[0]-obj.x)
 
@@ -51,8 +59,13 @@ class PursuitAgent:
         elif e_angle < -np.pi:
             e_angle += (np.pi*2)
 
+
         e_vel = target_vel-obj.vel
+        e_vel_ = np.sqrt((obj.y-target_loc[1])**2+(target_loc[0]-obj.x)**2) - obj.vel
+
 
         action_acc = self.PID_acc.get_control(e_vel)
         action_steer = self.PID_steer.get_control(e_angle)
+
+
         return (action_steer, action_acc)

@@ -4,13 +4,14 @@ import cProfile
 import time
 import numpy as np
 import numpy.linalg as LA
-import IPython
+from copy import deepcopy
 
-from gym_urbandriving.agents import KeyboardAgent, AccelAgent, NullAgent, TrafficLightAgent, RRTMAgent, RRTMPlanner
-from gym_urbandriving.assets import Car, TrafficLight
 from gym_urbandriving.utils.data_logger import DataLogger
 from gym_urbandriving.learner.imitation_learner import IL
 
+from gym_urbandriving.agents import NullAgent, TrafficLightAgent, ControlAgent, PursuitAgent
+from gym_urbandriving.planning import Trajectory, RRTMPlanner, GeometricPlanner, VelocityMPCPlanner
+from gym_urbandriving.assets import Car, TrafficLight
 
 THRESH = 150
 
@@ -21,7 +22,7 @@ il_learn = IL('test_data')
 
 class Trainer:
 
-    def __init__(self,file_path,time = 3.0, goal_bias = 0.05, planner = 'SST',num_data_points = 10, num_eval_points = 10, time_horizon = 2, num_cars = 2):
+    def __init__(self,file_path,time = 3.0, goal_bias = 0.05, planner = 'SST',num_data_points = 10, num_eval_points = 10, time_horizon = 2, num_cars = 2, num_lights=4,max_agents = 7):
 
         self.PLANNERS = planner
         self.TIME = time
@@ -32,6 +33,10 @@ class Trainer:
         self.NUM_DATA_POINTS = num_data_points
         self.NUM_EVAL_POINTS = num_eval_points
         self.NUM_CARS = num_cars
+        self.NUM_LIGHTS = num_lights
+        self.DEMO_LEN = 300
+
+        self.MAX_AGENTS = max_agents
 
         self.d_logger = DataLogger(file_path)
         self.il_learn = IL(file_path)
@@ -49,79 +54,10 @@ class Trainer:
 
             norm = LA.norm(goal_state - car_state)
 
-
             if norm > THRESH:
                 return False
 
         return True
-
-
-
-    def assign_goal_state(self,lane_orders):
-        """
-        Assign goal positions to the agents
-
-        Parameters
-        ----------
-        lane_orders: list of integers
-           A list of the lane indexes each agent is starting 
-
-        Returns
-        -----------
-        sorted_goals: a list of the goal positions to be assigned
-        lane_pick: a list of the correpsonding lanes that the car starts on
-        """
-
-        #No two agents can go to the same goal 
-        #No goal can be on the same starting spot
-        sorted_goal = []
-
-        #Goals organized in NSEW order
-        goal_states = []
-        goal_states.append([550,100,2,np.deg2rad(90.0)])
-        goal_states.append([450,900,2,np.deg2rad(270.0)])
-        goal_states.append([900,550,2,0])
-        goal_states.append([100,450,2,np.deg2rad(180.0)])
-
-        #Lanes that cannot be assigned 
-        forbidden_lanes = []
-
-        #list of the lanes picked
-        lane_pick = []
-
-        lane_count = 0
-        while True:
-            lane = lane_orders[lane_count]
-
-            #append current lane to constraint set
-            forbidden_lanes.append(lane)
-            count = 0 
-            while True:
-                random_lane = np.random.random_integers(0, 3)
-                
-                if not random_lane in forbidden_lanes:
-                    #remove current lane from constraint set
-                    forbidden_lanes.pop()
-                    #add the assigned lane
-                    forbidden_lanes.append(random_lane)
-                    sorted_goal.append(goal_states[random_lane])
-                    lane_pick.append(random_lane)
-                    lane_count += 1
-
-                    break;
-
-                if len(forbidden_lanes) == 4:
-                    forbidden_lanes = []
-                    sorted_goal = []
-                    lane_pick = []
-                    lane_count = 0
-                    break;
-            
-            if lane_count == self.NUM_CARS:
-                break;
-
-
-        return sorted_goal, lane_pick
 
 
     def train_model(self):
@@ -172,9 +108,22 @@ class Trainer:
         return loss_robot,success_rate
 
 
+    def inject_noise(self,target_vel):
+
+        draw = np.random.uniform()
+
+        if draw > 0.2:
+            return target_vel
+        else:
+            if target_vel == 4:
+                return 0
+            elif target_vel == 0:
+                return 4
+
+
     def initialize_world(self):
         """
-        Initiatlize the world of the simulator 
+        Initialize the world of the simulator 
 
         Returns
         --------
@@ -185,7 +134,7 @@ class Trainer:
         vis = uds.PyGameVisualizer((800, 800))
 
         # Create a simple-intersection state, with cars, no pedestrians, and traffic lights
-        init_state = uds.state.MultiIntersectionState(ncars=self.NUM_CARS, nped=0, traffic_lights=True)
+        init_state = uds.state.SimpleIntersectionState(ncars=self.NUM_CARS, nped=0, traffic_lights=True)
 
         # Create the world environment initialized to the starting state
         # Specify the max time the environment will run to 500
@@ -195,7 +144,7 @@ class Trainer:
 
         env = uds.UrbanDrivingEnv(init_state=init_state,
                                   visualizer=vis,
-                                  max_time=500,
+                                  max_time=self.DEMO_LEN,
                                   randomize=True,
                                   agent_mappings={Car:NullAgent,
                                                   TrafficLight:TrafficLightAgent},
@@ -203,7 +152,6 @@ class Trainer:
         )
 
         env._render()
-
         return env
 
     def rollout_supervisor(self):
@@ -220,57 +168,65 @@ class Trainer:
 
         env = self.initialize_world()
         
-        state = env.get_state_copy()
+        state = env.current_state
 
-        goal_states, lane_pick = self.assign_goal_state(env.init_state.lane_order)
+        goal_states = [c.destination for c in state.dynamic_objects[:self.NUM_CARS]]
         
-        self.d_logger.log_info('lane_order',env.init_state.lane_order)
-        self.d_logger.log_info('lane_pick',env.init_state.lane_order)
         self.d_logger.log_info('goal_states',goal_states)
         
 
         for i in range(self.NUM_CARS):
+            agents.append(PursuitAgent(i))
+        for i in range(self.NUM_CARS , self.NUM_CARS + self.NUM_LIGHTS):
+            agents.append(TrafficLightAgent(i))
 
-            agents.append(RRTMAgent(goal_states[i],agent_num = i))
-    
-        planner = RRTMPlanner(agents,planner = self.PLANNERS,time = self.TIME, goal = self.GOAL_BIAS,prune = self.PRUNE_RADIUS,selection = self.SELECTION_RADIUS)
-        plans  = planner.plan(state)
-       
-        for i  in range(len(plans)):
-            agent = agents[i]
-            plan = plans[i]
-            agent.add_plan(plan)
+        geoplanner = GeometricPlanner(deepcopy(state), inter_point_d=40.0, planning_time=0.1, num_cars = self.NUM_CARS)
+        geo_trajs = geoplanner.plan_all_agents(state)
+
+        pos_trajs = [Trajectory(mode='xyva') for _ in range(self.NUM_CARS)]
+        action_trajs = [Trajectory(mode = 'cs') for _ in range(self.NUM_CARS)]
 
 
         # Simulation loop
-        while(True):
-            # Determine an action based on the current state.
-            # For KeyboardAgent, this just gets keypresses
-            
-            i = 0 
+        for sim_time in range(self.DEMO_LEN):
+            # get all actions
+            actions = [] 
+            target_velocities = []
 
-            actions = []
+            for agent_num in range(self.NUM_CARS):
+                target_vel = VelocityMPCPlanner().plan(deepcopy(state), agent_num)
+                state.dynamic_objects[agent_num].trajectory.set_vel(target_vel)
+                target_velocities.append(target_vel)
+
             for agent in agents:
-                action = agent.eval_policy(state)
-                actions.append(action)
+                actions.append(agent.eval_policy(state))
 
-            sar = {}
+            # save old state
+            state_copy = env.get_state_copy()
 
+            # break if necessary
+
+            # Simulate the state
             state, reward, done, info_dict = env._step_test(actions)
+            env._render()
 
-            sar['state'] = state
+            # Log all information. 
+            sar = {}
+            sar['state'] = state_copy
             sar['reward'] = reward
             sar['action'] = actions
+            sar['target_velocities'] = target_velocities
 
             rollout.append(sar)
 
-            # Simulate the state
-           
-            env._render()
-           
-            # If we crash, sleep for a moment, then reset
-            if agents[0].is_done():
-                return rollout,goal_states
+            for i in range(self.NUM_CARS):
+                obj = state_copy.dynamic_objects[i]
+                pos_trajs[i].add_point([obj.x, obj.y, obj.vel, obj.angle])
+                action_trajs[i].add_point(actions[i])
+
+        self.d_logger.log_info('control_trajs', action_trajs)
+        self.d_logger.log_info('pos_trajs', pos_trajs)
+        return rollout,goal_states
 
 
     def rollout_policy(self):
@@ -287,53 +243,68 @@ class Trainer:
 
         env = self.initialize_world()
         
-        state = env.get_state_copy()
+        state = env.current_state
 
-        goal_states, lane_pick = self.assign_goal_state(env.init_state.lane_order)
+        goal_states = [c.destination for c in state.dynamic_objects[:self.NUM_CARS]]
         
+        self.d_logger.log_info('goal_states',goal_states)
         
+
         for i in range(self.NUM_CARS):
-            agents.append(RRTMAgent(goal_states[i],agent_num = i))
-    
-        planner = RRTMPlanner(agents,planner = self.PLANNERS,time = self.TIME, goal = self.GOAL_BIAS,prune = self.PRUNE_RADIUS,selection = self.SELECTION_RADIUS)
-        plans  = planner.plan(state)
-       
+            agents.append(PursuitAgent(i))
+        for i in range(self.NUM_CARS , self.NUM_CARS + self.NUM_LIGHTS):
+            agents.append(TrafficLightAgent(i))
+
+        geoplanner = GeometricPlanner(deepcopy(state), inter_point_d=40.0, planning_time=0.1, num_cars = self.NUM_CARS)
+        geo_trajs = geoplanner.plan_all_agents(state)
+
+        pos_trajs = [Trajectory(mode='xyva') for _ in range(self.NUM_CARS)]
+        action_trajs = [Trajectory(mode = 'cs') for _ in range(self.NUM_CARS)]
+
         # Simulation loop
-        for i in range(self.time_horizon):
-            # Determine an action based on the current state.
-            # For KeyboardAgent, this just gets keypresses
-            
-            i = 0 
-
-            actions = self.il_learn.eval_model(state,goal_states)
-            state = env.get_state_copy()
-       
-            plans  = planner.plan(state)
-
-            if plans == None: 
-                return rollout,goal_states
+        for sim_time in range(self.DEMO_LEN):
 
 
-            sup_actions = []
-            for i in range(len(agents)):
-                sup_actions.append(plans[i][0])
+            target_velocities_learner = self.il_learn.eval_model(self.NUM_CARS,state,goal_states)
+            target_velocities_sup = []
+            for agent_num in range(self.NUM_CARS):
+                state.dynamic_objects[agent_num].trajectory.set_vel(target_velocities_learner[agent_num])
+                target_velocities_sup.append(VelocityMPCPlanner().plan(deepcopy(state), agent_num))
 
 
-            sar = {}
-
-            state, reward, done, info_dict = env._step_test(actions)
-
-            sar['state'] = state
-            sar['reward'] = reward
-            sar['action'] = actions
-            sar['sup_action'] = sup_actions
-
-            rollout.append(sar)
+            # Get all actions
            
+            actions = []
+
+            for agent in agents:
+                actions.append(agent.eval_policy(state))
+                
+            # save old state
+            state_copy = env.get_state_copy()
+
+            # Simulate the state
+            state, reward, done, info_dict = env._step_test(actions)
             env._render()
 
-        return rollout,goal_states
+            # Log all information
+            sar = {}
+            sar['state'] = state_copy
+            sar['reward'] = reward
+            sar['action'] = actions
+            sar['target_velocities_learner'] = target_velocities_learner
+            sar['target_velocities_sup'] = target_velocities_sup
 
+            rollout.append(sar)
+
+            for i in range(self.NUM_CARS):
+                obj = state_copy.dynamic_objects[i]
+                pos_trajs[i].add_point([obj.x, obj.y, obj.vel, obj.angle])
+                action_trajs[i].add_point(actions[i])
+
+        self.d_logger.log_info('pos_trajs', pos_trajs)
+        self.d_logger.log_info('control_trajs', action_trajs)
+        self.d_logger.log_info('pos_trajs', pos_trajs)
+        return rollout,goal_states
 
     def collect_policy_rollouts(self):
         """
@@ -347,9 +318,12 @@ class Trainer:
         evaluations = []
         for i in range(self.NUM_EVAL_POINTS):
 
+            #Randomely Sample Number of Cars
+            self.NUM_CARS = np.random.randint(2,self.MAX_AGENTS)
+
             rollout,g_s = self.rollout_policy()
             if self.check_success(rollout,g_s):
-                success_rate += 1.0
+                policy_success_rate += 1.0
             evaluations.append(rollout)
             
       
@@ -369,11 +343,15 @@ class Trainer:
 
         for i in range(self.NUM_DATA_POINTS):
 
+            #Randomly Sample number of cars
+            self.NUM_CARS = np.random.randint(2,self.MAX_AGENTS)
+
             rollout,g_s = self.rollout_supervisor()
             if self.check_success(rollout,g_s):
                 success_rate += 1.0
             
             self.d_logger.log_info('success', self.check_success(rollout,g_s))
+            self.d_logger.log_info('num_cars', self.NUM_CARS)
             self.d_logger.save_rollout(rollout)
 
       

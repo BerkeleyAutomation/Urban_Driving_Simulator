@@ -4,11 +4,11 @@ import cProfile
 import time
 import numpy as np
 
-from gym_urbandriving.agents import KeyboardAgent, AccelAgent, NullAgent, TrafficLightAgent, PursuitAgent
+from gym_urbandriving.agents import NullAgent, TrafficLightAgent, PursuitAgent, ControlAgent
 from gym_urbandriving.assets import Car, TrafficLight
 from gym_urbandriving.utils.data_logger import DataLogger
 
-NUM_ITERS = 128 #NNumber of iterations 
+NUM_ITERS = 1 #Number of iterations 
 
 FILE_PATH = 'test_data/'
 
@@ -17,10 +17,6 @@ ALG_NAME = 'KIN_DYN_TRAJS'
 FILE_PATH_ALG =  FILE_PATH + ALG_NAME 
 
 DISTANCE_THRESHOLDS = [2,5,10,20,40]
-"""
- Test File, to demonstrate general functionality of environment
-"""
-
 
 def test_rollout(index, thres):
     # Instantiate a PyGame Visualizer of size 800x800
@@ -48,15 +44,23 @@ def test_rollout(index, thres):
     data_logger = DataLogger(FILE_PATH_ALG)
     loaded_rollout = data_logger.load_rollout(index)
 
-    state.dynamic_objects[0].breadcrumbs = [(d['state'].dynamic_objects[0].x, d['state'].dynamic_objects[0].y, d['state'].dynamic_objects[0].vel) for d in loaded_rollout[0]][::1]
-    state.dynamic_objects[0].destination = (450,900)
+    # Reset the agents to be at the correct initial starting configurations. 
+    state.dynamic_objects[0].destination = loaded_rollout[1]['goal_states'][0]
     state.dynamic_objects[0].x = loaded_rollout[0][0]['state'].dynamic_objects[0].x
     state.dynamic_objects[0].y = loaded_rollout[0][0]['state'].dynamic_objects[0].y
     state.dynamic_objects[0].vel = loaded_rollout[0][0]['state'].dynamic_objects[0].vel
     state.dynamic_objects[0].angle = loaded_rollout[0][0]['state'].dynamic_objects[0].angle
+    loaded_rollout[1]['pos_trajs'][0].pop()
+    state.dynamic_objects[0].trajectory = loaded_rollout[1]['pos_trajs'][0]
 
-    # Car 0 will be controlled by our KeyboardAgent
-    agent = PursuitAgent()
+    state.dynamic_objects[1].destination = loaded_rollout[1]['goal_states'][0]
+    state.dynamic_objects[1].x = loaded_rollout[0][0]['state'].dynamic_objects[0].x
+    state.dynamic_objects[1].y = loaded_rollout[0][0]['state'].dynamic_objects[0].y
+    state.dynamic_objects[1].vel = loaded_rollout[0][0]['state'].dynamic_objects[0].vel
+    state.dynamic_objects[1].angle = loaded_rollout[0][0]['state'].dynamic_objects[0].angle
+    state.dynamic_objects[1].trajectory = loaded_rollout[1]['control_trajs'][0]
+
+    agents = [PursuitAgent(0), ControlAgent(1)]
     action = None
 
     # Simulation loop
@@ -66,26 +70,14 @@ def test_rollout(index, thres):
     while(True):
         # Determine an action based on the current state.
         # For KeyboardAgent, this just gets keypresses
-        action = agent.eval_policy(state)
-        start_time = time.time()
-
-        # Simulate the state
-        state, reward, done, info_dict = env._step(action)
-
-        env.current_state.dynamic_objects[1].x = loaded_rollout[0][t]['state'].dynamic_objects[0].x
-        env.current_state.dynamic_objects[1].y = loaded_rollout[0][t]['state'].dynamic_objects[0].y
-        env.current_state.dynamic_objects[1].vel = loaded_rollout[0][t]['state'].dynamic_objects[0].vel
-        env.current_state.dynamic_objects[1].angle = loaded_rollout[0][t]['state'].dynamic_objects[0].angle
-
+        actions = []
+        for agent in agents:
+            action = agent.eval_policy(state)
+            actions.append(action)
+        state, reward, done, info_dict = env._step_test(actions)
         env._render()
         # keep simulator running in spite of collisions or timing out
 
-        diff_angle = (env.current_state.dynamic_objects[0].angle-env.current_state.dynamic_objects[1].angle)
-
-        while diff_angle < -np.pi:
-            diff_angle += (np.pi*2)
-        while diff_angle > np.pi:
-            diff_angle -= (np.pi*2)
 
         one_step_loss = np.sqrt((env.current_state.dynamic_objects[0].x-env.current_state.dynamic_objects[1].x)**2
                                 +(env.current_state.dynamic_objects[0].y-env.current_state.dynamic_objects[1].y)**2)
@@ -93,7 +85,7 @@ def test_rollout(index, thres):
                                 #+(diff_angle)**2)
         loss += one_step_loss
 
-        if one_step_loss > ta:
+        if one_step_loss > thres:
             success = False
 
         t += 1
@@ -113,6 +105,5 @@ for ta in DISTANCE_THRESHOLDS:
             total_successes += 1
         total_avg_loss += l
         total_runs += 1
-        #print s, total_successes, total_avg_loss, total_runs
 
-    print float(total_successes) / float(total_runs),  float(total_avg_loss) / float(total_runs), ta
+    print(float(total_successes) / float(total_runs),  float(total_avg_loss) / float(total_runs), ta)

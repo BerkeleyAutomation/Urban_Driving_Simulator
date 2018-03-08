@@ -4,7 +4,7 @@ import numpy as np
 class AccelAgent:
     """
     Simple greedy search agent. Chooses action which maximizes expected time
-    collision
+    to next collision
 
     Attributes
     ----------

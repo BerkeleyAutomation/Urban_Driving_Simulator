@@ -7,4 +7,8 @@ install:
   - pip install -e .
 # command to run tests
 script:
-  - python tests/test.py # or py.test for Python versions 3.5 and below
+  - python tests/test1.py # or py.test for Python versions 3.5 and below
+  - python tests/test2.py # or py.test for Python versions 3.5 and below
+  - python tests/test3.py # or py.test for Python versions 3.5 and below
+  - python tests/test4.py # or py.test for Python versions 3.5 and below
+  - python tests/test5.py # or py.test for Python versions 3.5 and below

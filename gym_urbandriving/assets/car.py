@@ -5,6 +5,7 @@ from gym_urbandriving.assets.primitives.dynamic_shape import DynamicShape
 from gym_urbandriving.assets.terrain import Terrain
 from gym_urbandriving.assets.sidewalk import Sidewalk
 from gym_urbandriving.assets.pedestrian import Pedestrian
+from gym_urbandriving.assets.traffic_light import TrafficLight
 
 from gym import spaces
 import numpy as np
@@ -38,15 +39,15 @@ class Car(Rectangle, DynamicShape):
     """
     def __init__(self, x, y, xdim=80, ydim=40, angle=0.0, vel=0.0,
                  max_vel=5, mass=100.0, dynamics_model="kinematic", destination=None,
-                 breadcrumbs=[]):
-        Rectangle.__init__(self, x, y, xdim, ydim, angle, mass=mass, sprite="grey_car.png")
+                 trajectory=None):
+        Rectangle.__init__(self, x, y, xdim, ydim, angle, mass=mass, sprite="blue_car.png")
         l_f = l_r = self.ydim / 2.0
         DynamicShape.__init__(self, l_r, l_f, max_vel, dynamics_model)
         self.vel = vel
         self.max_vel = max_vel
         self.dynamics_model = dynamics_model
         self.destination = destination
-        self.breadcrumbs = breadcrumbs
+        self.trajectory = trajectory
         self.l_f = self.l_r = self.ydim / 2.0
 
     def at_goal(self, state):
@@ -65,7 +66,7 @@ class Car(Rectangle, DynamicShape):
         elif self.destination == 'E':
             return self.x > state.dimensions[0]
         else:
-            return self.contains_point(self.destination)
+            return self.contains_point(self.destination[:2])
 
     def step(self, action):
         """
@@ -85,17 +86,11 @@ class Car(Rectangle, DynamicShape):
         else:
             self.x, self.y, self.vel, self.angle = self.point_model_step(action, self.x, self.y, self.vel, self.angle)
 
-        """
-        while self.breadcrumbs:
-            bc = self.breadcrumbs[0][:2]
-            if self.contains_point(bc):
-                self.breadcrumbs.pop(0)
-            else:
-                return
-        """
-        if self.breadcrumbs:
-            self.breadcrumbs.pop(0)
-            
+    def set_pos(self, x, y, vel, angle):
+        self.shapely_obj = None
+        angle = (angle + 2*np.pi) % (2*np.pi)
+        self.x, self.y, self.vel, self.angle = x, y, vel, angle
+
     def get_state(self):
         """
         Get state.
@@ -121,6 +116,9 @@ class Car(Rectangle, DynamicShape):
         """
         from gym_urbandriving.assets.lane import Lane
         if type(other) in {Terrain, Sidewalk, Car, Pedestrian}:
+            return True
+
+        if type(other) in {TrafficLight} and other.color == 'red':
             return True
 
         if type(other) is Lane:
