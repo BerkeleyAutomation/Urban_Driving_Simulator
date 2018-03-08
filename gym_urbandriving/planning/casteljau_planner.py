@@ -1,5 +1,6 @@
 import numpy as np
 import math
+from gym_urbandriving.planning import Trajectory
 
 class CasteljauPlanner:
     def __init__(self):
@@ -28,3 +29,11 @@ class CasteljauPlanner:
             res_path[i].append(v0*(1-float(i)/float(num_points))+v1*(float(i)/float(num_points)))
 
         return res_path
+
+    def plan_agent(self, obj):
+        traj = Trajectory(mode = 'xyv', fsm=0)
+        for p in self.plan(obj.x, obj.y, obj.vel, obj.angle, obj.destination[0], obj.destination[1], 1, obj.destination[3]):
+            traj.add_point(p)
+
+        obj.trajectory = traj
+

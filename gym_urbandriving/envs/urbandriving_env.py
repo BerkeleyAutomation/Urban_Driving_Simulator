@@ -68,16 +68,10 @@ class UrbanDrivingEnv(gym.Env):
         if (self.init_state):
             self._reset()
 
-    def _step_test(self, car_actions, agentnum=0):
+    def _step_test(self, actions, agentnum=0):
         assert(self.current_state is not None)
         # Get actions for all objects
-        actions = [None]*len(self.current_state.dynamic_objects)
-        
-        
-        assert(all([type(bgagent) != RayNode for i, bgagent in self.bg_agents.items()]))
-        
-        for i in range(len(car_actions)):
-            actions[i] = car_actions[i]
+            
         for i, dobj in enumerate(self.current_state.dynamic_objects):
             dobj.step(actions[i])
 

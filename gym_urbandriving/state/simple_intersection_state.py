@@ -66,7 +66,7 @@ class SimpleIntersectionState(PositionState):
             man.vel = 2
             if not any([man.collides(obj) for obj in self.static_objects+self.dynamic_objects]):
                 self.dynamic_objects.append(man)
-                man.destination = [man.x+600*np.cos(man.angle), man.y-600*np.sin(man.angle)]
+                man.destination = [man.x+600*np.cos(man.angle), man.y-600*np.sin(man.angle), 2, man.angle]
                 
         if self.traffic_lights:
             self.dynamic_objects.append(TrafficLight(600, 440, 0))
