@@ -20,6 +20,7 @@ Makes sure the pursuit agent still works.
 
 def test_rollout(index, thres):
     # Instantiate a PyGame Visualizer of size 800x800
+    #vis = uds.PyGameVisualizer((1000, 1000))
 
     # Create a simple-intersection state, with 4 cars, no pedestrians, and traffic lights
     init_state = uds.state.SimpleIntersectionState(ncars=2, nped=0, traffic_lights=True)
@@ -51,6 +52,7 @@ def test_rollout(index, thres):
     state.dynamic_objects[0].angle = loaded_rollout[0][0]['state'].dynamic_objects[0].angle
     loaded_rollout[1]['pos_trajs'][0].pop()
     state.dynamic_objects[0].trajectory = loaded_rollout[1]['pos_trajs'][0]
+    state.dynamic_objects[0].trajectory.add_interpolated_t()
 
     state.dynamic_objects[1].destination = loaded_rollout[1]['goal_states'][0]
     state.dynamic_objects[1].x = loaded_rollout[0][0]['state'].dynamic_objects[0].x

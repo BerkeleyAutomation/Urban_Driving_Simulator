@@ -42,22 +42,14 @@ class Trainer:
         self.il_learn = IL(file_path)
         self.time_horizon = time_horizon
 
-    def check_success(self,rollouts,g_state):
-
+    def check_success(self,rollouts,final_state):
+        # checks that all cars have collected all points in their trajectories. 
         
-        final_states = rollouts[-1]['state'].dynamic_objects
-
         for i in range(self.NUM_CARS):
-           
-            goal_state = np.array([g_state[i][0],g_state[i][1]])
-            car_state = np.array([final_states[i].x,final_states[i].y])
-
-            norm = LA.norm(goal_state - car_state)
-
-            if norm > THRESH:
+            if not final_state.dynamic_objects[i].trajectory.is_empty():
                 return False
-
         return True
+
 
 
     def train_model(self):
@@ -174,7 +166,6 @@ class Trainer:
         
         self.d_logger.log_info('goal_states',goal_states)
         
-
         for i in range(self.NUM_CARS):
             agents.append(PursuitAgent(i))
         for i in range(self.NUM_CARS , self.NUM_CARS + self.NUM_LIGHTS):
@@ -226,7 +217,7 @@ class Trainer:
 
         self.d_logger.log_info('control_trajs', action_trajs)
         self.d_logger.log_info('pos_trajs', pos_trajs)
-        return rollout,goal_states
+        return rollout,deepcopy(env.current_state)
 
 
     def rollout_policy(self):
@@ -304,7 +295,7 @@ class Trainer:
         self.d_logger.log_info('pos_trajs', pos_trajs)
         self.d_logger.log_info('control_trajs', action_trajs)
         self.d_logger.log_info('pos_trajs', pos_trajs)
-        return rollout,goal_states
+        return rollout,deepcopy(env.current_state)
 
     def collect_policy_rollouts(self):
         """
@@ -321,8 +312,8 @@ class Trainer:
             #Randomely Sample Number of Cars
             self.NUM_CARS = np.random.randint(2,self.MAX_AGENTS)
 
-            rollout,g_s = self.rollout_policy()
-            if self.check_success(rollout,g_s):
+            rollout,final_state= self.rollout_policy()
+            if self.check_success(rollout,final_state):
                 policy_success_rate += 1.0
             evaluations.append(rollout)
             
@@ -342,15 +333,11 @@ class Trainer:
         success_rate = 0.0
 
         for i in range(self.NUM_DATA_POINTS):
-
-            #Randomly Sample number of cars
-            self.NUM_CARS = np.random.randint(2,self.MAX_AGENTS)
-
-            rollout,g_s = self.rollout_supervisor()
-            if self.check_success(rollout,g_s):
+            rollout,final_state = self.rollout_supervisor()
+            if self.check_success(rollout,final_state):
                 success_rate += 1.0
             
-            self.d_logger.log_info('success', self.check_success(rollout,g_s))
+            self.d_logger.log_info('success', self.check_success(rollout,final_state))
             self.d_logger.log_info('num_cars', self.NUM_CARS)
             self.d_logger.save_rollout(rollout)
 

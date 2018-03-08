@@ -7,7 +7,6 @@ import time
 import numpy as np
 import shapely
 import cv2
-import IPython
 
 COLORS = [(255, 0, 0),
           (0, 255, 0),
