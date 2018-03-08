@@ -56,8 +56,6 @@ def f():
 
     sim_time = 0
 
-    action_trajs = [Trajectory(mode = 'cs') for _ in range(NUM_CARS)]
-
     #max_e = 0
     # Simulation loop
     env = uds.UrbanDrivingEnv(init_state=deepcopy(state),
@@ -78,9 +76,7 @@ def f():
 
 
     agents = []
-    for i in range(0, NUM_CARS): # TODO FIX FOR PEDS
-        agents.append(PursuitAgent(i))
-    for i in range(NUM_CARS, NUM_CARS+NUM_PEDS): # TODO FIX FOR PEDS
+    for i in range(NUM_CARS+NUM_PEDS):
         agents.append(PursuitAgent(i))
     for i in range(NUM_CARS + NUM_PEDS, NUM_CARS + NUM_PEDS + 4):
         agents.append(TrafficLightAgent(i))

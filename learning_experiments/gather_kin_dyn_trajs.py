@@ -9,8 +9,7 @@ NUM_EVAL_POINTS = 1 #NUMBER OF TRAJECTORIES TO SAMPLE FROM THE LEANRED POLICY (i
 NUM_ITERS = 1 #NNumber of iterations 
 TIME_HORIZON = 100 #Time horizon for the learned policy
 PLANNING_TIME = 50 #planning time limit for the supervisor 
-MAX_AGENTS = 7
-NUM_CARS = np.random.randint(2,MAX_AGENTS)
+MAX_AGENTS = 5
 #Path to save data
 
 FILE_PATH = 'test_data/'
@@ -25,7 +24,6 @@ t_exp = Trainer(FILE_PATH_ALG,
                 num_eval_points = NUM_EVAL_POINTS,
                 time_horizon = TIME_HORIZON,
                 time = PLANNING_TIME,
-                num_cars = NUM_CARS, 
                 max_agents = MAX_AGENTS)
 
 for i in range(NUM_ITERS):
