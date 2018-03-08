@@ -1,6 +1,6 @@
 from gym_urbandriving.state.state import PositionState
 from gym_urbandriving.assets import Terrain, Lane, Street, Sidewalk,\
-    Pedestrian, Car, TrafficLight
+    Pedestrian, Car, TrafficLight, CrosswalkLight
 import numpy as np
 import random
 from copy import deepcopy
@@ -66,12 +66,21 @@ class SimpleIntersectionState(PositionState):
             man.vel = 2
             if not any([man.collides(obj) for obj in self.static_objects+self.dynamic_objects]):
                 self.dynamic_objects.append(man)
+                man.destination = [man.x+600*np.cos(man.angle), man.y-600*np.sin(man.angle)]
                 
         if self.traffic_lights:
             self.dynamic_objects.append(TrafficLight(600, 440, 0))
             self.dynamic_objects.append(TrafficLight(400, 560, -np.pi))
             self.dynamic_objects.append(TrafficLight(560, 600, -(np.pi/2), initial_color="red"))
             self.dynamic_objects.append(TrafficLight(440, 400, (np.pi/2), initial_color="red"))
+            self.dynamic_objects.append(CrosswalkLight(375, 390, -np.pi/2, initial_color="red", time_in_color=80))
+            self.dynamic_objects.append(CrosswalkLight(390, 375, 0, initial_color="white"))
+            self.dynamic_objects.append(CrosswalkLight(610, 625, -np.pi, initial_color="white"))
+            self.dynamic_objects.append(CrosswalkLight(625, 610, np.pi/2, initial_color="red", time_in_color=80))
+            self.dynamic_objects.append(CrosswalkLight(375, 610, np.pi/2, initial_color="red", time_in_color=80))
+            self.dynamic_objects.append(CrosswalkLight(390, 625, 0, initial_color="white"))
+            self.dynamic_objects.append(CrosswalkLight(625, 390, -np.pi/2, initial_color="red", time_in_color=80))
+            self.dynamic_objects.append(CrosswalkLight(610, 375, -np.pi, initial_color="white"))
 
 
     def assign_goal_states(self, lane_orders):

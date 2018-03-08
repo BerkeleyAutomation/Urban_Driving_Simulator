@@ -2,6 +2,7 @@ import numpy as np
 from gym_urbandriving.assets.primitives.circle import Circle
 from gym_urbandriving.assets.primitives.dynamic_shape import DynamicShape
 from gym_urbandriving.assets.terrain import Terrain
+from gym_urbandriving.assets.crosswalk_light import CrosswalkLight
 
 class Pedestrian(Circle, DynamicShape):
     """
@@ -66,4 +67,7 @@ class Pedestrian(Circle, DynamicShape):
         from gym_urbandriving.assets import Car
         if type(other) in {Terrain, Car}:
             return True
+        if type(other) in {CrosswalkLight} and other.color == 'red' and abs(other.angle-self.angle) < .1:
+            return True
+
         return False

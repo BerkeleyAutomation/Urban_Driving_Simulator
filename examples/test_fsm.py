@@ -6,10 +6,10 @@ import numpy as np
 import math
 import random
 
-from gym_urbandriving.agents import KeyboardAgent, AccelAgent, NullAgent, TrafficLightAgent, PursuitAgent, ControlAgent, PlanningPursuitAgent
+from gym_urbandriving.agents import KeyboardAgent, AccelAgent, NullAgent, TrafficLightAgent, CrosswalkLightAgent,  PursuitAgent, ControlAgent, PlanningPursuitAgent
 from gym_urbandriving.planning import Trajectory, CasteljauPlanner, GeometricPlanner, VelocityMPCPlanner
 
-from gym_urbandriving.assets import Car, TrafficLight
+from gym_urbandriving.assets import Car, TrafficLight, Pedestrian, CrosswalkLight
 
 from copy import deepcopy
 
@@ -18,8 +18,7 @@ from copy import deepcopy
 """
 
 NUM_CARS = 4
-NUM_PEDS = 0
-NUM_LIGHTS = 4
+NUM_PEDS = 2
 DEMO_LEN = 300
 
 
@@ -28,7 +27,7 @@ def f():
     vis = uds.PyGameVisualizer((800, 800))
 
     # Create a simple-intersection state, with 4 cars, no pedestrians, and traffic lights
-    init_state = uds.state.SimpleIntersectionState(ncars=NUM_CARS, nped=0, traffic_lights=True)
+    init_state = uds.state.SimpleIntersectionState(ncars=NUM_CARS, nped=NUM_PEDS, traffic_lights=True)
 
 
     # Create the world environment initialized to the starting state
@@ -41,7 +40,9 @@ def f():
                               max_time=500,
                               randomize=False,
                               agent_mappings={Car:ControlAgent,
-                                              TrafficLight:TrafficLightAgent},
+                                              Pedestrian:NullAgent,
+                                              TrafficLight:TrafficLightAgent, 
+                                              CrosswalkLight:CrosswalkLightAgent},
                               use_ray=False
     )
 
@@ -51,8 +52,7 @@ def f():
 
 
     geoplanner = GeometricPlanner(deepcopy(state), inter_point_d=40.0, planning_time=0.1, num_cars = NUM_CARS)
-
-    geo_trajs = geoplanner.plan_all_agents(state)
+    geoplanner.plan_all_agents(state)
         
 
     sim_time = 0
@@ -79,16 +79,20 @@ def f():
 
 
     agents = []
-    for i in range(0, NUM_CARS+NUM_PEDS): # TODO FIX FOR PEDS
+    for i in range(0, NUM_CARS): # TODO FIX FOR PEDS
         agents.append(PursuitAgent(i))
-    for i in range(NUM_CARS + NUM_PEDS, NUM_CARS + NUM_PEDS + NUM_LIGHTS):
+    for i in range(NUM_CARS, NUM_CARS+NUM_PEDS): # TODO FIX FOR PEDS
+        agents.append(NullAgent(i))
+    for i in range(NUM_CARS + NUM_PEDS, NUM_CARS + NUM_PEDS + 4):
         agents.append(TrafficLightAgent(i))
+    for i in range(NUM_CARS + NUM_PEDS + 4, NUM_CARS + NUM_PEDS + 12):
+        agents.append(CrosswalkLightAgent(i))
 
 
     for sim_time in range(DEMO_LEN):
         actions = [] 
 
-        for agent_num in range(NUM_CARS+NUM_PEDS):
+        for agent_num in range(NUM_CARS):
             target_vel = VelocityMPCPlanner().plan(deepcopy(state), agent_num)
             state.dynamic_objects[agent_num].trajectory.set_vel(target_vel)
 
