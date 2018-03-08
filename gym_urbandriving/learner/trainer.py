@@ -42,12 +42,11 @@ class Trainer:
         self.il_learn = IL(file_path)
         self.time_horizon = time_horizon
 
-    def check_success(self,rollouts,final_state):
-        # checks that all cars have collected all points in their trajectories. 
-        
-        for i in range(self.NUM_CARS):
-            if not final_state.dynamic_objects[i].trajectory.is_empty():
-                return False
+    def check_success(self, state):
+        for obj in state.dynamic_objects:
+            if type(obj) in {Car}:
+                if np.linalg.norm(np.array([obj.x, obj.y]) - np.array([obj.destination[0], obj.destination[1]])) > 280:
+                    return False
         return True
 
 
@@ -215,6 +214,9 @@ class Trainer:
                 pos_trajs[i].add_point([obj.x, obj.y, obj.vel, obj.angle])
                 action_trajs[i].add_point(actions[i])
 
+            if self.check_success(state):
+                break
+
         self.d_logger.log_info('control_trajs', action_trajs)
         self.d_logger.log_info('pos_trajs', pos_trajs)
         return rollout,deepcopy(env.current_state)
@@ -292,6 +294,9 @@ class Trainer:
                 pos_trajs[i].add_point([obj.x, obj.y, obj.vel, obj.angle])
                 action_trajs[i].add_point(actions[i])
 
+            if self.check_success(final_state):
+                break
+
         self.d_logger.log_info('pos_trajs', pos_trajs)
         self.d_logger.log_info('control_trajs', action_trajs)
         self.d_logger.log_info('pos_trajs', pos_trajs)
@@ -313,7 +318,7 @@ class Trainer:
             self.NUM_CARS = np.random.randint(2,self.MAX_AGENTS)
 
             rollout,final_state= self.rollout_policy()
-            if self.check_success(rollout,final_state):
+            if self.check_success(final_state):
                 policy_success_rate += 1.0
             evaluations.append(rollout)
             
@@ -334,10 +339,10 @@ class Trainer:
 
         for i in range(self.NUM_DATA_POINTS):
             rollout,final_state = self.rollout_supervisor()
-            if self.check_success(rollout,final_state):
+            if self.check_success(final_state):
                 success_rate += 1.0
             
-            self.d_logger.log_info('success', self.check_success(rollout,final_state))
+            self.d_logger.log_info('success', self.check_success(final_state))
             self.d_logger.log_info('num_cars', self.NUM_CARS)
             self.d_logger.save_rollout(rollout)
 
