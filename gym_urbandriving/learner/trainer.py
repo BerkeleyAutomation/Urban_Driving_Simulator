@@ -45,11 +45,10 @@ class Trainer:
     def check_success(self, state):
         for obj in state.dynamic_objects:
             if type(obj) in {Car}:
-                if np.linalg.norm(np.array([obj.x, obj.y]) - np.array([obj.destination[0], obj.destination[1]])) > THRESH:
+                if np.linalg.norm(np.array([obj.x, obj.y]) - np.array([obj.destination[0], obj.destination[1]])) > THRESH and not obj.trajectory.is_empty():
                     return False
         return True
-
-
+    
 
     def train_model(self):
         """

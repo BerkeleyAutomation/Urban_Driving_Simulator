@@ -25,7 +25,7 @@ class Pedestrian(Circle, DynamicShape):
     mass : float
         Mass of pedestrian
     """
-    def __init__(self, x, y, radius=17, angle=0.0, vel=0.0, acc=0.0, max_vel=2.0, mass=100.0, dynamics_model="point"):
+    def __init__(self, x, y, radius=12, angle=0.0, vel=0.0, acc=0.0, max_vel=2.0, mass=100.0, dynamics_model="point"):
         Circle.__init__(self, x, y, radius, angle, sprite="person.png")
         DynamicShape.__init__(self, 0, 0, max_vel, dynamics_model)
         self.vel = vel
