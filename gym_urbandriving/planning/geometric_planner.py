@@ -92,7 +92,7 @@ class GeometricPlanner:
             orig_obj.vel = 0
             orig_obj.trajectory.set_vel(4)
             
-            print orig_obj.trajectory.get_points_list()
+            print(orig_obj.trajectory.get_points_list())
             npoints = orig_obj.trajectory.npoints()
             points = orig_obj.trajectory.get_points_list()
             xp, yp = points[:,0], points[:,1]

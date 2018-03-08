@@ -93,16 +93,8 @@ class Trajectory(object):
         return self._trajectory
 
     def add_point(self, p):
-        if p == None:
+        if p is None:
             return
-        if 't' in self.mode:
-            t_index = self.mode.index('t')
-            t = p[t_index]
-            if t < 0 and self.is_empty():
-                t = 0
-            elif t < 0:
-                t = self._trajectory[-1][t_index] + 1
-
         expanded_p = [p[self.dimensions_used.index(i)] if (i in self.dimensions_used) else np.nan for i in range(7)]
         self._trajectory = np.append(self._trajectory, [expanded_p], axis=0)
 
@@ -133,6 +125,12 @@ class Trajectory(object):
             res.append(self._trajectory[i][self.dimensions_used].tolist())
         return np.array(res)
 
+    def add_interpolated_t(self):
+        self.mode += 't'
+        self.dimensions_used.append(6)
+
+        for t in range(self.npoints()):
+            self._trajectory[t][6] = t
     # TODO FIX
     def add_camera_point(self, x, y, t=-1, h=720, w=1280):
         if t < 0 and not self._trajectory.shape[0]:

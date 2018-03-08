@@ -41,10 +41,13 @@ class PursuitAgent(NullAgent):
             target_vel = p[2]
 
             #while (((obj.y-p[1])**2+(p[0]-obj.x)**2)<400 and not obj.trajectory.is_empty()):
-            while obj.contains_point((p[0], p[1])) and not obj.trajectory.is_empty():
+            if 't' in obj.trajectory.mode:
                 p = obj.trajectory.pop()
-                target_loc = p[:2].tolist()
-                target_vel = p[2]
+            else:
+                while obj.contains_point((p[0], p[1])) and not obj.trajectory.is_empty():
+                    p = obj.trajectory.pop()
+                    target_loc = p[:2].tolist()
+                    target_vel = p[2]
         else:
             return (0,0)
             #target_loc = obj.destination
