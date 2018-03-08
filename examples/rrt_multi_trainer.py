@@ -3,7 +3,6 @@ import gym_urbandriving as uds
 import cProfile
 import time
 import numpy as np
-import IPython
 import numpy.linalg as LA
 
 from gym_urbandriving.agents import KeyboardAgent, AccelAgent, NullAgent, TrafficLightAgent, RRTMAgent, RRTMPlanner
@@ -110,7 +109,7 @@ def test_goal_state():
 
             if lane_orders[i] == lane_pick[i]:
 
-                IPython.embed()
+                #IPython.embed()
 
     print("NO FALSE ASSIGNMENTS ")
 

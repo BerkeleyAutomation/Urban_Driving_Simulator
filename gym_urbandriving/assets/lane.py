@@ -2,8 +2,6 @@ from gym_urbandriving.assets.street import Street
 from gym_urbandriving.assets.primitives import Rectangle, Polygon
 from gym_urbandriving.assets.car import Car
 import numpy as np
-import IPython
-
 
 class Lane(Polygon):
     """
@@ -95,10 +93,7 @@ class Lane(Polygon):
         if x_dif > 0:
           return "LEFT"
         else: 
-          return "RIGHT"
-
-      IPython.embed()
-     
+          return "RIGHT"     
 
 
 

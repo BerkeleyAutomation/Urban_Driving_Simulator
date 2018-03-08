@@ -93,6 +93,8 @@ class Trajectory(object):
         return self._trajectory
 
     def add_point(self, p):
+        if p == None:
+            return
         if 't' in self.mode:
             t_index = self.mode.index('t')
             t = p[t_index]
