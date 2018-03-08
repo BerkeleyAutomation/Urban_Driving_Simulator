@@ -231,11 +231,6 @@ class PyGameVisualizer:
         if len(traffic_trajectories) > 0:
             self.render_traffic_trajectories(traffic_trajectories, valid_area)
 
-        for dobj in state.dynamic_objects:
-            self.render_waypoints(dobj.breadcrumbs, valid_area)
-
-
-
         
         for i, dobj in enumerate(state.dynamic_objects):
             if not dobj.trajectory is None and ('x' in dobj.trajectory.mode and 'y' in dobj.trajectory.mode):
