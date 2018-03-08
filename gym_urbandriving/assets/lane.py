@@ -2,6 +2,7 @@ from gym_urbandriving.assets.street import Street
 from gym_urbandriving.assets.primitives import Rectangle, Polygon
 from gym_urbandriving.assets.car import Car
 import numpy as np
+import IPython
 
 
 class Lane(Polygon):
@@ -76,3 +77,31 @@ class Lane(Polygon):
         car = Car(x, y, angle=self.angle+np.random.uniform(-0.1, 0.1),
                   dynamics_model=car_model)
         return car
+
+
+    def side_of_road(self,point):
+      
+      if self.angle%np.pi < 1e-5:
+        y_dif = point[1] - ((self.miny +self.maxy)/2.0)
+
+        if y_dif > 0:
+          return "RIGHT"
+        else: 
+          return "LEFT"
+
+      if self.angle%np.pi > 1e-5:
+        x_dif = point[0] - ((self.minx +self.maxx)/2.0)
+
+        if x_dif > 0:
+          return "LEFT"
+        else: 
+          return "RIGHT"
+
+      IPython.embed()
+     
+
+
+
+
+
+

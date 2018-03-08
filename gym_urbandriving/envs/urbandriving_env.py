@@ -178,7 +178,7 @@ class UrbanDrivingEnv(gym.Env):
 
         return
 
-    def _render(self, mode='human', close=False, waypoints=[]):
+    def _render(self, mode='human', close=False, waypoints=[],traffic_trajectories = [],transparent_surface = None):
         """
         If the renderer was specifed at construction, renders the current state of the world
         
@@ -192,11 +192,14 @@ class UrbanDrivingEnv(gym.Env):
         if close:
             return
         if self.visualizer:
+            
             window = [0, self.current_state.dimensions[0],
                       0, self.current_state.dimensions[1]]
             self.visualizer.render(self.current_state, window,
                                    rerender_statics=not self.statics_rendered,
-                                   waypoints=waypoints)
+                                   waypoints=waypoints,
+                                   traffic_trajectories = traffic_trajectories,
+                                   transparent_surface = transparent_surface)
             self.statics_rendered = True
 
     def get_state_copy(self):
