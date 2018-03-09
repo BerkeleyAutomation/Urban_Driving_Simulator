@@ -21,7 +21,7 @@ class Featurizer(object):
         pass
 
     def featurize(self, current_state, previous_state, agent_num):
-        os.system('clear')
+        #os.system('clear')
         car = current_state.dynamic_objects[agent_num]
 
         x, y, angle, vel = car.get_state()
@@ -48,7 +48,7 @@ class Featurizer(object):
         if (dy > 0):
             goal_a += np.pi
         goal_a = (angle - goal_a) % (2 * np.pi)
-        print(goal_d, goal_a)
+        #print(goal_d, goal_a)
         features = [x, y, vel, goal_d, np.cos(goal_a), np.sin(goal_a)]
         #print(goalx, goaly)
 
@@ -91,7 +91,7 @@ class Featurizer(object):
                         min_coll_acc = dobj.vel - p_obj.vel
                         min_coll_ang_vel = (dobj.angle - p_obj.angle) % (2 * np.pi)
             print(min_coll_d, min_coll_type, 180 * min_coll_angle / np.pi, min_coll_vel, 180 * min_coll_ang_vel / np.pi)
-            features.extend([min_coll_d, min_coll_angle, min_coll_vel, min_coll_ang_vel])
+            features.extend([min_coll_d, np.sin(min_coll_angle), np.cos(min_coll_angle), min_coll_vel, min_coll_ang_vel])
         for dobj in current_state.dynamic_objects:
             if type(dobj) is TrafficLight and light_cone.intersects(dobj.get_shapely_obj()):
                 d = distance((x, y), (dobj.x, dobj.y))
@@ -102,4 +102,5 @@ class Featurizer(object):
         #print(min_light_d, min_light_state)
         #print(x, y, vel)
 #        print(features)
+        #print(len(features))
         return features
