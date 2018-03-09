@@ -26,6 +26,7 @@ class Trainer:
 
         self.PLANNERS = planner
         self.TIME = time
+        self.lookahead = 20
 
         self.GOAL_BIAS = goal_bias
         self.PRUNE_RADIUS = 0.5
@@ -176,6 +177,9 @@ class Trainer:
 
         pos_trajs = [Trajectory(mode='xyva') for _ in range(self.NUM_CARS)]
         action_trajs = [Trajectory(mode = 'cs') for _ in range(self.NUM_CARS)]
+        agent_ids = []
+        for agent_num in range(self.NUM_CARS):
+            agent_ids.append(agent_num) # TODO: Lets not assume the first n dynamic objects are cars
 
 
         # Simulation loop
@@ -185,7 +189,7 @@ class Trainer:
             target_velocities = []
 
             for agent_num in range(self.NUM_CARS):
-                target_vel = VelocityMPCPlanner().plan(deepcopy(state), agent_num)
+                target_vel = VelocityMPCPlanner(self.lookahead).plan(deepcopy(state), agent_num)
                 state.dynamic_objects[agent_num].trajectory.set_vel(target_vel)
                 target_velocities.append(target_vel)
 
@@ -217,6 +221,7 @@ class Trainer:
 
         self.d_logger.log_info('control_trajs', action_trajs)
         self.d_logger.log_info('pos_trajs', pos_trajs)
+        self.d_logger.log_info('agent_ids', agent_ids)
         return rollout,deepcopy(env.current_state)
 
 
@@ -260,7 +265,7 @@ class Trainer:
             target_velocities_sup = []
             for agent_num in range(self.NUM_CARS):
                 state.dynamic_objects[agent_num].trajectory.set_vel(target_velocities_learner[agent_num])
-                target_velocities_sup.append(VelocityMPCPlanner().plan(deepcopy(state), agent_num))
+                target_velocities_sup.append(VelocityMPCPlanner(self.lookahead).plan(deepcopy(state), agent_num))
 
 
             # Get all actions
@@ -294,7 +299,7 @@ class Trainer:
 
         self.d_logger.log_info('pos_trajs', pos_trajs)
         self.d_logger.log_info('control_trajs', action_trajs)
-        self.d_logger.log_info('pos_trajs', pos_trajs)
+
         return rollout,deepcopy(env.current_state)
 
     def collect_policy_rollouts(self):
