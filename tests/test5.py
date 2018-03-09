@@ -3,8 +3,8 @@ import gym_urbandriving as uds
 import time
 import numpy as np
 
-from gym_urbandriving.agents import NullAgent, TrafficLightAgent, PursuitAgent, ControlAgent
-from gym_urbandriving.assets import Car, TrafficLight
+from gym_urbandriving.agents import *
+from gym_urbandriving.assets import *
 from gym_urbandriving.utils.data_logger import DataLogger
 
 NUM_ITERS = 1 #Number of iterations 
@@ -23,7 +23,7 @@ def test_rollout(index, thres):
     #vis = uds.PyGameVisualizer((1000, 1000))
 
     # Create a simple-intersection state, with 4 cars, no pedestrians, and traffic lights
-    init_state = uds.state.SimpleIntersectionState(ncars=2, nped=0, traffic_lights=True)
+    init_state = uds.state.SimpleIntersectionState(ncars=2, nped=0)
     # Create the world environment initialized to the starting state
     # Specify the max time the environment will run to 500
     # Randomize the environment when env._reset() is called
@@ -33,8 +33,7 @@ def test_rollout(index, thres):
                               visualizer=None,
                               max_time=500,
                               randomize=True,
-                              agent_mappings={Car:NullAgent,
-                                              TrafficLight:TrafficLightAgent},
+                              agent_mappings={Car:NullAgent},
                               use_ray=False
     )
     

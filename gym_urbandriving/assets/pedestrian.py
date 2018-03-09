@@ -2,6 +2,7 @@ import numpy as np
 from gym_urbandriving.assets.primitives.circle import Circle
 from gym_urbandriving.assets.primitives.dynamic_shape import DynamicShape
 from gym_urbandriving.assets.terrain import Terrain
+from gym_urbandriving.assets.crosswalk_light import CrosswalkLight
 
 class Pedestrian(Circle, DynamicShape):
     """
@@ -24,7 +25,7 @@ class Pedestrian(Circle, DynamicShape):
     mass : float
         Mass of pedestrian
     """
-    def __init__(self, x, y, radius=17, angle=0.0, vel=0.0, acc=0.0, max_vel=2.0, mass=100.0, dynamics_model="point"):
+    def __init__(self, x, y, radius=12, angle=0.0, vel=0.0, acc=0.0, max_vel=2.0, mass=100.0, dynamics_model="point"):
         Circle.__init__(self, x, y, radius, angle, sprite="person.png")
         DynamicShape.__init__(self, 0, 0, max_vel, dynamics_model)
         self.vel = vel
@@ -66,4 +67,13 @@ class Pedestrian(Circle, DynamicShape):
         from gym_urbandriving.assets import Car
         if type(other) in {Terrain, Car}:
             return True
+        if type(other) in {CrosswalkLight} and other.color == 'red':
+            e_angle = other.angle-self.angle
+            if e_angle > np.pi:
+                e_angle -= (np.pi*2)
+            elif e_angle < -np.pi:
+                e_angle += (np.pi*2)
+            if abs(e_angle) < .1:
+                return True
+
         return False

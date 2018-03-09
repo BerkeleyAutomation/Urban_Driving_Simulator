@@ -1,6 +1,6 @@
 from gym_urbandriving.agents.pursuit_agent import PursuitAgent
-from gym_urbandriving.assets import Car, TrafficLight
-from gym_urbandriving.agents import NullAgent, TrafficLightAgent, PursuitAgent
+from gym_urbandriving.assets import Car, TrafficLight, CrosswalkLight, Pedestrian
+from gym_urbandriving.agents import NullAgent, TrafficLightAgent, CrosswalkLightAgent, PursuitAgent
 from copy import deepcopy
 import gym_urbandriving as uds
 
@@ -12,10 +12,12 @@ class VelocityMPCPlanner:
     def plan(self, state, agent_num):
         agents = []
         for i,obj in enumerate(state.dynamic_objects):
-            if type(obj) in {Car}:
+            if type(obj) in {Car, Pedestrian}:
                 agents.append(PursuitAgent(i))
             elif type(obj) in {TrafficLight}:
                 agents.append(NullAgent(i))
+            elif type(obj) in {CrosswalkLight}:
+                agents.append(CrosswalkLightAgent(i))
             else:
                 agents.append(NullAgent(i))
 
