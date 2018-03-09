@@ -67,7 +67,13 @@ class Pedestrian(Circle, DynamicShape):
         from gym_urbandriving.assets import Car
         if type(other) in {Terrain, Car}:
             return True
-        if type(other) in {CrosswalkLight} and other.color == 'red' and abs(other.angle-self.angle) < .1:
-            return True
+        if type(other) in {CrosswalkLight} and other.color == 'red':
+            e_angle = other.angle-self.angle
+            if e_angle > np.pi:
+                e_angle -= (np.pi*2)
+            elif e_angle < -np.pi:
+                e_angle += (np.pi*2)
+            if abs(e_angle) < .1:
+                return True
 
         return False
