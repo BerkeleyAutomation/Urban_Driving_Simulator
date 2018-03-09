@@ -109,8 +109,8 @@ class GeometricPlanner:
 
             xn = splx(np.linspace(0,npoints-1,200))
             yn = sply(np.linspace(0,npoints-1,200))
-            xn = sc.ndimage.filters.gaussian_filter1d(xn, 20)
-            yn = sc.ndimage.filters.gaussian_filter1d(yn, 20)
+            xn = sc.ndimage.filters.gaussian_filter1d(xn, 15)
+            yn = sc.ndimage.filters.gaussian_filter1d(yn, 15)
 
             #sc.interpolate.splprep([newx, newy], s=0)
             newtraj = Trajectory(mode = 'xyv', fsm=0)

@@ -199,7 +199,7 @@ class Trainer:
                 state.dynamic_objects[agent_num].trajectory.set_vel(target_vel)
                 target_velocities.append(target_vel)
 
-            for agent_num in range(self.NUM_CARS+self.NUM_PEDS):
+            for agent_num in range(self.NUM_CARS, self.NUM_CARS+self.NUM_PEDS):
                 target_vel = VelocityMPCPlanner(1).plan(deepcopy(state), agent_num)
                 state.dynamic_objects[agent_num].trajectory.set_vel(target_vel)
                 target_velocities.append(target_vel)
@@ -365,7 +365,7 @@ class Trainer:
             #Randomly Sample Number of Cars
             self.NUM_CARS = np.random.randint(2,self.MAX_AGENTS)
             self.NUM_PEDS = np.random.randint(2,self.MAX_AGENTS)
-
+            self.NUM_PEDS = 0
 
             rollout,final_state = self.rollout_supervisor()
             if self.check_success(final_state):
