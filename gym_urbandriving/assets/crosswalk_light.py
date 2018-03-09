@@ -1,7 +1,7 @@
 from gym_urbandriving.assets.primitives.rectangle import Rectangle
 from gym_urbandriving.assets.primitives.shape import Shape
 
-class TrafficLight(Rectangle):
+class CrosswalkLight(Rectangle):
     """
     Represents a static traffic light in the scene
     
@@ -14,10 +14,9 @@ class TrafficLight(Rectangle):
     angle : float
         Starting angle of light in degrees
     """
-    colors = {"green" : "traffic_green.png",
-              "yellow" : "traffic_yellow.png",
-              "red" : "traffic_red.png"}
-    def __init__(self, x, y, angle, initial_color="green", time_in_color = 0):
+    colors = {"white" : "cross_white.png",
+              "red" : "cross_red.png"}
+    def __init__(self, x, y, angle, initial_color="red", time_in_color = 0):
         Rectangle.__init__(self, x, y, 15, 15, angle)
         self.time_in_color = time_in_color
         self.color = initial_color

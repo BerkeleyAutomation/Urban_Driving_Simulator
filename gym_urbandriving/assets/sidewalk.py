@@ -42,9 +42,9 @@ class Sidewalk(Polygon):
             Generated Pedestrian object
         """
 
-        x = np.random.uniform(self.minx,
-                              self.maxx)
-        y = np.random.uniform(self.miny,
-                              self.maxy)
+        x = np.random.uniform(self.minx+15,
+                              self.maxx-15)
+        y = np.random.uniform(self.miny+15,
+                              self.maxy-15)
         man = man_type(x, y, angle=self.angle)
         return man

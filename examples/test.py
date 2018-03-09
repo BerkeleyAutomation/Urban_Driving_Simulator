@@ -4,8 +4,8 @@ import cProfile
 import time
 import numpy as np
 
-from gym_urbandriving.agents import KeyboardAgent, AccelAgent, NullAgent, TrafficLightAgent
-from gym_urbandriving.assets import Car, TrafficLight
+from gym_urbandriving.agents import KeyboardAgent, AccelAgent, NullAgent, TrafficLightAgent, CrosswalkLightAgent
+from gym_urbandriving.assets import Car, TrafficLight, CrosswalkLight
 
 
 """
@@ -30,7 +30,8 @@ def f():
                               max_time=500,
                               randomize=True,
                               agent_mappings={Car:NullAgent,
-                                              TrafficLight:TrafficLightAgent},
+                                              TrafficLight:TrafficLightAgent, 
+                                              CrosswalkLight:CrosswalkLightAgent},
                               use_ray=False
     )
     
