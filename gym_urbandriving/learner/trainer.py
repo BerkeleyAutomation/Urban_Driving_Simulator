@@ -10,7 +10,7 @@ from gym_urbandriving.utils.data_logger import DataLogger
 from gym_urbandriving.learner.imitation_learner import IL
 
 from gym_urbandriving.agents import NullAgent, TrafficLightAgent, ControlAgent, PursuitAgent, CrosswalkLightAgent
-from gym_urbandriving.planning import Trajectory, RRTMPlanner, GeometricPlanner, VelocityMPCPlanner, CasteljauPlanner
+from gym_urbandriving.planning import Trajectory, RRTMPlanner, GeometricPlanner, VelocityMPCPlanner, CasteljauPlanner, PedestrianVelPlanner
 from gym_urbandriving.assets import Car, TrafficLight, CrosswalkLight
 
 THRESH = 280
@@ -192,17 +192,17 @@ class Trainer:
             actions = [] 
             target_velocities = []
 
-
-
             for agent_num in range(self.NUM_CARS):
-                target_vel = VelocityMPCPlanner(self.lookahead).plan(deepcopy(state), agent_num)
+                target_vel = VelocityMPCPlanner().plan(deepcopy(state), agent_num)
                 state.dynamic_objects[agent_num].trajectory.set_vel(target_vel)
                 target_velocities.append(target_vel)
 
-            for agent_num in range(self.NUM_CARS, self.NUM_CARS+self.NUM_PEDS):
-                target_vel = VelocityMPCPlanner(1).plan(deepcopy(state), agent_num)
+            for agent_num in range(self.NUM_CARS, self.NUM_CARS + self.NUM_PEDS):
+                target_vel = PedestrianVelPlanner().plan(deepcopy(state),agent_num)
                 state.dynamic_objects[agent_num].trajectory.set_vel(target_vel)
                 target_velocities.append(target_vel)
+
+
 
             for agent in agents:
                 actions.append(agent.eval_policy(state))
@@ -279,12 +279,16 @@ class Trainer:
         for sim_time in range(self.DEMO_LEN):
             target_velocities_learner = self.il_learn.eval_model(self.NUM_CARS,state,goal_states)
             target_velocities_sup = []
-            for agent_num in range(self.NUM_CARS+self.NUM_PEDS):
+
+            for agent_num in range(self.NUM_CARS):
                 state.dynamic_objects[agent_num].trajectory.set_vel(target_velocities_learner[agent_num])
-                target_velocities_sup.append(VelocityMPCPlanner(self.lookahead).plan(deepcopy(state), agent_num))
-            for agent_num in range(self.NUM_CARS,self.NUM_CARS+self.NUM_PEDS):
-                state.dynamic_objects[agent_num].trajectory.set_vel(target_velocities_learner[agent_num])
-                target_velocities_sup.append(VelocityMPCPlanner(1).plan(deepcopy(state), agent_num))
+                target_vel = VelocityMPCPlanner().plan(deepcopy(state), agent_num)
+                target_velocities_sup.append(target_vel)
+
+            # Don't learn for pedestrians
+            for agent_num in range(self.NUM_CARS, self.NUM_CARS + self.NUM_PEDS):
+                target_vel = PedestrianVelPlanner().plan(deepcopy(state),agent_num)
+                state.dynamic_objects[agent_num].trajectory.set_vel(target_vel)
 
 
             # Get all actions
@@ -365,7 +369,6 @@ class Trainer:
             #Randomly Sample Number of Cars
             self.NUM_CARS = np.random.randint(2,self.MAX_AGENTS)
             self.NUM_PEDS = np.random.randint(2,self.MAX_AGENTS)
-            self.NUM_PEDS = 0
 
             rollout,final_state = self.rollout_supervisor()
             if self.check_success(final_state):
