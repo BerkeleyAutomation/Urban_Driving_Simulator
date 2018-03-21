@@ -49,7 +49,7 @@ class PursuitAgent(NullAgent):
                     target_loc = p[:2].tolist()
                     target_vel = p[2]
         else:
-            return (0,0)
+            return None
             #target_loc = obj.destination
             #target_vel = 0
 
