@@ -183,7 +183,7 @@ class GeometricPlanner:
         sol = pdef.getSolutionPath()
 
         if not sol:
-            return None
+            return []
         #print(sol.cost(pathObj).value())
         sol = sol.printAsMatrix()
         #print(sol)
