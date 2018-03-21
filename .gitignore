@@ -8,6 +8,10 @@ stats/
 *.pyc
 *.swp
 *.swo
+*.model
+*.pickle
+*.eps
+*.pdf
 data/
 temp/
 test_data/
