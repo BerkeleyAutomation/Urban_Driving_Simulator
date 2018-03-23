@@ -28,7 +28,6 @@ class VelocityMPCPlanner:
                                   randomize=False,
                                   agent_mappings={Car:NullAgent,
                                                   TrafficLight:NullAgent},
-                                  use_ray=False
         )
         state_copy = testing_env.current_state
         if state_copy.dynamic_objects[agent_num].trajectory.stopped:

@@ -34,7 +34,6 @@ def test_rollout(index, thres):
                               max_time=500,
                               randomize=True,
                               agent_mappings={Car:NullAgent},
-                              use_ray=False
     )
     
     env._reset()

@@ -15,7 +15,6 @@ env =  uds.UrbanDrivingEnv(init_state=init_state,
                               agent_mappings={Car:NullAgent,
                                               TrafficLight:TrafficLightAgent, 
                                               CrosswalkLight:CrosswalkLightAgent},
-                              use_ray=False
     )
 
 for i in range(80):

@@ -144,7 +144,6 @@ def f(planner,time,goal,prune,select):
                               agent_mappings={Car:NullAgent,
                                               TrafficLight:TrafficLightAgent, 
                                               CrosswalkLight:CrosswalkLightAgent},
-                              use_ray=False
     )
 
     env._render()
