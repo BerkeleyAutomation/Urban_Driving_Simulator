@@ -43,7 +43,6 @@ def f():
                                               Pedestrian:ControlAgent,
                                               TrafficLight:TrafficLightAgent, 
                                               CrosswalkLight:CrosswalkLightAgent},
-                              use_ray=False
     )
 
     visualizing_env._reset()
@@ -64,7 +63,6 @@ def f():
                               randomize=False,
                               agent_mappings={Car:NullAgent,
                                               TrafficLight:TrafficLightAgent},
-                              use_ray=False
     )
 
 

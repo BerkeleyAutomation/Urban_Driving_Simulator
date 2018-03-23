@@ -32,7 +32,6 @@ def f():
                               agent_mappings={Car:NullAgent,
                                               TrafficLight:TrafficLightAgent, 
                                               CrosswalkLight:CrosswalkLightAgent},
-                              use_ray=False
     )
     
     env._reset()

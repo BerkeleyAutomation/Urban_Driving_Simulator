@@ -23,7 +23,6 @@ env =  uds.UrbanDrivingEnv(init_state=init_state,
                               randomize=False,
                               agent_mappings={Car:NullAgent,
                                             },
-                              use_ray=False, 
     )
 
 agent = AccelAgent()
