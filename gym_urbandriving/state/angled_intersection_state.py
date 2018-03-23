@@ -1,6 +1,6 @@
 from gym_urbandriving.state.state import PositionState
 from gym_urbandriving.assets import Terrain, Lane, Street, Sidewalk,\
-    Pedestrian, Car, TrafficLight
+    Pedestrian, Car, TrafficLight, CrosswalkLight
 import numpy as np
 
 class AngledIntersectionState(PositionState):
@@ -52,3 +52,12 @@ class AngledIntersectionState(PositionState):
             self.dynamic_objects.append(TrafficLight(400, 560, -np.pi))
             self.dynamic_objects.append(TrafficLight(580, 600, -(np.pi/2), initial_color="red"))
             self.dynamic_objects.append(TrafficLight(460, 400, (np.pi/2), initial_color="red"))
+
+            self.dynamic_objects.append(CrosswalkLight(365, 395, -np.pi/2, initial_color="red", time_in_color=80))
+            self.dynamic_objects.append(CrosswalkLight(375, 375, 0, initial_color="white"))
+            self.dynamic_objects.append(CrosswalkLight(770, 625, -np.pi, initial_color="white"))
+            self.dynamic_objects.append(CrosswalkLight(790, 610, np.pi/2, initial_color="red", time_in_color=80))
+            self.dynamic_objects.append(CrosswalkLight(495, 610, np.pi/2, initial_color="red", time_in_color=80))
+            self.dynamic_objects.append(CrosswalkLight(520, 625, 0, initial_color="white"))
+            self.dynamic_objects.append(CrosswalkLight(660, 395, -np.pi/2, initial_color="red", time_in_color=80))
+            self.dynamic_objects.append(CrosswalkLight(625, 375, -np.pi, initial_color="white"))
