@@ -1,7 +1,7 @@
 import numpy as np
 from gym_urbandriving.utils.PID import PIDController
 from gym_urbandriving.agents import PursuitAgent
-from gym_urbandriving.planning import VelocityMPCPlanner
+from gym_urbandriving.planning import VelocityMPCPlanner,GeometricPlanner
 from copy import deepcopy
 import gym_urbandriving as uds
 
@@ -15,9 +15,19 @@ class PlanningPursuitAgent(PursuitAgent):
     agent_num : int
         Index of this agent in the world.
         Used to access its object in state.dynamic_objects
+
     """
+
+    def __init__(self, agent_num=0):
+        self.agent_num = agent_num
+        #Move to JSON 
+        self.PID_acc = PIDController(1.0, 0, 0)
+        self.PID_steer = PIDController(2.0, 0, 0)
+        self.not_initiliazed = True
         
-    def eval_policy(self, state):
+
+        
+    def eval_policy(self, state,simplified = False):
         """
         Returns action based next state in trajectory. 
 
@@ -27,8 +37,15 @@ class PlanningPursuitAgent(PursuitAgent):
             State of the world, unused
         """
 
-        target_vel = VelocityMPCPlanner().plan(deepcopy(state), self.agent_num)
-        state.dynamic_objects[self.agent_num].trajectory.set_vel(target_vel)
+        if self.not_initiliazed:
+            geoplanner = GeometricPlanner(deepcopy(state), inter_point_d=40.0, planning_time=0.1)
+
+            geoplanner.plan_for_agents(state,type_of_agent='background_cars',agent_num=self.agent_num)
+            self.not_initiliazed = False
+
+        if not simplified:
+            target_vel = VelocityMPCPlanner().plan(deepcopy(state), self.agent_num)
+            state.dynamic_objects['background_cars'][str(self.agent_num)].trajectory.set_vel(target_vel)
 
         return super(PlanningPursuitAgent, self).eval_policy(state)
 

@@ -1,7 +1,9 @@
 from gym_urbandriving.state.state import PositionState
 from gym_urbandriving.assets import Terrain, Lane, Street, Sidewalk,\
-    Pedestrian, Car, TrafficLight, CrosswalkLight
+    Pedestrian, Car, TrafficLight
 import numpy as np
+from gym_urbandriving.agents import *
+from gym_urbandriving.assets import Car, TrafficLight, CrosswalkLight
 import random
 from copy import deepcopy
 
@@ -46,44 +48,70 @@ class SimpleIntersectionState(PositionState):
         Randomly generates car and pedestrian positions
         """
         car_goals = "NSEW"
-        self.dynamic_objects = []
+        self.dynamic_objects = {}
+
+        self.dynamic_objects['controlled_cars'] = {}
+        self.dynamic_objects['background_cars'] = {}
+        self.dynamic_objects['pedestrians'] = {}
+        self.dynamic_objects['traffic_lights'] = {}
+
         self.dynamic_objects_lane_indices = []
-        while len(self.dynamic_objects) < self.ncars:
-            start = np.random.random_integers(0, 3)
-            lane = [Lane(450, 200, 400, 100, angle=-(np.pi/2)),
+
+        lanes = [Lane(450, 200, 400, 100, angle=-(np.pi/2)),
                     Lane(550, 800, 400, 100, angle=(np.pi/2)),
                     Lane(800, 450, 400, 100, angle=-np.pi),
-                    Lane(200, 550, 400, 100)][start]
-            car = lane.generate_car(self.car_model)
-            if not any([car.collides(obj) for obj in self.static_objects+self.dynamic_objects]):
-                self.dynamic_objects.append(car)
-                self.dynamic_objects_lane_indices.append(start)
-        self.assign_goal_states(self.dynamic_objects_lane_indices)
+                    Lane(200, 550, 400, 100)]
 
-        while len(self.dynamic_objects) < self.ncars+self.nped:
-            sidewalk = self.static_objects[-8:][np.random.random_integers(0, 7)]
-            man = sidewalk.generate_man()
-            man.vel = 2
-            if not any([man.collides(obj) for obj in self.static_objects+self.dynamic_objects]):
-                self.dynamic_objects.append(man)
-                man.destination = [man.x+600*np.cos(man.angle), man.y-600*np.sin(man.angle), 2, man.angle]
+        car_index = 0
+
+        for car_index in range(self.agent_config['controlled_cars']):
+
+            #Find a lane to generate car on 
+
+            while True:
+              start = np.random.random_integers(0, 3)
+              lane = lanes[start]
+              car = lane.generate_car(self.car_model)
+
+
+              if not self.is_in_collision(car):
+                  self.dynamic_objects['controlled_cars'][str(car_index)] = car
+                  self.dynamic_objects['controlled_cars'][str(car_index)].destination = self.assign_goal_states(start)
+                  break
+
+        for car_index in range(self.agent_config['background_cars']):
+
+            #Find a lane to generate car on 
+            while True:
+              start = np.random.random_integers(0, 3)
+              lane = lanes[start]
+              car = lane.generate_car(self.car_model)
+
+
+              if not self.is_in_collision(car):
+                  self.dynamic_objects['background_cars'][str(car_index)] = car
+                  self.dynamic_objects['background_cars'][str(car_index)].destination = self.assign_goal_states(start)
+                  break
+
+
+        if self.agent_config["use_pedesterians"]:
+          while len(self.dynamic_objects) < self.ncars+self.nped:
+              sidewalk = self.static_objects[-8:][np.random.random_integers(0, 7)]
+              man = sidewalk.generate_man()
+              man.vel = 2
+              if not any([man.collides(obj) for obj in self.static_objects+self.dynamic_objects]):
+                  self.dynamic_objects.append(man)
                 
-        if self.traffic_lights:
-            self.dynamic_objects.append(TrafficLight(600, 440, 0))
-            self.dynamic_objects.append(TrafficLight(400, 560, -np.pi))
-            self.dynamic_objects.append(TrafficLight(560, 600, -(np.pi/2), initial_color="red"))
-            self.dynamic_objects.append(TrafficLight(440, 400, (np.pi/2), initial_color="red"))
-            self.dynamic_objects.append(CrosswalkLight(375, 390, -np.pi/2, initial_color="red", time_in_color=80))
-            self.dynamic_objects.append(CrosswalkLight(390, 375, 0, initial_color="white"))
-            self.dynamic_objects.append(CrosswalkLight(610, 625, -np.pi, initial_color="white"))
-            self.dynamic_objects.append(CrosswalkLight(625, 610, np.pi/2, initial_color="red", time_in_color=80))
-            self.dynamic_objects.append(CrosswalkLight(375, 610, np.pi/2, initial_color="red", time_in_color=80))
-            self.dynamic_objects.append(CrosswalkLight(390, 625, 0, initial_color="white"))
-            self.dynamic_objects.append(CrosswalkLight(625, 390, -np.pi/2, initial_color="red", time_in_color=80))
-            self.dynamic_objects.append(CrosswalkLight(610, 375, -np.pi, initial_color="white"))
+        if self.agent_config["use_traffic_lights"]:
+            self.dynamic_objects['traffic_lights']['0'] = TrafficLight(600, 440, 0)
+            self.dynamic_objects['traffic_lights']['1'] = TrafficLight(400, 560, -np.pi)
+            self.dynamic_objects['traffic_lights']['2'] = TrafficLight(560, 600, -(np.pi/2), initial_color="red")
+            self.dynamic_objects['traffic_lights']['3'] = TrafficLight(440, 400, (np.pi/2), initial_color="red")
+
+        self.create_agents()
 
 
-    def assign_goal_states(self, lane_orders):
+    def assign_goal_states(self, start_lane):
         """
         Randomly assigns goal states to the cars
         No two agents can go to the same goal 
@@ -98,32 +126,35 @@ class SimpleIntersectionState(PositionState):
         goal_states.append([900,550,2,0])
         goal_states.append([100,450,2,np.pi])
 
+        del goal_states[start_lane]
+        return random.choice(goal_states)
 
-        for i in range(len(lane_orders)):
-          gs = deepcopy(goal_states)
-          del gs[lane_orders[i]]
-          self.dynamic_objects[i].destination = random.choice(gs)
 
-        """
-        #Lanes that cannot be assigned 
-        forbidden_lanes = []
+    def create_agents(self):
 
-        for lane in lane_orders:
+        self.agent_mappings = {Car:PlanningPursuitAgent,
+                    TrafficLight:TrafficLightAgent, 
+                    CrosswalkLight:CrosswalkLightAgent}
 
-            #append current lane to constraint set
-            forbidden_lanes.append(lane)
+        self.bg_agents = {}
 
-            while True:
-                random_lane = np.random.random_integers(0, 3)
-                if random_lane not in forbidden_lanes:
-                    #remove current lane from constraint set
-                    forbidden_lanes.pop()
-                    #add the assigned lane
-                    forbidden_lanes.append(random_lane)
-                    break;
+        for key in self.dynamic_objects.keys():
+            self.bg_agents[key] = []
+            for i, index in enumerate(self.dynamic_objects[key]):
+                obj = self.dynamic_objects[key][index]
+                if type(obj) in self.agent_mappings:
+                    self.bg_agents[key].append(self.agent_mappings[type(obj)](i))
 
-            sorted_goal.append(goal_states[random_lane])
+    def is_in_collision(self,car):
 
-        for i in range(len(sorted_goal)):
-          self.dynamic_objects[i].destination = sorted_goal[i]
-        """
+        for obj in self.static_objects:
+          if car.collides(obj):
+            return True
+
+        for key in self.dynamic_objects.keys():
+            for i,obj in enumerate(self.dynamic_objects[key]):
+              if car.collides(obj):
+                return True
+
+        return False
+

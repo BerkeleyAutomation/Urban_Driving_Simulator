@@ -8,13 +8,13 @@ class PositionState:
     Abstract class representing the objects in a scene
     """
     static_objects = []
-    def __init__(self, ncars=0, nped=0, traffic_lights=False, car_model="kinematic"):
+    def __init__(self, data, car_model="kinematic"):
         self.dimensions = (1000, 1000)
-        self.dynamic_objects = []
+        self.dynamic_objects = {}
         self.time = 0
-        self.ncars = ncars
-        self.nped = nped
-        self.traffic_lights = traffic_lights
+
+        self.agent_config = data['agents']
+
         assert (car_model in {"kinematic", "point", "reeds_shepp"})
         self.car_model = car_model
         self.randomize()
@@ -38,14 +38,18 @@ class PositionState:
             The corresponding list for collisions between dynamic objects and static objects
         """
         dynamic_collisions, static_collisions = [], []
-        for i, dobj in enumerate(self.dynamic_objects):
-            for j, sobj in enumerate(self.static_objects):
-                if dobj.collides(sobj):
-                    static_collisions.append([i, j])
-            for j in range(i, len(self.dynamic_objects)):
-                dobj1 = self.dynamic_objects[j]
-                if j > i and dobj.collides(dobj1):
-                    dynamic_collisions.append([i, j])
+        
+        for key in self.dynamic_objects.keys():
+            for i, dobj in self.dynamic_objects[key].items():
+                for j, sobj in enumerate(self.static_objects):
+                    if dobj.collides(sobj):
+                        static_collisions.append([int(i), j])
+
+                for j in range(int(i), len(self.dynamic_objects[key])):
+                    dobj1 = self.dynamic_objects[key][str(j)]
+                    if j > i and dobj.collides(dobj1):
+                        dynamic_collisions.append([i, j])
+
         return dynamic_collisions, static_collisions
 
 
@@ -79,7 +83,7 @@ class PositionState:
                 return True
         return False
 
-    def min_dist_to_coll(self, agentnum):
+    def min_dist_to_coll(self, agentnum,type_of_agent = 'background_cars'):
         """
         Returns the minimum distance between the object with id agentnum and a collideable object.
 
@@ -94,11 +98,13 @@ class PositionState:
             Distance to nearest collideable object
         """
         min_dist = np.finfo('f').max
-        obj = self.dynamic_objects[agentnum]
+        obj = self.dynamic_objects[type_of_agent][agentnum]
         for j, sobj in enumerate(self.static_objects):
             if obj.can_collide(sobj):
                 min_dist = min(min_dist, obj.dist_to(sobj))
-        for j, dobj in enumerate(self.dynamic_objects):
-            if j != agentnum and obj.can_collide(dobj):
-                min_dist = min(min_dist, obj.dist_to(dobj))
+
+        for key in self.dynamic_objects.keys():
+            for j, dobj in enumerate(self.dynamic_objects):
+                if j != agentnum and obj.can_collide(dobj):
+                    min_dist = min(min_dist, obj.dist_to(dobj))
         return min_dist

@@ -1,16 +1,10 @@
 import gym
 from copy import deepcopy
 from gym_urbandriving.agents import *
+import gym_urbandriving as uds
 import numpy as np
-import ray
-
-@ray.remote
-class RayNode:
-    def __init__(self, agent_type, agent_num):
-        self.agent = agent_type(agent_num)
-
-    def eval_policy(self, state):
-        return self.agent.eval_policy(state)
+import IPython
+from gym_urbandriving.assets import Car, TrafficLight, CrosswalkLight
 
 class UrbanDrivingEnv(gym.Env):
     """
@@ -47,46 +41,36 @@ class UrbanDrivingEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
     def __init__(self,
-                 init_state,
+                 config_data=None,
+                 init_state = None,
                  visualizer=None,
                  reward_fn=lambda x: 0,
                  max_time=500,
                  randomize=False,
-                 use_ray=False,
                  agent_mappings={}):
+    
         self.visualizer = visualizer
         self.reward_fn = reward_fn
-        self.init_state = deepcopy(init_state)
-        self.agent_mappings = agent_mappings
+
+
+        if not config_data == None:
+            if config_data['enviroment'] == 'four_way_intersection':
+                self.init_state = uds.state.SimpleIntersectionState(config_data)
+        else:
+            self.init_state = init_state
+
+
+
         self.max_time = max_time
         self.randomize = randomize
         self.statics_rendered = False
-        self.use_ray = use_ray
-        if use_ray:
-            ray.init()
+
         self.dynamic_collisions, self.static_collisions, self.last_col = [], [], -1
         if (self.init_state):
             self._reset()
 
-    def _step_test(self, actions, agentnum=0):
-        assert(self.current_state is not None)
-        # Get actions for all objects
-            
-        for i, dobj in enumerate(self.current_state.dynamic_objects):
-            dobj.step(actions[i])
 
-        self.current_state.time += 1
-        dynamic_coll, static_coll = self.current_state.get_collisions()
-        state = self.current_state
-        reward = self.reward_fn(self.current_state)
-        done = (self.current_state.time == self.max_time) or len(dynamic_coll) or len(static_coll)
-
-        info_dict = {"saved_actions": actions, "static_coll" : static_coll, "dynamic_coll" : dynamic_coll}
-
-        return state, reward, done, info_dict
-
-
-    def _step(self, action, agentnum=0):
+    def _step(self, action,background_simplified = False):
         """
         The step function accepts a control for the 0th agent in the scene. Then, it queries
         all the background agents to determine their actions. Then, it updates the scene
@@ -112,35 +96,42 @@ class UrbanDrivingEnv(gym.Env):
         """
         assert(self.current_state is not None)
         # Get actions for all objects
-        actions = [None]*len(self.current_state.dynamic_objects)
-        actions[agentnum] = action
+        background_car_actions = []
+        background_traffic_actions = []
      
+        ### GET ALL ACTIONS ####
+    
+        for agent in self.current_state.bg_agents['background_cars']:
+            if background_simplified:
+                background_car_actions.append(agent.eval_policy(self.current_state,simplified=True))
+            else:
+                background_car_actions.append(agent.eval_policy(self.current_state))
 
-        if self.use_ray:
-            assert(all([type(bgagent) == RayNode for i, bgagent in self.bg_agents.items()]))
-            stateid = ray.put(self.current_state)
-            actionids = {}
-            for i, agent in self.bg_agents.items():
-                if i is not agentnum:
-                    actionids[i] = agent.eval_policy.remote(stateid)
-            for i, aid in actionids.items():
-                action = ray.get(aid)
-                actions[i] = action
-        else:
-            assert(all([type(bgagent) != RayNode for i, bgagent in self.bg_agents.items()]))
-            for i, agent in self.bg_agents.items():
-                if i is not agentnum:
-                    actions[i] = agent.eval_policy(self.current_state)
-        for i, dobj in enumerate(self.current_state.dynamic_objects):
-            dobj.step(actions[i])
+        for agent in self.current_state.bg_agents['traffic_lights']:
+            background_traffic_actions.append(agent.eval_policy(self.current_state))
+
+
+        ####UPDATE ALL POLICIES#########
+        for index, dobj in self.current_state.dynamic_objects['background_cars'].items():
+            dobj.step(background_car_actions[int(index)])
+
+        for index, dobj in self.current_state.dynamic_objects['traffic_lights'].items():
+            dobj.step(background_traffic_actions[int(index)])
+
+        if not background_simplified:
+            for i, dobj in self.current_state.dynamic_objects['controlled_cars'].items():
+                dobj.step(action[int(i)])
+
+
 
         self.current_state.time += 1
         dynamic_coll, static_coll = self.current_state.get_collisions()
         state = self.current_state
         reward = self.reward_fn(self.current_state)
+
         done = (self.current_state.time == self.max_time) or len(dynamic_coll) or len(static_coll)
 
-        info_dict = {"saved_actions": actions}
+        info_dict = {"saved_actions": action}
 
         return state, reward, done, info_dict
 
@@ -162,13 +153,7 @@ class UrbanDrivingEnv(gym.Env):
             self.init_state.randomize()
         self.current_state = deepcopy(self.init_state)
 
-        self.bg_agents = {}
-        for i, obj in enumerate(self.current_state.dynamic_objects):
-            if type(obj) in self.agent_mappings:
-                if self.use_ray:
-                    self.bg_agents[i] = RayNode.remote(self.agent_mappings[type(obj)], i)
-                else:
-                    self.bg_agents[i] = self.agent_mappings[type(obj)](i)
+        
 
         return
 

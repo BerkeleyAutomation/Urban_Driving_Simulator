@@ -33,7 +33,7 @@ class PursuitAgent(NullAgent):
             Keyboard action
         """
 
-        obj = state.dynamic_objects[self.agent_num]
+        obj = state.dynamic_objects['background_cars'][str(self.agent_num)]
 
         if not obj.trajectory.is_empty():    
             p = obj.trajectory.first()

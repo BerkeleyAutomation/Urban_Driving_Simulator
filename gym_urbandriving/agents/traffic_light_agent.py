@@ -23,7 +23,7 @@ class TrafficLightAgent:
         self.agentnum = agentnum
 
     def eval_policy(self, state):
-        obj = state.dynamic_objects[self.agentnum]
+        obj = state.dynamic_objects['traffic_lights'][str(self.agentnum)]
         assert(type(obj) == TrafficLight)
         if obj.time_in_color < self.color_times[obj.color]:
             return None
