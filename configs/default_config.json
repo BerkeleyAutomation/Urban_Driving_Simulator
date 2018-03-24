@@ -1,0 +1,20 @@
+{   
+
+    "enviroment": "four_way_intersection",
+    
+    "agents":{
+        "controlled_cars":1,
+        "action_space":"steering",
+        "state_space":"Q-LIDAR",
+        "background_cars":3,
+        "use_traffic_lights":true,
+        "use_pedesterians":false,
+        "number_of_pedesterians":0
+    },
+
+    "recorded_data":{
+        "action_space":"steering",
+        "state_space":"Q-LIDAR",
+        "all_cars":false
+    }
+}
