@@ -13,7 +13,7 @@ with open('configs/default_config.json') as json_data_file:
 
 print data
 
-env = uds.UrbanDrivingEnv(data,visualizer = True)
+env = uds.UrbanDrivingEnv(data)
 
 
 env._render()

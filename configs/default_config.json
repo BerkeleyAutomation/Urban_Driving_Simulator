@@ -2,7 +2,7 @@
 
     "enviroment":{
         "state": "four_way_intersection",
-        "visualize": true
+        "visualize": false
     },
 
     "agents":{
