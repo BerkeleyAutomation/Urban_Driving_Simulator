@@ -8,7 +8,7 @@ setup(name='gym_urbandriving',
                         "shapely",
                         "numpy",
                         "pygame",
-                        "ray",
                         "scikit-image", 
-                        "opencv-python"]
+                        "opencv-python",
+                        "ipython"]
 )
