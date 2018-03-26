@@ -52,12 +52,14 @@ class UrbanDrivingEnv(gym.Env):
         
         self.reward_fn = reward_fn
 
-
         if config_data:
             if config_data['enviroment']['state'] == 'four_way_intersection':
                 self.init_state = uds.state.SimpleIntersectionState(config_data)
             if config_data['enviroment']['visualize']:
                 self.visualizer = uds.PyGameVisualizer((800, 800))
+            else:
+                self.visualizer = None
+
         else:
             self.init_state = init_state
             self.visualizer = None
@@ -159,6 +161,7 @@ class UrbanDrivingEnv(gym.Env):
             self.statics_rendered = False
         if self.randomize:
             self.init_state.randomize()
+
         self.current_state = deepcopy(self.init_state)
 
         
@@ -176,8 +179,6 @@ class UrbanDrivingEnv(gym.Env):
         waypoints :
             Extra points you would like to render over top of the the scene, for debugging
         """
-        if not config_data['enviroment']['visualize']:
-            return
 
         if close:
             return
