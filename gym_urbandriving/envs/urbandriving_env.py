@@ -49,15 +49,18 @@ class UrbanDrivingEnv(gym.Env):
                  randomize=False,
                  agent_mappings={}):
     
-        self.visualizer = visualizer
+        
         self.reward_fn = reward_fn
 
 
-        if not config_data == None:
-            if config_data['enviroment'] == 'four_way_intersection':
+        if config_data:
+            if config_data['enviroment']['state'] == 'four_way_intersection':
                 self.init_state = uds.state.SimpleIntersectionState(config_data)
+            if config_data['enviroment']['visualize']:
+                self.visualizer = uds.PyGameVisualizer((800, 800))
         else:
             self.init_state = init_state
+            self.visualizer = None
 
 
 

@@ -1,7 +1,10 @@
 {   
 
-    "enviroment": "four_way_intersection",
-    
+    "enviroment":{
+        "state": "four_way_intersection",
+        "visualize": true
+    },
+
     "agents":{
         "controlled_cars":1,
         "action_space":"steering",

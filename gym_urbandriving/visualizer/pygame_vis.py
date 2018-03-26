@@ -92,8 +92,9 @@ class PyGameVisualizer:
         new_surface = pygame.Surface((valid_area[1] - valid_area[0],
                                       valid_area[3] - valid_area[2]),
                                      pygame.SRCALPHA)
-        for obj in state.dynamic_objects:
-            self.drawfns[obj.primitive](obj, new_surface)
+        for key in state.dynamic_objects.keys():
+            for index,obj in state.dynamic_objects[key].items():
+                self.drawfns[obj.primitive](obj, new_surface)
 
         new_surface = pygame.transform.scale(new_surface, (self.screen_dim))
         self.surface.blit(new_surface, (0, 0), None)
@@ -231,9 +232,10 @@ class PyGameVisualizer:
             self.render_traffic_trajectories(traffic_trajectories, valid_area)
 
         
-        for i, dobj in enumerate(state.dynamic_objects):
-            if not dobj.trajectory is None and ('x' in dobj.trajectory.mode and 'y' in dobj.trajectory.mode):
-                self.render_waypoints(dobj.trajectory.get_renderable_points(), valid_area, i)
+        for key in state.dynamic_objects.keys():
+            for index,dobj in state.dynamic_objects[key].items():
+                if not dobj.trajectory is None and ('x' in dobj.trajectory.mode and 'y' in dobj.trajectory.mode):
+                    self.render_waypoints(dobj.trajectory.get_renderable_points(), valid_area, i)
 
         pygame.display.flip()
 
