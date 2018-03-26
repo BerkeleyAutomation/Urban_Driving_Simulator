@@ -47,6 +47,6 @@ class VelocityActionAgent(PursuitAgent):
         target_vel = action
         state.dynamic_objects['controlled_cars'][str(self.agent_num)].trajectory.set_vel(target_vel)
 
-        return super(VelocityActionAgent, self).eval_policy(state)
+        return super(VelocityActionAgent, self).eval_policy(state,type_of_agent='controlled_cars')
 
 
