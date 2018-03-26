@@ -15,8 +15,7 @@ class ValidityChecker(ob.StateValidityChecker):
         self.obj = controlled_obj
         self.state.dynamic_objects = {'background_cars':{}}
         self.state.dynamic_objects['background_cars']['0']=self.obj
-        #print(self.state.dynamic_objects)
-        #print(self.state.static_objects)
+       
         super(ValidityChecker, self).__init__(si)
     def isValid(self, s):
         x = s[0]
@@ -243,9 +242,9 @@ class GeometricPlanner:
 
         if not sol:
             return []
-        #print(sol.cost(pathObj).value())
+        
         sol = sol.printAsMatrix()
-        #print(sol)
+       
 
         s = [[float(j) for j in i.split(" ")[:-1]] for i in sol.splitlines()][:-1]
 

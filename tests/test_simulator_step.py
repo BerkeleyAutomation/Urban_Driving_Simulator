@@ -11,9 +11,6 @@ import IPython
 with open('configs/default_config.json') as json_data_file:
     data = json.load(json_data_file)
 
-print data
-
-
 action = [np.array([0.0,0.0])]
 env = uds.UrbanDrivingEnv(data)
 

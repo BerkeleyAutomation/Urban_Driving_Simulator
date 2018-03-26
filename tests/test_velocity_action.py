@@ -11,8 +11,6 @@ import IPython
 with open('configs/default_config.json') as json_data_file:
     data = json.load(json_data_file)
 
-print data
-
 
 data['agents']['action_space'] = 'velocity'
 action = [4.0]
