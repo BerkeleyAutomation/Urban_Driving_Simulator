@@ -6,3 +6,5 @@ from gym_urbandriving.agents.crosswalk_light_agent import CrosswalkLightAgent
 from gym_urbandriving.agents.pursuit_agent import PursuitAgent
 from gym_urbandriving.agents.control_agent import ControlAgent
 from gym_urbandriving.agents.planning_pursuit_agent import PlanningPursuitAgent
+from gym_urbandriving.agents.steering_action_agent import SteeringActionAgent
+from gym_urbandriving.agents.velocity_action_agent import VelocityActionAgent

@@ -97,6 +97,7 @@ class UrbanDrivingEnv(gym.Env):
         assert(self.current_state is not None)
         # Get actions for all objects
         background_car_actions = []
+        controlled_car_actions = []
         background_traffic_actions = []
      
         ### GET ALL ACTIONS ####
@@ -110,6 +111,10 @@ class UrbanDrivingEnv(gym.Env):
         for agent in self.current_state.bg_agents['traffic_lights']:
             background_traffic_actions.append(agent.eval_policy(self.current_state))
 
+        if not background_simplified:
+            for i,agent in enumerate(self.current_state.bg_agents['controlled_cars']):
+                controlled_car_actions.append(agent.eval_policy(action[i],self.current_state))
+        
 
         ####UPDATE ALL POLICIES#########
         for index, dobj in self.current_state.dynamic_objects['background_cars'].items():
@@ -120,7 +125,7 @@ class UrbanDrivingEnv(gym.Env):
 
         if not background_simplified:
             for i, dobj in self.current_state.dynamic_objects['controlled_cars'].items():
-                dobj.step(action[int(i)])
+                dobj.step(controlled_car_actions[int(i)])
 
 
 

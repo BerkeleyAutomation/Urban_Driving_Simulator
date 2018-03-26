@@ -139,11 +139,25 @@ class SimpleIntersectionState(PositionState):
         self.bg_agents = {}
 
         for key in self.dynamic_objects.keys():
-            self.bg_agents[key] = []
-            for i, index in enumerate(self.dynamic_objects[key]):
-                obj = self.dynamic_objects[key][index]
-                if type(obj) in self.agent_mappings:
-                    self.bg_agents[key].append(self.agent_mappings[type(obj)](i))
+            if not key == 'controlled_cars':
+              self.bg_agents[key] = []
+              for i, index in enumerate(self.dynamic_objects[key]):
+                  obj = self.dynamic_objects[key][index]
+                  if type(obj) in self.agent_mappings:
+                      self.bg_agents[key].append(self.agent_mappings[type(obj)](i))
+
+        ###Hierachy Control for cars
+        self.bg_agents['controlled_cars'] = []
+        for i in range(self.agent_config['controlled_cars']):
+
+          if self.agent_config['action_space'] == 'steering':
+            self.bg_agents['controlled_cars'].append(SteeringActionAgent(i))
+          elif self.agent_config['action_space'] == 'velocity':
+            self.bg_agents['controlled_cars'].append(VelocityActionAgent(i))
+          elif self.agent_config['action_space'] == 'trajectory':
+            self.bg_agents['controlled_cars'].append(TrajectoryActionAgent(i))
+          else:
+            raise Exception('No Valid Action Space Specified. Please Change Config File')
 
     def is_in_collision(self,car):
 
