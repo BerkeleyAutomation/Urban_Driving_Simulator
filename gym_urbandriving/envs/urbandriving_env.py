@@ -176,6 +176,9 @@ class UrbanDrivingEnv(gym.Env):
         waypoints :
             Extra points you would like to render over top of the the scene, for debugging
         """
+        if not config_data['enviroment']['visualize']:
+            return
+
         if close:
             return
         if self.visualizer:
