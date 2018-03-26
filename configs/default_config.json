@@ -7,9 +7,9 @@
 
     "agents":{
         "controlled_cars":1,
+        "background_cars":3,
         "action_space":"steering",
         "state_space":"Q-LIDAR",
-        "background_cars":3,
         "use_traffic_lights":true,
         "use_pedesterians":false,
         "number_of_pedesterians":0

@@ -1,7 +1,6 @@
 from gym_urbandriving.assets import TrafficLight
-from gym_urbandriving.agents import Agent
 
-class TrafficLightAgent(Agent):
+class TrafficLightAgent:
     """
     Agent for controlling traffic one traffic light. 
     

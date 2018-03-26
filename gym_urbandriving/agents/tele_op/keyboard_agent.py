@@ -1,6 +1,7 @@
 import pygame
+from gym_urbandriving.agents import Agent
 
-class KeyboardAgent:
+class KeyboardAgent(Agent):
     """
     Agent which interprets user keyboard inputs
 

@@ -44,17 +44,17 @@ class PositionState:
                 i = int(i)
                 for j, sobj in enumerate(self.static_objects):
                     if dobj.collides(sobj):
-                        static_collisions.append([i, j])
+                        static_collisions.append([i, j,key])
 
                 for j in range(i, len(self.dynamic_objects[key])):
                     dobj1 = self.dynamic_objects[key][str(j)]
                     if j > i and dobj.collides(dobj1):
-                        dynamic_collisions.append([i, j])
+                        dynamic_collisions.append([i, j,key])
 
         return dynamic_collisions, static_collisions
 
 
-    def collides_any(self, agentnum):
+    def collides_any(self, agentnum,type_of_agent = 'background_cars'):
         """
         Returns if the agentnum object in the scene is colliding with any other object
 
@@ -70,17 +70,17 @@ class PositionState:
         """
         dynamic_collisions, static_collisions = self.get_collisions()
         for coll in dynamic_collisions:
-            if agentnum in coll:
+            if (agentnum in coll) and (type_of_agent in coll):
                 return True
         for coll in static_collisions:
-            if agentnum == coll[0]:
+            if (agentnum in coll) and (type_of_agent in coll):
                 return True
         return False
     
-    def collides_any_dynamic(self, agentnum):
+    def collides_any_dynamic(self, agentnum,type_of_agent = 'background_cars'):
         dynamic_collisions, static_collisions = self.get_collisions()
         for coll in dynamic_collisions:
-            if agentnum in coll:
+            if (agentnum in coll) and (type_of_agent in coll):
                 return True
         return False
 
