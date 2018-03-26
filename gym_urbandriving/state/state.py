@@ -41,11 +41,12 @@ class PositionState:
         
         for key in self.dynamic_objects.keys():
             for i, dobj in self.dynamic_objects[key].items():
+                i = int(i)
                 for j, sobj in enumerate(self.static_objects):
                     if dobj.collides(sobj):
-                        static_collisions.append([int(i), j])
+                        static_collisions.append([i, j])
 
-                for j in range(int(i), len(self.dynamic_objects[key])):
+                for j in range(i, len(self.dynamic_objects[key])):
                     dobj1 = self.dynamic_objects[key][str(j)]
                     if j > i and dobj.collides(dobj1):
                         dynamic_collisions.append([i, j])
