@@ -10,3 +10,4 @@ script:
   - python tests/test_velocity_action.py # or py.test for Python versions 3.5 and below
   - python tests/test_simulator_step.py # or py.test for Python versions 3.5 and below
   - python tests/test_json_agent_init.py # or py.test for Python versions 3.5 and below
+  - python tests/test_render.py #or py.test for Python versions 3.5 and below 
