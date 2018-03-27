@@ -6,6 +6,7 @@ from gym_urbandriving.agents import *
 import json
 import os
 import random
+import six
 
 class PositionState:
     """
@@ -95,7 +96,7 @@ class PositionState:
         #TODO: Move this to env
         """
         agent_mappings = {}
-        for k, v in self.agent_config['agent_mappings'].iteritems():
+        for k, v in six.iteritems(self.agent_config['agent_mappings']):
             agent_mappings[{"Car":Car,
                             "TrafficLight":TrafficLight,
                             "CrosswalkLight":CrosswalkLight}[k]] = {"PlanningPursuitAgent":PlanningPursuitAgent,
