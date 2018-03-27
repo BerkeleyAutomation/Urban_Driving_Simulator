@@ -38,7 +38,7 @@ class PositionState:
             The corresponding list for collisions between dynamic objects and static objects
         """
         dynamic_collisions, static_collisions = [], []
-        
+
         for key in self.dynamic_objects.keys():
             for i, dobj in self.dynamic_objects[key].items():
                 i = int(i)

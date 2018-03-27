@@ -78,7 +78,7 @@ class Car(Rectangle, DynamicShape):
             The action to take
         """
         self.shapely_obj = None
-        
+
         if self.dynamics_model == "kinematic":
             self.x, self.y, self.vel, self.angle = self.kinematic_model_step(action, self.x, self.y, self.vel, self.angle)
         elif self.dynamics_model == "reeds_shepp":

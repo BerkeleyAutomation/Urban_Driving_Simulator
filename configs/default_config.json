@@ -1,8 +1,9 @@
 {   
 
-    "enviroment":{
+    "environment":{
         "state": "four_way_intersection",
-        "visualize": false
+        "visualize": false,
+        "max_time":500
     },
 
     "agents":{
