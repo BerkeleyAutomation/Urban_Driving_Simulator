@@ -7,3 +7,5 @@ To facilitate automation of urban driving, we present an efficient, lightweight,
 ## Imitation Learning Supplementary Material
 
 [Imitation Learning Supplementary Material](FLUIDS_IL.pdf)
+
+## Demo Video ##
