@@ -46,9 +46,7 @@ class UrbanDrivingEnv(gym.Env):
         self.reward_fn = reward_fn
         self.max_time = 500
         if config_data:
-
-            if config_data['environment']['state'] == 'four_way_intersection':
-                self.init_state = uds.state.SimpleIntersectionState(config_data)
+            self.init_state = uds.state.PositionState(config_data)
             if config_data['environment']['visualize']:
                 self.visualizer = uds.PyGameVisualizer((800, 800))
             else:

@@ -19,7 +19,8 @@ class Sidewalk(Polygon):
     points : list
        If specified, constructs sidewalk as polygon
     """
-    def __init__(self, x, y, xdim, ydim, angle=0.0, points=[]):
+    def __init__(self, x, y, xdim, ydim, angle=0.0, angle_deg=0, points=[]):
+        angle = np.deg2rad(angle_deg % 360.) if angle_deg else angle
         if not points:
             a = -angle
             corner_offsets = np.array([xdim / 2.0, ydim / 2.0])

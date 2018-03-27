@@ -12,7 +12,7 @@ with open('configs/default_config.json') as json_data_file:
 
 #print data
 
-state = uds.state.SimpleIntersectionState(data)
+state = uds.state.PositionState(data)
 
 
 assert(len(state.dynamic_objects['controlled_cars']) == 1)
