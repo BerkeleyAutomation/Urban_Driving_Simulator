@@ -1,0 +1,49 @@
+{
+    "static_objects": [
+        { "type":"Terrain" , "x":175, "y":175, "xdim":350, "ydim":350 },
+        { "type":"Terrain" , "x":825, "y":175, "xdim":350, "ydim":350 },
+        { "type":"Terrain" , "x":175, "y":825, "xdim":350, "ydim":350 },
+        { "type":"Terrain" , "x":825, "y":825, "xdim":350, "ydim":350 },
+        { "type":"Lane"    , "x":200, "y":450, "xdim":400, "ydim":100, "angle_deg":-180 },
+        { "type":"Lane"    , "x":200, "y":550, "xdim":400, "ydim":100, "angle_deg":0 },
+        { "type":"Lane"    , "x":800, "y":450, "xdim":400, "ydim":100, "angle_deg":-180 },
+        { "type":"Lane"    , "x":800, "y":550, "xdim":400, "ydim":100, "angle_deg":0 },
+        { "type":"Lane"    , "x":450, "y":200, "xdim":400, "ydim":100, "angle_deg":-90 },
+        { "type":"Lane"    , "x":550, "y":200, "xdim":400, "ydim":100, "angle_deg":90 },
+        { "type":"Lane"    , "x":450, "y":800, "xdim":400, "ydim":100, "angle_deg":-90 },
+        { "type":"Lane"    , "x":550, "y":800, "xdim":400, "ydim":100, "angle_deg":90 },
+        { "type":"Street"  , "x":500, "y":500, "xdim":200, "ydim":200 },
+        { "type":"Sidewalk", "x":200, "y":375, "xdim":400, "ydim":50,  "angle_deg":0 },
+        { "type":"Sidewalk", "x":200, "y":625, "xdim":400, "ydim":50,  "angle_deg":0 },
+        { "type":"Sidewalk", "x":800, "y":375, "xdim":400, "ydim":50,  "angle_deg":-180 },
+        { "type":"Sidewalk", "x":800, "y":625, "xdim":400, "ydim":50,  "angle_deg":-180 },
+        { "type":"Sidewalk", "x":375, "y":175, "xdim":350, "ydim":50,  "angle_deg":-90 },
+        { "type":"Sidewalk", "x":625, "y":175, "xdim":350, "ydim":50,  "angle_deg":-90 },
+        { "type":"Sidewalk", "x":375, "y":825, "xdim":350, "ydim":50,  "angle_deg":90 },
+        { "type":"Sidewalk", "x":625, "y":825, "xdim":350, "ydim":50,  "angle_deg":90 }
+    ],
+    "car_start_lanes": [
+        { "x":450, "y":200, "xdim":400, "ydim":100, "angle_deg":-90 },
+        { "x":550, "y":800, "xdim":400, "ydim":100, "angle_deg":90 },
+        { "x":800, "y":450, "xdim":400, "ydim":100, "angle_deg":-180 },
+        { "x":200, "y":550, "xdim":400, "ydim":100, "angle_deg":0 }
+    ],
+    "traffic_lights": [
+        { "x": 600, "y": 440, "init_color":"green", "angle_deg":0},
+        { "x": 400, "y": 560, "init_color":"green", "angle_deg":-180 },
+        { "x": 560, "y": 600, "init_color":"red"  , "angle_deg":-90 },
+        { "x": 440, "y": 400, "init_color":"red"  , "angle_deg":90 }
+    ],
+    "goal_states": [
+        { "x":550, "y":100, "vel":2, "angle_deg":90 },
+        { "x":450, "y":900, "vel":2, "angle_deg":-90 },
+        { "x":900, "y":550, "vel":2, "angle_deg":0 },
+        { "x":100, "y":450, "vel":2, "angle_deg":90 }
+    ]
+}
+    
+        
+
+        
+        
+    

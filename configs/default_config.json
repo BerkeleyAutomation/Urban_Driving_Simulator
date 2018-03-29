@@ -1,8 +1,9 @@
 {   
 
-    "enviroment":{
+    "environment":{
         "state": "four_way_intersection",
-        "visualize": false
+        "visualize": false,
+        "max_time":500
     },
 
     "agents":{
@@ -11,8 +12,13 @@
         "action_space":"steering",
         "state_space":"Q-LIDAR",
         "use_traffic_lights":true,
-        "use_pedesterians":false,
-        "number_of_pedesterians":0
+        "use_pedestrians":false,
+        "number_of_pedestrians":0,
+        "agent_mappings":{
+            "Car":"PlanningPursuitAgent",
+            "TrafficLight":"TrafficLightAgent",
+            "CrosswalkLight":"CrosswalkLightAgent"
+        }
     },
 
     "recorded_data":{

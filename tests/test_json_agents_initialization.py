@@ -1,4 +1,4 @@
-eimport json
+import json
 import gym
 import gym_urbandriving as uds
 from gym_urbandriving import *
@@ -10,9 +10,9 @@ import numpy as np
 with open('configs/default_config.json') as json_data_file:
     data = json.load(json_data_file)
 
-print data
+#print data
 
-state = uds.state.SimpleIntersectionState(data)
+state = uds.state.PositionState(data)
 
 
 assert(len(state.dynamic_objects['controlled_cars']) == 1)

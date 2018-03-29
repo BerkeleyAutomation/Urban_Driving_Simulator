@@ -10,7 +10,7 @@ import numpy as np
 with open('configs/default_config.json') as json_data_file:
     data = json.load(json_data_file)
 
-state = uds.state.SimpleIntersectionState(data)
+state = uds.state.PositionState(data)
 
 
 assert(len(state.dynamic_objects['controlled_cars']) == 1)

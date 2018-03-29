@@ -94,7 +94,7 @@ class SimpleIntersectionState(PositionState):
                   break
 
 
-        if self.agent_config["use_pedesterians"]:
+        if self.agent_config["use_pedestrians"]:
           while len(self.dynamic_objects) < self.ncars+self.nped:
               sidewalk = self.static_objects[-8:][np.random.random_integers(0, 7)]
               man = sidewalk.generate_man()
@@ -105,8 +105,8 @@ class SimpleIntersectionState(PositionState):
         if self.agent_config["use_traffic_lights"]:
             self.dynamic_objects['traffic_lights']['0'] = TrafficLight(600, 440, 0)
             self.dynamic_objects['traffic_lights']['1'] = TrafficLight(400, 560, -np.pi)
-            self.dynamic_objects['traffic_lights']['2'] = TrafficLight(560, 600, -(np.pi/2), initial_color="red")
-            self.dynamic_objects['traffic_lights']['3'] = TrafficLight(440, 400, (np.pi/2), initial_color="red")
+            self.dynamic_objects['traffic_lights']['2'] = TrafficLight(560, 600, -(np.pi/2), init_color="red")
+            self.dynamic_objects['traffic_lights']['3'] = TrafficLight(440, 400, (np.pi/2), init_color="red")
 
         self.create_agents()
 
