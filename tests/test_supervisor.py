@@ -19,16 +19,16 @@ sup = VelocitySupervisor(agent_num = 0)
 env = uds.UrbanDrivingEnv(data)
 state = env.current_state
 
-for i in range(3): 
+for i in range(10): 
 	action = sup.eval_policy(state)
 	state,reward,done,info_dict = env.step([action])
 
 
-sup = SteeringSupervisor(agent_num = 0)
-data['agents']['action_space'] = "steering"
-env = uds.UrbanDrivingEnv(data)
-state = env.current_state
+# sup = SteeringSupervisor(agent_num = 0)
+# data['agents']['action_space'] = "steering"
+# env = uds.UrbanDrivingEnv(data)
+# state = env.current_state
 
-for i in range(3): 
-	action = sup.eval_policy(state)
-	state,reward,done,info_dict = env.step([action])
+# for i in range(3): 
+# 	action = sup.eval_policy(state)
+# 	state,reward,done,info_dict = env.step([action])

@@ -160,6 +160,7 @@ class UrbanDrivingEnv(gym.Env):
             self.init_state = new_state
             self.statics_rendered = False
         if self.randomize:
+            
             self.init_state.randomize()
 
         self.current_state = deepcopy(self.init_state)

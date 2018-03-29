@@ -25,6 +25,7 @@ class VelocitySupervisor(PursuitAgent):
         self.PID_steer = PIDController(2.0, 0, 0)
         self.not_initiliazed = True
         
+        
 
         
     def eval_policy(self, state,simplified = False):
@@ -42,6 +43,7 @@ class VelocitySupervisor(PursuitAgent):
 
             geoplanner.plan_for_agents(state,type_of_agent='controlled_cars',agent_num=self.agent_num)
             self.not_initiliazed = False
+           
 
         if not simplified:
             target_vel = VelocityMPCPlanner().plan(deepcopy(state), self.agent_num, type_of_agent = "controlled_cars")

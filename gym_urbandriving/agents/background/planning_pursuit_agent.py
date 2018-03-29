@@ -24,6 +24,9 @@ class PlanningPursuitAgent(PursuitAgent):
         self.PID_acc = PIDController(1.0, 0, 0)
         self.PID_steer = PIDController(2.0, 0, 0)
         self.not_initiliazed = True
+        self.count = 0
+
+        
         
 
         
@@ -36,17 +39,21 @@ class PlanningPursuitAgent(PursuitAgent):
         state : PositionState
             State of the world, unused
         """
-
+     
         if self.not_initiliazed:
+            
             geoplanner = GeometricPlanner(deepcopy(state), inter_point_d=40.0, planning_time=0.1)
 
             geoplanner.plan_for_agents(state,type_of_agent='background_cars',agent_num=self.agent_num)
             self.not_initiliazed = False
+            print("MADE PLAN")
+            print(simplified)
 
         if not simplified:
             target_vel = VelocityMPCPlanner().plan(deepcopy(state), self.agent_num)
             state.dynamic_objects['background_cars'][str(self.agent_num)].trajectory.set_vel(target_vel)
 
-        return super(PlanningPursuitAgent, self).eval_policy(state)
-
+        action = super(PlanningPursuitAgent, self).eval_policy(state)
+      
+        return action
 
