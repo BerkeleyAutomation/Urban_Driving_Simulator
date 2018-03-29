@@ -1,5 +1,6 @@
 from gym_urbandriving.assets.primitives.rectangle import Rectangle
 from gym_urbandriving.assets.primitives.shape import Shape
+import numpy as np
 
 class TrafficLight(Rectangle):
     """
@@ -17,10 +18,11 @@ class TrafficLight(Rectangle):
     colors = {"green" : "traffic_green.png",
               "yellow" : "traffic_yellow.png",
               "red" : "traffic_red.png"}
-    def __init__(self, x, y, angle, initial_color="green", time_in_color = 0):
+    def __init__(self, x, y, angle=0, init_color="green", angle_deg=0, time_in_color = 0):
+        angle = np.deg2rad(angle_deg % 360) if angle_deg else angle
         Rectangle.__init__(self, x, y, 15, 15, angle)
         self.time_in_color = time_in_color
-        self.color = initial_color
+        self.color = init_color
 
     def step(self, action):
         self.time_in_color += 1

@@ -30,7 +30,11 @@ class KeyboardAgent(Agent):
             Keyboard action
         """
         steer, acc = 0, 0
-        pygame.event.pump()
+        try:
+            pygame.event.pump()
+        except pygame.error:
+            print("Error: Needs a visualizer")
+            return (0, 0)
         keys = pygame.key.get_pressed()
         if keys[pygame.K_UP]:
             acc = 1

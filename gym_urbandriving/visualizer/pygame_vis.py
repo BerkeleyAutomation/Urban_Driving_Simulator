@@ -120,13 +120,13 @@ class PyGameVisualizer:
                                       valid_area[3] - valid_area[2]),
                                      pygame.SRCALPHA)
 
-        for obj1id, obj2id in dynamic_collisions:
+        for obj1id, obj2id, _ in dynamic_collisions:
             obj1 = state.dynamic_objects[obj1id]
             obj2 = state.dynamic_objects[obj2id]
             pygame.draw.circle(new_surface, (255, 0, 255), obj1.get_pos().astype(int), 5)
             pygame.draw.circle(new_surface, (255, 0, 255), obj2.get_pos().astype(int), 5)
-        for obj1id, obj2id in static_collisions:
-            obj1 = state.dynamic_objects[obj1id]
+        for obj1id, obj2id, k in static_collisions:
+            obj1 = state.dynamic_objects[k][str(obj1id)]
             obj2 = state.static_objects[obj2id]
             pygame.draw.circle(new_surface, (255, 0, 255), obj1.get_pos().astype(int), 5)
             pygame.draw.circle(new_surface, (255, 0, 255), obj2.get_pos().astype(int), 5)
