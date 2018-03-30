@@ -23,7 +23,6 @@ def run():
                           randomize=True,
                           agent_mappings={Car:AccelAgent, 
                                           Pedestrian:AccelAgent},
-                          use_ray=False
                           )
     state = init_state
     env._render()

@@ -7,7 +7,7 @@ import math
 import random
 
 from gym_urbandriving.agents import KeyboardAgent, AccelAgent, NullAgent, TrafficLightAgent, CrosswalkLightAgent,  PursuitAgent, ControlAgent, PlanningPursuitAgent
-from gym_urbandriving.planning import Trajectory, CasteljauPlanner, GeometricPlanner, VelocityMPCPlanner
+from gym_urbandriving.planning import Trajectory, CasteljauPlanner, GeometricPlanner, VelocityMPCPlanner, PedestrianVelPlanner
 
 from gym_urbandriving.assets import Car, TrafficLight, Pedestrian, CrosswalkLight
 
@@ -43,7 +43,6 @@ def f():
                                               Pedestrian:ControlAgent,
                                               TrafficLight:TrafficLightAgent, 
                                               CrosswalkLight:CrosswalkLightAgent},
-                              use_ray=False
     )
 
     visualizing_env._reset()
@@ -64,7 +63,6 @@ def f():
                               randomize=False,
                               agent_mappings={Car:NullAgent,
                                               TrafficLight:TrafficLightAgent},
-                              use_ray=False
     )
 
 
@@ -87,8 +85,12 @@ def f():
     for sim_time in range(DEMO_LEN):
         actions = [] 
 
-        for agent_num in range(NUM_CARS+NUM_PEDS):
+        for agent_num in range(NUM_CARS):
             target_vel = VelocityMPCPlanner().plan(deepcopy(state), agent_num)
+            state.dynamic_objects[agent_num].trajectory.set_vel(target_vel)
+
+        for agent_num in range(NUM_CARS, NUM_CARS + NUM_PEDS):
+            target_vel = PedestrianVelPlanner().plan(deepcopy(state),agent_num)
             state.dynamic_objects[agent_num].trajectory.set_vel(target_vel)
 
         for agent in agents:

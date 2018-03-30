@@ -40,9 +40,8 @@ class UrbanDrivingEnv(gym.Env):
     def __init__(self,
                  config_data=None,
                  init_state= None,
-                 reward_fn=lambda x: 0,
+                 reward_fn=lambda state: 1 if len(state.get_collisions()[2]) == 0 else 0,
                  randomize=False):
-    
         
         self.reward_fn = reward_fn
         self.max_time = 500
@@ -65,7 +64,6 @@ class UrbanDrivingEnv(gym.Env):
 
         self.randomize = randomize
         self.statics_rendered = False
-
         self.dynamic_collisions, self.static_collisions, self.last_col = [], [], -1
         if (self.init_state):
             self._reset()
@@ -129,10 +127,8 @@ class UrbanDrivingEnv(gym.Env):
             for i, dobj in self.current_state.dynamic_objects['controlled_cars'].items():
                 dobj.step(controlled_car_actions[int(i)])
 
-
-
         self.current_state.time += 1
-        dynamic_coll, static_coll = self.current_state.get_collisions()
+        dynamic_coll, static_coll, controlled_car_collisions = self.current_state.get_collisions()
         state = self.current_state
         reward = self.reward_fn(self.current_state)
 
@@ -171,8 +167,6 @@ class UrbanDrivingEnv(gym.Env):
             self.init_state.randomize()
 
         self.current_state = deepcopy(self.init_state)
-
-        
 
         return
 

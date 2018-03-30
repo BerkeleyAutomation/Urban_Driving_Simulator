@@ -34,7 +34,6 @@ def f():
                               agent_mappings={Car:NullAgent,
                                               TrafficLight:TrafficLightAgent, 
                                               CrosswalkLight:CrosswalkLightAgent},
-                              use_ray=False
     )
 
     state = env.current_state

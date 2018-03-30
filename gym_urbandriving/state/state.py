@@ -101,7 +101,8 @@ class PositionState:
                             "TrafficLight":TrafficLight,
                             "CrosswalkLight":CrosswalkLight}[k]] = {"PlanningPursuitAgent":PlanningPursuitAgent,
                                                                     "TrafficLightAgent":TrafficLightAgent,
-                                                                    "CrosswalkLightAgent":CrosswalkLightAgent}[v]
+                                                                    "CrosswalkLightAgent":CrosswalkLightAgent, 
+                                                                    "NullAgent": NullAgent}[v]
 
 
         self.bg_agents = {}
@@ -132,6 +133,8 @@ class PositionState:
                 return True
 
         return False
+
+
     def get_collisions(self):
         """
         Get list of all collisions in this state
@@ -143,22 +146,26 @@ class PositionState:
         list
             The corresponding list for collisions between dynamic objects and static objects
         """
-        dynamic_collisions, static_collisions = [], []
+        dynamic_collisions, static_collisions, controlled_car_collisions = [], [], []
 
         #TODO Fix this. Controlled cars can't collide with background cars
         for key in self.dynamic_objects.keys():
             for i, dobj in self.dynamic_objects[key].items():
                 i = int(i)
+
                 for j, sobj in enumerate(self.static_objects):
                     if dobj.collides(sobj):
-                        static_collisions.append([i, j,key])
+                        static_collisions.append([i, j, key, 'static'])
 
-                for j in range(i, len(self.dynamic_objects[key])):
-                    dobj1 = self.dynamic_objects[key][str(j)]
-                    if j > i and dobj.collides(dobj1):
-                        dynamic_collisions.append([i, j,key])
+                for inner_key in self.dynamic_objects.keys():
+                    for j, dobj1 in self.dynamic_objects[inner_key].items():
+                        j = int(j)
+                        if (not (i == j and key == inner_key)) and dobj.collides(dobj1):
+                            dynamic_collisions.append([i, j,key, inner_key])
+                            if key == 'controlled_cars':
+                                controlled_car_collisions.append([i, j,key, inner_key])
 
-        return dynamic_collisions, static_collisions
+        return dynamic_collisions, static_collisions, controlled_car_collisions
 
 
     def collides_any(self, agentnum,type_of_agent = 'background_cars'):
@@ -175,7 +182,7 @@ class PositionState:
         bool
             True if this object is colliding
         """
-        dynamic_collisions, static_collisions = self.get_collisions()
+        dynamic_collisions, static_collisions, _ = self.get_collisions()
         for coll in dynamic_collisions:
             if (agentnum in coll) and (type_of_agent in coll):
                 return True
@@ -185,7 +192,7 @@ class PositionState:
         return False
 
     def collides_any_dynamic(self, agentnum,type_of_agent = 'background_cars'):
-        dynamic_collisions, static_collisions = self.get_collisions()
+        dynamic_collisions, static_collisions, _ = self.get_collisions()
         for coll in dynamic_collisions:
             if (agentnum in coll) and (type_of_agent in coll):
                 return True
