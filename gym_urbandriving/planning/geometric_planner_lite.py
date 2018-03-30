@@ -2,8 +2,8 @@ import numpy as np
 import math
 from gym_urbandriving.planning import Trajectory
 
-class CasteljauPlanner:
-    def __init__(self):
+class GeometricPlanner:
+    def __init__(self,state, inter_point_d=1.0, planning_time=1.0, optional_targets = None, num_cars = 0):
         pass
 
     def plan(self,x0,y0,v0,a0,x1,y1,v1,a1):
@@ -32,7 +32,7 @@ class CasteljauPlanner:
 
     def plan_for_agents(self, state,type_of_agent='background_cars',agent_num=0):
 
-        obj =  state.dynamic_objects[type_of_agent][str(agent_num)]:
+        obj =  state.dynamic_objects[type_of_agent][str(agent_num)]
         
         traj = Trajectory(mode = 'xyv', fsm=0)
         for p in self.plan(obj.x, obj.y, obj.vel, obj.angle, obj.destination[0], obj.destination[1], 1, obj.destination[3]):

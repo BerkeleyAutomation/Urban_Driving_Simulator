@@ -1,8 +1,8 @@
 import numpy as np
 from gym_urbandriving.utils.PID import PIDController
-from gym_urbandriving.agents import NullAgent
+from gym_urbandriving.agents import Agent
 
-class PursuitAgent(NullAgent):
+class PursuitAgent(Agent):
     """
     Agent which uses PID to implement a pursuit control policy
     Uses a trajectory with x,y,v,-
@@ -18,7 +18,7 @@ class PursuitAgent(NullAgent):
         self.PID_acc = PIDController(1.0, 0, 0)
         self.PID_steer = PIDController(2.0, 0, 0)
         
-    def eval_policy(self, state):
+    def eval_policy(self, state,type_of_agent = 'background_cars'):
         """
         Returns action based next state in trajectory. 
 
@@ -33,7 +33,7 @@ class PursuitAgent(NullAgent):
             Keyboard action
         """
 
-        obj = state.dynamic_objects[self.agent_num]
+        obj = state.dynamic_objects[type_of_agent][str(self.agent_num)]
 
         if not obj.trajectory.is_empty():    
             p = obj.trajectory.first()

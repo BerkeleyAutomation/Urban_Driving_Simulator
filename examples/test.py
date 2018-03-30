@@ -4,9 +4,8 @@ import cProfile
 import time
 import numpy as np
 
-from gym_urbandriving.agents import KeyboardAgent, AccelAgent, NullAgent, TrafficLightAgent, CrosswalkLightAgent
-from gym_urbandriving.assets import Car, TrafficLight, CrosswalkLight
-
+import json
+from gym_urbandriving.agents import KeyboardAgent
 
 """
  Test File, to demonstrate general functionality of environment
@@ -14,27 +13,13 @@ from gym_urbandriving.assets import Car, TrafficLight, CrosswalkLight
 
 
 def f():
-    # Instantiate a PyGame Visualizer of size 800x800
-    vis = uds.PyGameVisualizer((800, 800))
-
-    # Create a simple-intersection state, with 4 cars, no pedestrians, and traffic lights
-    init_state = uds.state.SimpleIntersectionState(ncars=1, nped=0, traffic_lights=True)
-
-    # Create the world environment initialized to the starting state
-    # Specify the max time the environment will run to 500
-    # Randomize the environment when env._reset() is called
-    # Specify what types of agents will control cars and traffic lights
-    # Use ray for multiagent parallelism
-    env = uds.UrbanDrivingEnv(init_state=init_state,
-                              visualizer=vis,
-                              max_time=500,
-                              randomize=True,
-                              agent_mappings={Car:NullAgent,
-                                              TrafficLight:TrafficLightAgent, 
-                                              CrosswalkLight:CrosswalkLightAgent},
-    )
+    config = json.load(open('configs/default_config.json'))
+    config['environment']['visualize'] = True
+    config['agents']['background_cars'] = 0
+    env = uds.UrbanDrivingEnv(config_data=config)
     
     env._reset()
+    env._render()
     state = env.current_state
 
     # Car 0 will be controlled by our KeyboardAgent
@@ -49,7 +34,7 @@ def f():
         start_time = time.time()
 
         # Simulate the state
-        state, reward, done, info_dict = env._step(action)
+        state, reward, done, info_dict = env._step([action])
         env._render()
         # keep simulator running in spite of collisions or timing out
         done = False

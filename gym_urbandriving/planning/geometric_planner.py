@@ -13,9 +13,9 @@ class ValidityChecker(ob.StateValidityChecker):
     def __init__(self, si, state, controlled_obj):
         self.state = deepcopy(state)
         self.obj = controlled_obj
-        self.state.dynamic_objects = [self.obj]
-        #print(self.state.dynamic_objects)
-        #print(self.state.static_objects)
+        self.state.dynamic_objects = {'background_cars':{}}
+        self.state.dynamic_objects['background_cars']['0']=self.obj
+       
         super(ValidityChecker, self).__init__(si)
     def isValid(self, s):
         x = s[0]
@@ -29,7 +29,10 @@ class MotionValidityChecker(ob.MotionValidator):
     def __init__(self, si, state, controlled_obj):
         self.state = deepcopy(state)
         self.obj = controlled_obj
-        self.state.dynamic_objects = [self.obj]
+
+
+        self.state.dynamic_objects = {'background_cars':{}}
+        self.state.dynamic_objects['background_cars']['0']=self.obj
         super(MotionValidityChecker, self).__init__(si)
     def isValid(self, s):
         x = s[0]
@@ -92,7 +95,62 @@ class GeometricPlanner:
             orig_obj.vel = 0
             orig_obj.trajectory.set_vel(4)
             
-            print(orig_obj.trajectory.get_points_list())
+            #print(orig_obj.trajectory.get_points_list())
+            npoints = orig_obj.trajectory.npoints()
+            points = orig_obj.trajectory.get_points_list()
+            xp, yp = points[:,0], points[:,1]
+
+            splx = np.poly1d(np.polyfit(np.arange(npoints), xp, deg=4))
+            sply = np.poly1d(np.polyfit(np.arange(npoints), yp, deg=4))
+            splx = sc.interpolate.interp1d(np.arange(npoints), xp, 'cubic')
+            sply = sc.interpolate.interp1d(np.arange(npoints), yp, 'cubic')
+            #splx = UnivariateSpline(np.arange(npoints), points[:,0])
+            #sply = UnivariateSpline(np.arange(npoints), points[:,1])
+            #splx.set_smoothing_factor(0.9)
+            #sply.set_smoothing_factor(0.9)
+
+
+            xn = splx(np.linspace(0,npoints-1,200))
+            yn = sply(np.linspace(0,npoints-1,200))
+            xn = sc.ndimage.filters.gaussian_filter1d(xn, 15)
+            yn = sc.ndimage.filters.gaussian_filter1d(yn, 15)
+
+            #sc.interpolate.splprep([newx, newy], s=0)
+            newtraj = Trajectory(mode = 'xyv', fsm=0)
+            for x, y in zip(xn, yn):
+                newtraj.add_point((x, y, 4))
+            newtraj.set_vel(4)
+            orig_obj.trajectory = newtraj
+
+    def plan_for_agents(self, state,type_of_agent='background_cars',agent_num=0):
+
+            obj =  state.dynamic_objects[type_of_agent][str(agent_num)]
+            orig_obj = obj
+            obj = deepcopy(obj)
+            obj.vel = 4
+            closest_point = sorted(self.optional_targets, key = lambda p: (p[0]-obj.x)**2+(p[1]-obj.y)**2 )[0]
+            mid_target = sorted(self.optional_targets, key = lambda p: (p[0]-obj.destination[0])**2+(p[1]-obj.destination[1])**2)[0]
+            traj = Trajectory(mode = 'xyv', fsm=0)
+
+            path_to_follow = self.plan(obj, closest_point[0], closest_point[1], 4, closest_point[2])
+            for p in path_to_follow:
+                traj.add_point(p)
+            #print(closest_point)
+            obj.set_pos(closest_point[0], closest_point[1], 4, closest_point[2])
+            path_to_follow = self.plan(obj, mid_target[0],mid_target[1],4,mid_target[2])
+            for p in path_to_follow:
+                traj.add_point(p)
+                
+            obj.set_pos(mid_target[0], mid_target[1], 4, mid_target[2])
+            path_to_follow = self.plan(obj, obj.destination[0], obj.destination[1], 4, obj.destination[3])
+            for p in path_to_follow:
+                traj.add_point(p)
+
+            orig_obj.trajectory = traj
+            orig_obj.vel = 0
+            orig_obj.trajectory.set_vel(4)
+            
+            
             npoints = orig_obj.trajectory.npoints()
             points = orig_obj.trajectory.get_points_list()
             xp, yp = points[:,0], points[:,1]
@@ -184,9 +242,9 @@ class GeometricPlanner:
 
         if not sol:
             return []
-        #print(sol.cost(pathObj).value())
+        
         sol = sol.printAsMatrix()
-        #print(sol)
+       
 
         s = [[float(j) for j in i.split(" ")[:-1]] for i in sol.splitlines()][:-1]
 

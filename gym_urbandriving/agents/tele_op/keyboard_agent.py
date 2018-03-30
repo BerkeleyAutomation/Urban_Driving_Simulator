@@ -1,6 +1,7 @@
 import pygame
+from gym_urbandriving.agents import Agent
 
-class KeyboardAgent:
+class KeyboardAgent(Agent):
     """
     Agent which interprets user keyboard inputs
 
@@ -29,7 +30,11 @@ class KeyboardAgent:
             Keyboard action
         """
         steer, acc = 0, 0
-        pygame.event.pump()
+        try:
+            pygame.event.pump()
+        except pygame.error:
+            print("Error: Needs a visualizer")
+            return (0, 0)
         keys = pygame.key.get_pressed()
         if keys[pygame.K_UP]:
             acc = 1
