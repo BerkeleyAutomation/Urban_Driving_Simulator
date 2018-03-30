@@ -10,24 +10,29 @@ class VelocityMPCPlanner:
         
         state_copy = deepcopy(state)
         testing_env = uds.UrbanDrivingEnv(init_state=state_copy,
-                                          randomize=False,)
+                                          randomize=False)
         state_copy = testing_env.current_state
         if state_copy.dynamic_objects[type_of_agent][str(agent_num)].trajectory.stopped:
             state_copy.dynamic_objects[type_of_agent][str(agent_num)].trajectory.set_vel(4)
             for t in range(self.lookahead):
                 state_copy, reward, done, info_dict = testing_env._step(None,background_simplified = True)
+                state_copy = state_copy[0]
                 done = state_copy.collides_any_dynamic(agent_num,type_of_agent = type_of_agent)
                 if done:
                     break
             if not done:
                 return 4.0
+            return 0.0
+
 
         elif not state_copy.dynamic_objects[type_of_agent][str(agent_num)].trajectory.stopped:
             for t in range(self.lookahead):
                 state_copy, reward, done, info_dict = testing_env._step(None,background_simplified = True)
+                state_copy = state_copy[0]
                 done = state_copy.collides_any_dynamic(agent_num,type_of_agent = type_of_agent)
                 if done:
                     break
             if done:
                 return 0.0
-        return None
+            return 4.0
+

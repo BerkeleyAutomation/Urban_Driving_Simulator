@@ -1,5 +1,6 @@
 from gym_urbandriving.planning.trajectory import Trajectory
 from gym_urbandriving.planning.vel_mpc_planner import VelocityMPCPlanner
+from gym_urbandriving.planning.ped_vel_planner import PedestrianVelPlanner
 
 
 try:

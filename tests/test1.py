@@ -8,6 +8,7 @@ import json
 
 config = json.load(open('configs/default_config.json'))
 config['agents']['background_cars'] = 0
+config['recorded_data']['state_space'] = 'raw'
 env = uds.UrbanDrivingEnv(config_data=config)
 state = env.current_state
 state.dynamic_objects['controlled_cars']['0'].x = 100
@@ -17,17 +18,20 @@ state.dynamic_objects['controlled_cars']['0'].vel = 0
 
 for i in range(80):
     state, reward, done, info_dict = env._step([(0, 1)])
+    state = state[0]
     car = state.dynamic_objects['controlled_cars']['0']
     #print(car.x, car.y, car.angle, done)
     assert not done
 
 for i in range(23):
     state, reward, done, info_dict = env._step([(1, 1)])
+    state = state[0]
     car = state.dynamic_objects['controlled_cars']['0']
     #print(car.x, car.y, car.angle, done)
     assert not done
 
 for i in range(70):
     state, reward, done, info_dict = env._step([(0, 1)])
+    state = state[0]
     car = state.dynamic_objects['controlled_cars']['0']
     assert not done

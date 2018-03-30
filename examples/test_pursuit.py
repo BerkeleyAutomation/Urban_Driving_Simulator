@@ -36,7 +36,6 @@ def test_rollout(index, thres):
                               agent_mappings={Car:NullAgent,
                                               TrafficLight:TrafficLightAgent, 
                                               CrosswalkLight:CrosswalkLightAgent},
-                              use_ray=False
     )
     
     env._reset()

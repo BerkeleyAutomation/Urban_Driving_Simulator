@@ -48,6 +48,11 @@ class PyGameVisualizer:
         }
         self.static_surface = None
 
+    def get_bitmap(self):
+        """
+        Returns the current displayed visualization as a bitmap array
+        """
+        return pygame.surfarray.pixels3d(self.surface)
     def render_statics(self, state, valid_area):
         """
         Renders the static objects of the state such as sidewalks and streets.
@@ -120,10 +125,10 @@ class PyGameVisualizer:
                                       valid_area[3] - valid_area[2]),
                                      pygame.SRCALPHA)
 
-        for obj1id, obj2id, key1, key2 in dynamic_collisions:
-            obj1id, obj2id = str(obj1id), str(obj2id)
-            obj1 = state.dynamic_objects[key1][obj1id]
-            obj2 = state.dynamic_objects[key2][obj2id]
+
+        for obj1id, obj2id, k in dynamic_collisions:
+            obj1 = state.dynamic_objects[k][str(obj1id)]
+            obj2 = state.dynamic_objects[k][str(obj2id)]
             pygame.draw.circle(new_surface, (255, 0, 255), obj1.get_pos().astype(int), 5)
             pygame.draw.circle(new_surface, (255, 0, 255), obj2.get_pos().astype(int), 5)
         for obj1id, obj2id, k, _ in static_collisions:
@@ -150,7 +155,7 @@ class PyGameVisualizer:
             Two points in the form [x_1, x_2, y_1, y_2] that define the viewing window of the state.
 
         """
-        index = index % len(COLORS)
+        index = int(index) % len(COLORS)
         new_surface = pygame.Surface((valid_area[1] - valid_area[0],
                                       valid_area[3] - valid_area[2]),
                                      pygame.SRCALPHA)
@@ -237,7 +242,7 @@ class PyGameVisualizer:
         for key in state.dynamic_objects.keys():
             for index,dobj in state.dynamic_objects[key].items():
                 if not dobj.trajectory is None and ('x' in dobj.trajectory.mode and 'y' in dobj.trajectory.mode):
-                    self.render_waypoints(dobj.trajectory.get_renderable_points(), valid_area, i)
+                    self.render_waypoints(dobj.trajectory.get_renderable_points(), valid_area, index)
 
         pygame.display.flip()
 
