@@ -47,7 +47,7 @@ class VelocityActionAgent(PursuitAgent):
         ----------
         state : PositionState
             State of the world, unused
-        action : float
+        action : float or None
             Target velocity for car to travel at 
 
         Returns
@@ -55,7 +55,7 @@ class VelocityActionAgent(PursuitAgent):
         tuple with floats (steering,acceleration)
         """
 
-        if not type(action) == float:
+        if not (type(action) == float or action == None):
            raise Exception('Velocity Action is not of type float')
 
         if self.not_initiliazed:

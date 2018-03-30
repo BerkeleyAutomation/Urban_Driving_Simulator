@@ -20,7 +20,7 @@ class VelocityMPCPlanner:
                 if done:
                     break
             if not done:
-                return 4
+                return 4.0
 
         elif not state_copy.dynamic_objects[type_of_agent][str(agent_num)].trajectory.stopped:
             for t in range(self.lookahead):
@@ -29,5 +29,5 @@ class VelocityMPCPlanner:
                 if done:
                     break
             if done:
-                return 0
+                return 0.0
         return None

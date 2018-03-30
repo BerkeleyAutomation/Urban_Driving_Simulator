@@ -46,6 +46,9 @@ class VelocitySupervisor(PursuitAgent):
         state : PositionState
             State of the world, unused
 
+        simplified: bool
+            specifies whether or not to use a simplified greedy model for look ahead planning
+
         Returns
         --------
         float specifying target velocity
@@ -60,6 +63,7 @@ class VelocitySupervisor(PursuitAgent):
 
         if not simplified:
             target_vel = VelocityMPCPlanner().plan(deepcopy(state), self.agent_num, type_of_agent = "controlled_cars")
+            
             
 
         return target_vel
