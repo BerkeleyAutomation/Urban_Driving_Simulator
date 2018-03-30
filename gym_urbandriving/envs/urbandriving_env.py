@@ -39,7 +39,7 @@ class UrbanDrivingEnv(gym.Env):
     def __init__(self,
                  config_data=None,
                  init_state= None,
-                 reward_fn=lambda x: 0,
+                 reward_fn=lambda state: 1 if len(state.get_collisions()[2]) == 0 else 0,
                  randomize=False):
     
         
@@ -127,7 +127,7 @@ class UrbanDrivingEnv(gym.Env):
 
 
         self.current_state.time += 1
-        dynamic_coll, static_coll = self.current_state.get_collisions()
+        dynamic_coll, static_coll, controlled_car_collisions = self.current_state.get_collisions()
         state = self.current_state
         reward = self.reward_fn(self.current_state)
 
