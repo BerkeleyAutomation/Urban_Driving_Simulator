@@ -3,17 +3,17 @@ from gym_urbandriving.utils.PID import PIDController
 from gym_urbandriving.agents import Agent
 
 class PursuitAgent(Agent):
-    """
-    Agent which uses PID to implement a pursuit control policy
-    Uses a trajectory with x,y,v,-
-
-    Attributes
-    ----------
-    agent_num : int
-        Index of this agent in the world.
-        Used to access its object in state.dynamic_objects
-    """
+    
     def __init__(self, agent_num=0):
+        """
+        Initializes the PlanningPursuitAgent Class
+
+        Parameters
+        ----------
+        agent_num: int
+            The number which specifies the agent in the dictionary state.dynamic_objects['background_cars']
+
+        """
         self.agent_num = agent_num
         self.PID_acc = PIDController(1.0, 0, 0)
         self.PID_steer = PIDController(2.0, 0, 0)
@@ -29,8 +29,7 @@ class PursuitAgent(Agent):
 
         Returns
         -------
-        action
-            Keyboard action
+        tuple with floats (steering,acceleration)
         """
 
         obj = state.dynamic_objects[type_of_agent][str(self.agent_num)]

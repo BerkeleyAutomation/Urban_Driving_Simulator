@@ -26,6 +26,7 @@ for i in range(3):
     state = obs[0]
 
 
+
 sup = SteeringSupervisor(agent_num = 0)
 data['agents']['action_space'] = "steering"
 env = uds.UrbanDrivingEnv(data)
@@ -35,3 +36,4 @@ for i in range(3):
     action = sup.eval_policy(state)
     obs,reward,done,info_dict = env.step([action])
     state = obs[0]
+

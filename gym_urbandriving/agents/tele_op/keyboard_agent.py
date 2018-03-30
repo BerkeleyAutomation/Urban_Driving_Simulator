@@ -26,8 +26,7 @@ class KeyboardAgent(Agent):
 
         Returns
         -------
-        action
-            Keyboard action
+        numpy array with elements (steering,acceleration)
         """
         steer, acc = 0, 0
         try:
@@ -44,4 +43,4 @@ class KeyboardAgent(Agent):
             steer = 1
         elif keys[pygame.K_RIGHT]:
             steer = -1
-        return (steer, acc)
+        return np.array([steer, acc])
