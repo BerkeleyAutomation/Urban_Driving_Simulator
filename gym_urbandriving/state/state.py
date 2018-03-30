@@ -101,7 +101,8 @@ class PositionState:
                             "TrafficLight":TrafficLight,
                             "CrosswalkLight":CrosswalkLight}[k]] = {"PlanningPursuitAgent":PlanningPursuitAgent,
                                                                     "TrafficLightAgent":TrafficLightAgent,
-                                                                    "CrosswalkLightAgent":CrosswalkLightAgent}[v]
+                                                                    "CrosswalkLightAgent":CrosswalkLightAgent, 
+                                                                    "NullAgent": NullAgent}[v]
 
 
         self.bg_agents = {}

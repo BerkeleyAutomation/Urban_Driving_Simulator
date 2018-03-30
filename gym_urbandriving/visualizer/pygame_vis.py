@@ -116,9 +116,6 @@ class PyGameVisualizer:
         """
         dynamic_collisions, static_collisions, _ = state.get_collisions()
 
-        print dynamic_collisions
-        print static_collisions
-
         new_surface = pygame.Surface((valid_area[1] - valid_area[0],
                                       valid_area[3] - valid_area[2]),
                                      pygame.SRCALPHA)

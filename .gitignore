@@ -11,3 +11,8 @@ stats/
 data/
 temp/
 test_data/
+*.model
+*.pickle
+*.pdf
+*.eps
+*.png
