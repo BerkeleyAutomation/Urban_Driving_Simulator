@@ -12,11 +12,10 @@ with open('configs/default_config.json') as json_data_file:
     data = json.load(json_data_file)
 
 action = [np.array([0.0,0.0])]
+
 env = uds.UrbanDrivingEnv(data)
 
-observations,reward,done,info_dict = env.step(action)
-state = env.current_state
+obs,reward,done,info_dict = env.step(action)
 
-assert(state.dynamic_objects['controlled_cars']['0'].vel == 0.0)
 
 

@@ -17,8 +17,8 @@ action = [0.0]
 
 env = uds.UrbanDrivingEnv(data)
 
-state,reward,done,info_dict = env.step(action)
+obs,reward,done,info_dict = env.step(action)
 
-assert(state.dynamic_objects['controlled_cars']['0'].vel == 0.0)
+assert(env.current_state.dynamic_objects['controlled_cars']['0'].vel == 0.0)
 
 

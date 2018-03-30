@@ -148,6 +148,7 @@ class PositionState:
         """
         dynamic_collisions, static_collisions, controlled_car_collisions = [], [], []
 
+        #TODO Fix this. Controlled cars can't collide with background cars
         for key in self.dynamic_objects.keys():
             for i, dobj in self.dynamic_objects[key].items():
                 i = int(i)
@@ -222,3 +223,18 @@ class PositionState:
                 if j != agentnum and obj.can_collide(dobj):
                     min_dist = min(min_dist, obj.dist_to(dobj))
         return min_dist
+
+    def get_observations(self, observation_type):
+        """
+        Returns a set
+
+        Parameters
+        ----------
+        agentnum : int
+            The index of the object to query
+
+        Returns
+        -------
+        float
+            Distance to nearest collideable object
+        """

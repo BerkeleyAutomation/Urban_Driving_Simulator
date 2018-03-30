@@ -131,7 +131,7 @@ class SimpleIntersectionState(PositionState):
 
 
     def create_agents(self):
-
+        
         self.agent_mappings = {Car:PlanningPursuitAgent,
                     TrafficLight:TrafficLightAgent, 
                     CrosswalkLight:CrosswalkLightAgent}
