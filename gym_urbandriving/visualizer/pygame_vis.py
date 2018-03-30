@@ -114,19 +114,24 @@ class PyGameVisualizer:
             Two points in the form [x_1, x_2, y_1, y_2] that define the viewing window of the state.
 
         """
-        dynamic_collisions, static_collisions = state.get_collisions()
+        dynamic_collisions, static_collisions, _ = state.get_collisions()
+
+        print dynamic_collisions
+        print static_collisions
 
         new_surface = pygame.Surface((valid_area[1] - valid_area[0],
                                       valid_area[3] - valid_area[2]),
                                      pygame.SRCALPHA)
 
-        for obj1id, obj2id, _ in dynamic_collisions:
-            obj1 = state.dynamic_objects[obj1id]
-            obj2 = state.dynamic_objects[obj2id]
+        for obj1id, obj2id, key1, key2 in dynamic_collisions:
+            obj1id, obj2id = str(obj1id), str(obj2id)
+            obj1 = state.dynamic_objects[key1][obj1id]
+            obj2 = state.dynamic_objects[key2][obj2id]
             pygame.draw.circle(new_surface, (255, 0, 255), obj1.get_pos().astype(int), 5)
             pygame.draw.circle(new_surface, (255, 0, 255), obj2.get_pos().astype(int), 5)
-        for obj1id, obj2id, k in static_collisions:
-            obj1 = state.dynamic_objects[k][str(obj1id)]
+        for obj1id, obj2id, k, _ in static_collisions:
+            obj1id, obj2id = str(obj1id), obj2id
+            obj1 = state.dynamic_objects[k][obj1id]
             obj2 = state.static_objects[obj2id]
             pygame.draw.circle(new_surface, (255, 0, 255), obj1.get_pos().astype(int), 5)
             pygame.draw.circle(new_surface, (255, 0, 255), obj2.get_pos().astype(int), 5)
