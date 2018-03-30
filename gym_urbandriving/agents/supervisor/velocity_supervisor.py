@@ -7,8 +7,8 @@ import gym_urbandriving as uds
 
 class VelocitySupervisor(PursuitAgent):
     """
-    Agent which uses PID to implement a pursuit control policy
-    Uses a trajectory with x,y,v,-
+    Superivsor agent which implements the planning stack to obtain velocity level supervision of
+    which the car should follow. 
 
     Attributes
     ----------
@@ -19,6 +19,15 @@ class VelocitySupervisor(PursuitAgent):
     """
 
     def __init__(self, agent_num=0):
+        """
+        Initializes the VelocitySupervisor Class
+
+        Parameters
+        ----------
+        agent_num: int
+            The number which specifies the agent in the dictionary state.dynamic_objects['controlled_cars']
+
+        """
         self.agent_num = agent_num
         #Move to JSON 
         self.PID_acc = PIDController(1.0, 0, 0)
@@ -36,6 +45,10 @@ class VelocitySupervisor(PursuitAgent):
         ----------
         state : PositionState
             State of the world, unused
+
+        Returns
+        --------
+        float specifying target velocity
         """
 
         if self.not_initiliazed:

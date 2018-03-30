@@ -7,8 +7,10 @@ import gym_urbandriving as uds
 
 class VelocityActionAgent(PursuitAgent):
     """
-    Agent which uses PID to implement a pursuit control policy
-    Uses a trajectory with x,y,v,-
+    Hierarichal agent which implements the full plannning stack except the velocity component
+    The planner first generates a nominal trajecotry, then at each timestep recives a target velocity
+    to track with PID controller. 
+
 
     Attributes
     ----------
@@ -19,6 +21,16 @@ class VelocityActionAgent(PursuitAgent):
     """
 
     def __init__(self, agent_num=0):
+        """
+        Initializes the VelocityActionAgent Class
+
+        Parameters
+        ----------
+        agent_num: int
+            The number which specifies the agent in the dictionary state.dynamic_objects['controlled_cars']
+
+        """
+
         self.agent_num = agent_num
         #Move to JSON 
         self.PID_acc = PIDController(1.0, 0, 0)
@@ -35,7 +47,16 @@ class VelocityActionAgent(PursuitAgent):
         ----------
         state : PositionState
             State of the world, unused
+        action : float
+            Target velocity for car to travel at 
+
+        Returns
+        -------
+        tuple with floats (steering,acceleration)
         """
+
+        if not type(action) == float:
+           raise Exception('Velocity Action is not of type float')
 
         if self.not_initiliazed:
             geoplanner = GeometricPlanner(deepcopy(state), inter_point_d=40.0, planning_time=0.1)

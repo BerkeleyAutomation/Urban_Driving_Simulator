@@ -7,8 +7,8 @@ import gym_urbandriving as uds
 
 class SteeringActionAgent(PursuitAgent):
     """
-    Agent which uses PID to implement a pursuit control policy
-    Uses a trajectory with x,y,v,-
+    Hierarichal agent which does not include any planning stack and only requires 
+    specifiying the steering agent.  
 
     Attributes
     ----------
@@ -19,8 +19,16 @@ class SteeringActionAgent(PursuitAgent):
     """
 
     def __init__(self, agent_num=0):
+        """
+        Initializes the PlanningPursuitAgent Class
+
+        Parameters
+        ----------
+        agent_num: int
+            The number which specifies the agent in the dictionary state.dynamic_objects['controlled_cars']
+
+        """
         self.agent_num = agent_num
-        #Move to JSON 
         self.PID_acc = PIDController(1.0, 0, 0)
         self.PID_steer = PIDController(2.0, 0, 0)
         self.not_initiliazed = True
@@ -35,7 +43,20 @@ class SteeringActionAgent(PursuitAgent):
         ----------
         state : PositionState
             State of the world, unused
+        action : float
+            Target velocity for car to travel at 
+
+        Returns
+        -------
+        tuple with floats (steering,acceleration)
         """
+        
+        if (not type(action) == np.array):
+            if not action.shape[0] == 2:
+                raise Exception('Steering Action is not a numpy array of shape (2,)')
+
+        else:
+            raise Exception('Steering Action is not a numpy array of shape (2,)')
 
         return action
 

@@ -7,8 +7,9 @@ import gym_urbandriving as uds
 
 class PlanningPursuitAgent(PursuitAgent):
     """
-    Agent which uses PID to implement a pursuit control policy
-    Uses a trajectory with x,y,v,-
+    Background agent which implements the full plannning stack given known behavioral logic. 
+    The planner first generates a nominal trajecotry, then at each timestep
+    plans its velocity to avoid collisons. 
 
     Attributes
     ----------
@@ -19,6 +20,15 @@ class PlanningPursuitAgent(PursuitAgent):
     """
 
     def __init__(self, agent_num=0):
+        """
+        Initializes the PlanningPursuitAgent Class
+
+        Parameters
+        ----------
+        agent_num: int
+            The number which specifies the agent in the dictionary state.dynamic_objects['background_cars']
+
+        """
         self.agent_num = agent_num
         #Move to JSON 
         self.PID_acc = PIDController(1.0, 0, 0)
@@ -32,12 +42,16 @@ class PlanningPursuitAgent(PursuitAgent):
         
     def eval_policy(self, state,simplified = False):
         """
-        Returns action based next state in trajectory. 
+        Returns action based on current state
 
         Parameters
         ----------
         state : PositionState
             State of the world, unused
+
+        Returns
+        -------
+        tuple with floats (steering,acceleration)
         """
      
         if self.not_initiliazed:
