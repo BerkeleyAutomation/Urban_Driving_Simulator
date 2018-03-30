@@ -1,12 +1,9 @@
-States
+Intersections
 ======
 
-The Abstract PositionState
+Base Intersections
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. autoclass:: gym_urbandriving.state.PositionState
-   :members: get_collisions, collides_any, min_dist_to_coll
+   :members: get_collisions, collides_any, min_dist_to_coll,create_agents,randomize
 
-The Simple Intersection
-^^^^^^^^^^^^^^^^^^^^^^^
-.. autoclass:: gym_urbandriving.state.SimpleIntersectionState
-   :members: randomize
+

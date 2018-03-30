@@ -14,6 +14,7 @@ This is Berkeley AUTOLAB's Urban Driving Simulator.
    installation.rst
    examples.rst
    environment.rst
+   agents.rst
    state.rst
    objects.rst
    

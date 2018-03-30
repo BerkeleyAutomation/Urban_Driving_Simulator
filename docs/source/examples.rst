@@ -2,7 +2,7 @@ Examples
 =========
 
 
-Setup and KeyboardAgent Tutorial
+Specifying Enviroment 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 This introduction will guide you through running a simple example on the simulator with a car that can be controlled through the Keyboard. 
 
@@ -66,120 +66,9 @@ in the scene. For every other object, it queries its internal list of agents as 
 :download:`Download <../../examples/setup_tutorial.py>`
 
 
-State Design Tutorial
-^^^^^^^^^^^^^^^^^^^^^
-Designing a state is very simple in UDS. To design a custom state, simply inherit from ``PositionState``, implement your own array of ``static_objects`` and define your own ``randomize()`` function.
-
-First, create a custom state class that inherits from ``PositionState``. Let's also set up the render cycle. 
-
-::
-
-   import random
-   import gym_urbandriving as uds
-   from gym_urbandriving.state import PositionState
-   from gym_urbandriving.agents import NullAgent
-   from gym_urbandriving.assets import Car, Terrain, Street, Lane, Sidewalk
-
-   class CustomState(PositionState):
-      static_objects = []
-
-   vis = uds.PyGameVisualizer((800, 800))
-   init_state = CustomState()
-   env = uds.UrbanDrivingEnv(init_state=init_state,
-                             visualizer=vis,
-                             randomize=True)
-
-   while(True):
-      env._render()
-
-Now, running this script should generate a blank screen. 
-
-.. image:: blank.png
 
 
-Lets add the streets to our state now. Streets are composed of ``Lane`` and ``Street`` objects. ``Lane`` objects are associated with directionality, so use these to construct the two sides of a road. ``Street`` objects should be used at intersections, where cars can travel in any direction. Lets build a three-way intersection between a four lane road and a two lane road. Place down the four lane road first. For rectangular objects, the arguments are the coordinates of the centroid, the height and width of the object, and then any rotation around the centroid. Edit the ``CustomState`` class to look like the following.
-
-::
-
-   class CustomState(PositionState):
-      static_objects = [Lane(175, 550, 350, 100, angle=-np.pi),
-                        Lane(175, 650, 350, 100, angle=-np.pi),
-                        Lane(175, 750, 350, 100),
-                        Lane(175, 850, 350, 100),
-                        Lane(825, 550, 350, 100, angle=-np.pi),
-                        Lane(825, 650, 350, 100, angle=-np.pi),
-                        Lane(825, 750, 350, 100),
-                        Lane(825, 850, 350, 100),
-                        Street(500, 700, 300, 400),]
-
-
-.. image:: custom1.png
-
-Notice how the angle of the lanes is manipulated so the road has proper directionality. Next, let's add the third road and some sidewalks. Sidewalks have no directionality, so we can just place them down directly.
-
-::
-
-   class CustomState(PositionState):
-      static_objects = [Lane(175, 550, 350, 100, angle=-np.pi),
-                        Lane(175, 650, 350, 100, angle=-np.pi),
-                        Lane(175, 750, 350, 100),
-                        Lane(175, 850, 350, 100),
-                        Lane(825, 550, 350, 100, angle=-np.pi),
-                        Lane(825, 650, 350, 100, angle=-np.pi),
-                        Lane(825, 750, 350, 100),
-                        Lane(825, 850, 350, 100),
-                        Street(500, 700, 300, 400),
-                        Lane(450, 250, 500, 100, angle=-(np.pi/2)),
-                        Lane(550, 250, 500, 100, angle=(np.pi/2)),
-                        Sidewalk(200, 475, 400, 50),
-                        Sidewalk(800, 475, 400, 50)]
-
-.. image:: custom2.png
-
-We are almost done. All thats left is to fill in the empty blocks with ``Terrain`` objects and write our own ``randomize`` function. The easiest way is to use the ``Lane`` objects' builtin ``generate_car`` and the ``Sidewalk`` objects' built-in ``generate_man`` functions. These ``generate`` functions try to the position the actors facing the ``angle`` of the object. When generating objects, you should check if they collide with other randomly generated objects
-
-::
-
-  class CustomState(PositionState):
-      static_objects = [Lane(175, 550, 350, 100, angle=-np.pi),
-                        Lane(175, 650, 350, 100, angle=-np.pi),
-                        Lane(175, 750, 350, 100),
-                        Lane(175, 850, 350, 100),
-                        Lane(825, 550, 350, 100, angle=-np.pi),
-                        Lane(825, 650, 350, 100, angle=-np.pi),
-                        Lane(825, 750, 350, 100),
-                        Lane(825, 850, 350, 100),
-                        Street(500, 700, 300, 400),
-                        Lane(450, 250, 500, 100, angle=-(np.pi/2)),
-                        Lane(550, 250, 500, 100, angle=(np.pi/2)),
-                        Sidewalk(200, 475, 400, 50),
-                        Sidewalk(800, 475, 400, 50,angle=-np.pi),
-                        Terrain([(0, 0), (400, 0), (400, 450), (0, 450)]),
-                        Terrain([(600, 0), (1000, 0), (1000, 450), (600, 450)]),
-                        Terrain([(0, 900), (1000, 900), (1000, 1000), (0, 1000)]),
-                        ]
-
-      def randomize(self):
-            self.dynamic_objects = []
-            lane_objs = [obj for obj in self.static_objects if type(obj) == Lane]
-            sidewalk_objs = [obj for obj in self.static_objects if type(obj) == Sidewalk]
-
-            for i in range(3):
-              car = random.choice(lane_objs).generate_car()
-              if not any([car.collides(obj) for obj in self.static_objects + self.dynamic_objects]):
-                  self.dynamic_objects.append(car)
-            for i in range(2):
-              man = random.choice(sidewalk_objs).generate_man()
-              if not any([man.collides(obj) for obj in self.static_objects + self.dynamic_objects]):
-                  self.dynamic_objects.append(man)
-
-Now, you should see the following image (or something similar) when running this script.
-
-.. image:: custom3.png
-
-:download:`Download <../../examples/state_design_tutorial.py>`
-
-Changing the Background Agent
+Using Supervisors in FLUIDS
 ^^^^^^^^^^^^^^^^^^
 
 Finally, we will walk through changing the Background Agent and how agents in general should interact with the environment for the simulator to work properly. 
@@ -292,6 +181,12 @@ We have now background agents that should slow down or stop if there are obstacl
 See all of this action here:
 :download:`Download <../../examples/changing_background_agent_tutorial.py>`
 
+
+State Design Tutorial
+^^^^^^^^^^^^^^^^^^^^^
+
+
+:download:`Download <../../examples/state_design_tutorial.py>`
 
 
 .. _`Ray`: http://ray.readthedocs.io/en/latest/
