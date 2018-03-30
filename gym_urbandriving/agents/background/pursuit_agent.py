@@ -71,4 +71,4 @@ class PursuitAgent(Agent):
         action_steer = self.PID_steer.get_control(e_angle)
 
 
-        return (action_steer, action_acc)
+        return np.array([action_steer, action_acc])
