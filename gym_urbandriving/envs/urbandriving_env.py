@@ -5,6 +5,7 @@ import gym_urbandriving as uds
 import numpy as np
 import IPython
 from gym_urbandriving.assets import Car, TrafficLight, CrosswalkLight
+from gym_urbandriving.utils.featurizer import Featurizer
 
 class UrbanDrivingEnv(gym.Env):
     """
@@ -45,6 +46,7 @@ class UrbanDrivingEnv(gym.Env):
         
         self.reward_fn = reward_fn
         self.max_time = 500
+        self.observation_type = 'raw'
         if config_data:
             self.init_state = uds.state.PositionState(config_data)
             if config_data['environment']['visualize']:
@@ -52,10 +54,12 @@ class UrbanDrivingEnv(gym.Env):
             else:
                 self.visualizer = None
             self.max_time = config_data['environment']['max_time']
+            self.observation_type = config_data['recorded_data']['state_space']
+            assert(self.observation_type in {'Q-LIDAR', 'raw', 'bmp'})
         else:
             self.init_state = init_state
             self.visualizer = None
-
+        self.featurizer = Featurizer()
 
 
 
@@ -98,6 +102,7 @@ class UrbanDrivingEnv(gym.Env):
         background_traffic_actions = []
      
         ### GET ALL ACTIONS ####
+
     
         for agent in self.current_state.bg_agents['background_cars']:
             if background_simplified:
@@ -135,7 +140,18 @@ class UrbanDrivingEnv(gym.Env):
 
         info_dict = {"saved_actions": action}
 
-        return state, reward, done, info_dict
+        if self.observation_type == 'raw':
+            observations = [state] * len(state.dynamic_objects['controlled_cars'])
+        elif self.observation_type == 'Q-LIDAR':
+            observations = []
+            for key in self.current_state.dynamic_objects['controlled_cars'].keys():
+                observations.append(self.featurizer.featurize(self.current_state, key))
+        elif self.observation_type == 'bmp':
+            assert(self.visualizer)
+            self._render()
+            observations = [self.visualizer.get_bitmap()] * len(state.dynamic_objects['controlled_cars'])
+
+        return observations, reward, done, info_dict
 
 
     def _reset(self, new_state=None):

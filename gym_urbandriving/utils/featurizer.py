@@ -20,9 +20,9 @@ class Featurizer(object):
     def __init__(self):
         pass
 
-    def featurize(self, current_state, previous_state, agent_num):
-        #os.system('clear')
-        car = current_state.dynamic_objects[agent_num]
+    def featurize(self, current_state, controlled_key):
+
+        car = current_state.dynamic_objects['controlled_cars'][controlled_key]
 
         x, y, angle, vel = car.get_state()
 
@@ -35,21 +35,10 @@ class Featurizer(object):
                                                (x + np.cos(LIGHT_ARC+angle)*LIGHT_DISTANCE,
                                                 y - np.sin(LIGHT_ARC+angle)*LIGHT_DISTANCE),])
 
-        
 
-        if not (car.trajectory.npoints()):
-            return None
-        goalx, goaly, _ = car.trajectory.get_points_list()[-1]
-        dx = goalx - x
-        dy = goaly - y
-        goal_d = distance((x, y), (goalx, goaly))
-        goal_a = (np.arctan(-dy/(dx+0.0000001)))
-        goal_a = goal_a % np.pi
-        if (dy > 0):
-            goal_a += np.pi
-        goal_a = (angle - goal_a) % (2 * np.pi)
+
         #print(goal_d, goal_a)
-        features = [x, y, vel, goal_d, np.cos(goal_a), np.sin(goal_a)]
+        features = [vel]
         #print(goalx, goaly)
 
         for arc_delta in ARC_DELTAS:
@@ -57,7 +46,6 @@ class Featurizer(object):
             xd = x + np.cos(arc_angle)*BEAM_DISTANCE
             yd = y - np.sin(arc_angle)*BEAM_DISTANCE
             linestring = shapely.geometry.LineString([(x, y), (xd, yd)])
-            
             min_coll_d = BEAM_DISTANCE
             min_coll_type = None
             min_coll_vel = 0
@@ -87,11 +75,9 @@ class Featurizer(object):
                         min_coll_type = type(dobj)
                         min_coll_vel = dobj.vel
                         min_coll_angle = (angle - dobj.angle) % (2 * np.pi)
-                        p_obj = previous_state.dynamic_objects[did]
-                        min_coll_acc = dobj.vel - p_obj.vel
-                        min_coll_ang_vel = (dobj.angle - p_obj.angle) % (2 * np.pi)
-            print(min_coll_d, min_coll_type, 180 * min_coll_angle / np.pi, min_coll_vel, 180 * min_coll_ang_vel / np.pi)
-            features.extend([min_coll_d, np.sin(min_coll_angle), np.cos(min_coll_angle), min_coll_vel, min_coll_ang_vel])
+
+            #print(min_coll_d, min_coll_type, 180 * min_coll_angle / np.pi, min_coll_vel)
+            features.extend([min_coll_d, np.sin(min_coll_angle), np.cos(min_coll_angle), min_coll_vel])
         for dobj in current_state.dynamic_objects:
             if type(dobj) is TrafficLight and light_cone.intersects(dobj.get_shapely_obj()):
                 d = distance((x, y), (dobj.x, dobj.y))

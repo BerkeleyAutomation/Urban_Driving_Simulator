@@ -13,6 +13,7 @@ with open('configs/default_config.json') as json_data_file:
 
 
 data['agents']['action_space'] = "velocity"
+data['recorded_data']['state_space'] = 'raw'
 sup = VelocitySupervisor(agent_num = 0)
 
 
@@ -21,7 +22,8 @@ state = env.current_state
 
 for i in range(3): 
 	action = sup.eval_policy(state)
-	state,reward,done,info_dict = env.step([action])
+	obs,reward,done,info_dict = env.step([action])
+        state = obs[0]
 
 
 sup = SteeringSupervisor(agent_num = 0)
@@ -31,4 +33,5 @@ state = env.current_state
 
 for i in range(3): 
 	action = sup.eval_policy(state)
-	state,reward,done,info_dict = env.step([action])
+	obs,reward,done,info_dict = env.step([action])
+        state = obs[0]
