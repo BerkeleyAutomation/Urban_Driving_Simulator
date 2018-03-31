@@ -1,10 +1,32 @@
 Installation
 ============
+
+Install FLUIDS
+^^^^^^^^^^^^^^^^
+These commands install gym-urbandriving and its requirements in the current Python environment. 
 ::
    
-   git clone https://github.com/jerryz123/gym-urbandriving.git
+   git clone https://github.com/BerkeleyAutomation/Urban_Driving_Simulator.git
    cd gym-urbandriving
    pip3 install -e .
 
 
-These commands install gym-urbandriving and its requirements in the current Python environment.
+Optional OMPL Install
+^^^^^^^^^^^^^^^^^^^^^
+
+Additional trajecotry generation features are available if OMPL (Open Motion Planning Library) is installed. The following is the installation instructino for Mac users.
+
+Install Macports https://www.macports.org/install.php (Note macports is very heavily tied to xcode to guarantee this to work you will need to have xcode installed)
+With macports installed perform the following three lines of code
+::
+	sudo port sync
+	sudo port clean castxml
+	sudo port install ompl +app
+
+Macport will download its own version of python2.7 that everything will work off of. To link the command line python type the following:
+::
+	sudo port select python2 python2.7
+
+
+
+
