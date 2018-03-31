@@ -5,6 +5,7 @@ python:
 # command to install dependencies
 install:
   - pip install -e .
+  - pip install sphinx=1.6.5
 # command to run tests
 script:
   - python tests/test_velocity_action.py # or py.test for Python versions 3.5 and below
@@ -13,5 +14,6 @@ script:
   - python tests/test_render.py #or py.test for Python versions 3.5 and below
   - python tests/test_supervisor.py #or py.test for Python version 3.5 and below
   - python tests/test_q_lidar.py #or py.test for Python version 3.5 and below
-  - python tests/test_traj_class.py #or py.test for Python version 3.5 and below 
+  - python tests/test_traj_class.py #or py.test for Python version 3.5 and below
+  - cd docs && make html
 
