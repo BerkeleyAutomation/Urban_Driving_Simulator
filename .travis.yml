@@ -6,6 +6,7 @@ python:
 install:
   - pip install -e .
   - pip install sphinx==1.6.5
+  - pip install recommonmark
 # command to run tests
 script:
   - python tests/test_velocity_action.py # or py.test for Python versions 3.5 and below
