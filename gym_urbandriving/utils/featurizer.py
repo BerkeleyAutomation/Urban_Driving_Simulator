@@ -9,10 +9,7 @@ from gym_urbandriving.assets import Terrain, Lane, Street, Sidewalk,\
 import os
 
 
-N_ARCS = 9
-ARC_DELTAS = [-1, -0.5, -0.25, -0.20, -0.15, -0.1, -0.05, 0, 0.05, 0.1, 0.15, 0.20, 0.25, 0.5, 1]
-ARC_DELTAS = [i*np.pi/2 for i in ARC_DELTAS]
-BEAM_DISTANCE = 300
+
 LIGHT_ARC = np.pi / 16
 LIGHT_DISTANCE = 300
 
@@ -20,7 +17,21 @@ def distance(p1, p2):
     return ((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2)**0.5
 
 class Featurizer(object):
-    def __init__(self):
+    """
+    Object to convert a state observation into a Q-LIDAR observation.
+
+    Attributes
+    ----------
+    beam_distance : int
+        How far each "LIDAR" beam will project into the scene
+    n_arcs :
+        How many "LIDAR" beams to project around the car
+    """
+    def __init__(self, beam_distance=300, n_arcs=9):
+
+        self.arc_deltas = np.arange(n_arcs + 1) / (float(n_arcs) / 2) - 1
+        self.arc_deltas = [i*np.pi/2 for i in self.arc_deltas]
+        self.beam_distance = beam_distance
         pass
 
 
@@ -59,12 +70,12 @@ class Featurizer(object):
         features = [vel]
         #print(goalx, goaly)
 
-        for arc_delta in ARC_DELTAS:
+        for arc_delta in self.arc_deltas:
             arc_angle = angle + arc_delta
-            xd = x + np.cos(arc_angle)*BEAM_DISTANCE
-            yd = y - np.sin(arc_angle)*BEAM_DISTANCE
+            xd = x + np.cos(arc_angle)*self.beam_distance
+            yd = y - np.sin(arc_angle)*self.beam_distance
             linestring = shapely.geometry.LineString([(x, y), (xd, yd)])
-            min_coll_d = BEAM_DISTANCE
+            min_coll_d = self.beam_distance
             min_coll_type = None
             min_coll_vel = 0
             min_coll_angle = 0
