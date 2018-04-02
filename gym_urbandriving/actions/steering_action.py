@@ -7,7 +7,8 @@ class SteeringAction:
 
 	def __init__(self,steering =0.0, acceleration = 0.0):
 
-		self.box = Box(low=np.array([-3,-5.0]),high=np.array([3,5.0]))
+
+		self.box = Box(low=np.array([-30,-50.0]),high=np.array([30,50.0]))
 
 		self.controls = np.array([steering,acceleration])
 
