@@ -127,7 +127,7 @@ class PositionState:
           if car.collides(obj):
               return True
         for key in self.dynamic_objects.keys():
-            for i,obj in self.dynamic_objects[key].iteritems():
+            for i,obj in six.iteritems(self.dynamic_objects[key]):
                 if car.collides(obj):
                     return True
         return False
