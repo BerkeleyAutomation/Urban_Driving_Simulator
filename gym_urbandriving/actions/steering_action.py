@@ -12,8 +12,6 @@ class SteeringAction:
 
 		self.controls = np.array([steering,acceleration])
 
-		if not self.box.contains(self.controls):
-			raise Exception('Steering Controls is Out of Bounds')
 
 
 	def get_value(self):
