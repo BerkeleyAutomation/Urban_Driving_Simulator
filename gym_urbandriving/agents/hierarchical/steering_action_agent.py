@@ -4,6 +4,8 @@ from gym_urbandriving.agents import PursuitAgent
 from gym_urbandriving.planning import VelocityMPCPlanner,GeometricPlanner
 from copy import deepcopy
 import gym_urbandriving as uds
+from gym_urbandriving.actions import SteeringAction
+import IPython
 
 class SteeringActionAgent(PursuitAgent):
     """
@@ -43,20 +45,16 @@ class SteeringActionAgent(PursuitAgent):
         ----------
         state : PositionState
             State of the world, unused
-        action : float
-            Target velocity for car to travel at 
+        action : SteeringAction
+            
 
         Returns
         -------
         tuple with floats (steering,acceleration)
         """
         
-        if (not type(action) == np.array):
-            if not action.shape[0] == 2:
-                raise Exception('Steering Action is not a numpy array of shape (2,)')
-
-        else:
-            raise Exception('Steering Action is not a numpy array of shape (2,)')
+        if not isinstance(action,SteeringAction):
+            raise Exception('Actions is Not of Type Steering Action')
 
         return action
 

@@ -50,7 +50,7 @@ class SteeringSupervisor(PursuitAgent):
 
         Returns
         -------
-        tuple with floats (steering,acceleration)
+        SteeringAction
         """
 
         if self.not_initiliazed:

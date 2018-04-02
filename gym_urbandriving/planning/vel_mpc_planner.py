@@ -1,5 +1,6 @@
 from copy import deepcopy
 import gym_urbandriving as uds
+from gym_urbandriving.actions import VelocityAction
 
 class VelocityMPCPlanner:
     def __init__(self, lookahead=10):
@@ -13,7 +14,7 @@ class VelocityMPCPlanner:
                                           randomize=False)
         state_copy = testing_env.current_state
         if state_copy.dynamic_objects[type_of_agent][str(agent_num)].trajectory.stopped:
-            state_copy.dynamic_objects[type_of_agent][str(agent_num)].trajectory.set_vel(4)
+            state_copy.dynamic_objects[type_of_agent][str(agent_num)].trajectory.set_vel(VelocityAction(4))
             for t in range(self.lookahead):
                 state_copy, reward, done, info_dict = testing_env._step(None,background_simplified = True)
                 state_copy = state_copy[0]
@@ -21,8 +22,8 @@ class VelocityMPCPlanner:
                 if done:
                     break
             if not done:
-                return 4.0
-            return 0.0
+                return VelocityAction(4.0)
+            return VelocityAction(0.0)
 
 
         elif not state_copy.dynamic_objects[type_of_agent][str(agent_num)].trajectory.stopped:
@@ -33,6 +34,6 @@ class VelocityMPCPlanner:
                 if done:
                     break
             if done:
-                return 0.0
-            return 4.0
+                return VelocityAction(0.0)
+            return VelocityAction(4.0)
 

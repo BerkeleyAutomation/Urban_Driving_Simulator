@@ -109,8 +109,8 @@ class Trajectory(object):
             return
         v_index = self.mode.index('v')
         for i in range(self.npoints()):
-            self._trajectory[i][v_index] = target_vel
-        if target_vel == 0.0:
+            self._trajectory[i][v_index] = target_vel.get_value()
+        if target_vel.get_value() == 0.0:
             self.stopped = True
         else:
             self.stopped = False
