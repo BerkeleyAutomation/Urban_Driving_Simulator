@@ -7,13 +7,14 @@ from gym_urbandriving.assets import *
 from gym_urbandriving.planning import Trajectory
 import numpy as np
 import IPython
+from gym_urbandriving.actions import VelocityAction
 
 with open('configs/default_config.json') as json_data_file:
     data = json.load(json_data_file)
 
 
 data['agents']['action_space'] = 'velocity'
-action = [0.0]
+action = [VelocityAction(0.0)]
 
 env = uds.UrbanDrivingEnv(data)
 

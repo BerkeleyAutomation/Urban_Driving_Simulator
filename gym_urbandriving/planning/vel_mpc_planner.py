@@ -14,7 +14,7 @@ class VelocityMPCPlanner:
                                           randomize=False)
         state_copy = testing_env.current_state
         if state_copy.dynamic_objects[type_of_agent][str(agent_num)].trajectory.stopped:
-            state_copy.dynamic_objects[type_of_agent][str(agent_num)].trajectory.set_vel(4)
+            state_copy.dynamic_objects[type_of_agent][str(agent_num)].trajectory.set_vel(VelocityAction(4))
             for t in range(self.lookahead):
                 state_copy, reward, done, info_dict = testing_env._step(None,background_simplified = True)
                 state_copy = state_copy[0]
