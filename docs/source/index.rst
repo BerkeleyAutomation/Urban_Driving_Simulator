@@ -13,6 +13,7 @@ Urban Driving Simulator Documentation
    environment.rst
    agents.rst
    state.rst
+   actions.rst
    observations.rst
    objects.rst
    
