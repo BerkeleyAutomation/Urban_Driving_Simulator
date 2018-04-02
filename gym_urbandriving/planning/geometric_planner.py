@@ -8,6 +8,8 @@ from gym_urbandriving.planning import Trajectory
 import scipy as sc
 import scipy.interpolate
 from scipy.interpolate import UnivariateSpline
+from gym_urbandriving.actions import VelocityAction
+
 
 class ValidityChecker(ob.StateValidityChecker):
     def __init__(self, si, state, controlled_obj):
@@ -148,7 +150,7 @@ class GeometricPlanner:
 
             orig_obj.trajectory = traj
             orig_obj.vel = 0
-            orig_obj.trajectory.set_vel(4)
+            orig_obj.trajectory.set_vel(VelocityAction(4))
             
             
             npoints = orig_obj.trajectory.npoints()
@@ -174,7 +176,7 @@ class GeometricPlanner:
             newtraj = Trajectory(mode = 'xyv', fsm=0)
             for x, y in zip(xn, yn):
                 newtraj.add_point((x, y, 4))
-            newtraj.set_vel(4)
+            newtraj.set_vel(VelocityAction(4))
             orig_obj.trajectory = newtraj
 
     def plan(self, controlled_object, x1, y1, v1, a1):

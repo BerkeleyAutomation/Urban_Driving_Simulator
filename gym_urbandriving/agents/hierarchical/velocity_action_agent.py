@@ -5,6 +5,8 @@ from gym_urbandriving.planning import VelocityMPCPlanner,GeometricPlanner
 from copy import deepcopy
 import gym_urbandriving as uds
 
+from gym_urbandriving.actions import VelocityAction
+
 class VelocityActionAgent(PursuitAgent):
     """
     Hierarichal agent which implements the full plannning stack except the velocity component
@@ -47,7 +49,7 @@ class VelocityActionAgent(PursuitAgent):
         ----------
         state : PositionState
             State of the world, unused
-        action : float or None
+        action : VelocityAction or None
             Target velocity for car to travel at 
 
         Returns
@@ -55,8 +57,8 @@ class VelocityActionAgent(PursuitAgent):
         tuple with floats (steering,acceleration)
         """
 
-        if not (type(action) == float or action == None):
-           raise Exception('Velocity Action is not of type float')
+        if not (isinstance(action,VelocityAction) or action == None):
+           raise Exception('Action is not of type VelocityAction')
 
         if self.not_initiliazed:
             geoplanner = GeometricPlanner(deepcopy(state), inter_point_d=40.0, planning_time=0.1)

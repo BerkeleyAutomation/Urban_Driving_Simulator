@@ -115,14 +115,14 @@ class UrbanDrivingEnv(gym.Env):
 
         ####UPDATE ALL POLICIES#########
         for index, dobj in self.current_state.dynamic_objects['background_cars'].items():
-            dobj.step(background_car_actions[int(index)])
+            dobj.step(background_car_actions[int(index)].get_value())
 
         for index, dobj in self.current_state.dynamic_objects['traffic_lights'].items():
             dobj.step(background_traffic_actions[int(index)])
 
         if not background_simplified:
             for i, dobj in self.current_state.dynamic_objects['controlled_cars'].items():
-                dobj.step(controlled_car_actions[int(i)])
+                dobj.step(controlled_car_actions[int(i)].get_value())
 
         self.current_state.time += 1
         dynamic_coll, static_coll, controlled_car_collisions = self.current_state.get_collisions()

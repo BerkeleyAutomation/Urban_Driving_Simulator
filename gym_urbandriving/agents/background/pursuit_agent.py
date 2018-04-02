@@ -1,6 +1,7 @@
 import numpy as np
 from gym_urbandriving.utils.PID import PIDController
 from gym_urbandriving.agents import Agent
+from gym_urbandriving.actions import SteeringAction
 
 class PursuitAgent(Agent):
     
@@ -29,7 +30,7 @@ class PursuitAgent(Agent):
 
         Returns
         -------
-        tuple with floats (steering,acceleration)
+        SteeringAction
         """
 
         obj = state.dynamic_objects[type_of_agent][str(self.agent_num)]
@@ -71,4 +72,4 @@ class PursuitAgent(Agent):
         action_steer = self.PID_steer.get_control(e_angle)
 
 
-        return np.array([action_steer, action_acc])
+        return SteeringAction(steering=action_steer, acceleration=action_acc)
