@@ -1,5 +1,7 @@
 import pygame
 from gym_urbandriving.agents import Agent
+from gym_urbandriving.actions import SteeringAction
+import numpy as np
 
 class KeyboardAgent(Agent):
     """
@@ -43,4 +45,4 @@ class KeyboardAgent(Agent):
             steer = 1
         elif keys[pygame.K_RIGHT]:
             steer = -1
-        return np.array([steer, acc])
+        return SteeringAction(steer, acc)

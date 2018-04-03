@@ -122,16 +122,14 @@ class PositionState:
             self.bg_agents['controlled_cars'].append(agent)
 
     def is_in_collision(self,car):
-
+        
         for obj in self.static_objects:
           if car.collides(obj):
-            return True
-
+              return True
         for key in self.dynamic_objects.keys():
-            for i,obj in enumerate(self.dynamic_objects[key]):
-              if car.collides(obj):
-                return True
-
+            for i,obj in six.iteritems(self.dynamic_objects[key]):
+                if car.collides(obj):
+                    return True
         return False
 
 
