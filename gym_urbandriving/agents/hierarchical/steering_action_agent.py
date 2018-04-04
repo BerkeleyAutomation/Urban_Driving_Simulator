@@ -53,11 +53,13 @@ class SteeringActionAgent(PursuitAgent):
         tuple with floats (steering,acceleration)
         """
         
-        if not isinstance(action,SteeringAction):
-            raise Exception('Actions is Not of Type Steering Action')
+        
 
         if simplified:
             return SteeringAction(0.0,0.0)
+
+        if not isinstance(action,SteeringAction):
+            raise Exception('Actions is Not of Type Steering Action')
 
         return action
 
