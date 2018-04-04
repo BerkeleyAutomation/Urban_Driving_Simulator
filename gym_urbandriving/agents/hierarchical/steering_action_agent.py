@@ -37,7 +37,7 @@ class SteeringActionAgent(PursuitAgent):
         
 
         
-    def eval_policy(self, action,state):
+    def eval_policy(self, action,state,simplified=False):
         """
         Returns action based next state in trajectory. 
 
@@ -53,6 +53,11 @@ class SteeringActionAgent(PursuitAgent):
         tuple with floats (steering,acceleration)
         """
         
+        
+
+        if simplified:
+            return SteeringAction(0.0,0.0)
+
         if not isinstance(action,SteeringAction):
             raise Exception('Actions is Not of Type Steering Action')
 

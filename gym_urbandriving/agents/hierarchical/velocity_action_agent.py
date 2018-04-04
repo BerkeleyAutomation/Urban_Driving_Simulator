@@ -41,7 +41,7 @@ class VelocityActionAgent(PursuitAgent):
         
 
         
-    def eval_policy(self, action,state):
+    def eval_policy(self, action,state,simplified = False):
         """
         Returns action based next state in trajectory. 
 
@@ -66,9 +66,9 @@ class VelocityActionAgent(PursuitAgent):
             geoplanner.plan_for_agents(state,type_of_agent='controlled_cars',agent_num=self.agent_num)
             self.not_initiliazed = False
 
-        
-        target_vel = action
-        state.dynamic_objects['controlled_cars'][str(self.agent_num)].trajectory.set_vel(target_vel)
+        if not simplified:
+            target_vel = action
+            state.dynamic_objects['controlled_cars'][str(self.agent_num)].trajectory.set_vel(target_vel)
 
         return super(VelocityActionAgent, self).eval_policy(state,type_of_agent='controlled_cars')
 

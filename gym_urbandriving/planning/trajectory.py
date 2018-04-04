@@ -1,5 +1,6 @@
 import numpy as np
 from skimage import transform
+from gym_urbandriving.actions import VelocityAction
 
 # Four corners of the interection, hard-coded in camera space
 corners = np.array([[765, 385],
@@ -114,6 +115,14 @@ class Trajectory(object):
             self.stopped = True
         else:
             self.stopped = False
+
+    def get_vel(self):
+        if target_vel == None:
+            return
+        v_index = self.mode.index('v')
+        
+        return VelocityAction(self._trajectory[-1][v_index])
+        
       
 
 
