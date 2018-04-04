@@ -4,7 +4,15 @@ from gym_urbandriving.planning import Trajectory
 
 class GeometricPlanner:
     def __init__(self,state, inter_point_d=1.0, planning_time=1.0, optional_targets = None, num_cars = 0):
-        pass
+        if optional_targets is None:
+            self.optional_targets = [[450,375,-np.pi/2],
+                           [550,375,np.pi/2],
+                           [625,450,-np.pi],
+                           [625,550,0.0],
+                           [450,625,-np.pi/2],
+                           [550,625,np.pi/2],
+                           [375,450,-np.pi],
+                           [375,550,0.0]]
 
     def plan(self,x0,y0,v0,a0,x1,y1,v1,a1):
         def interpolate(p0,p1,p2,p3,t):
@@ -34,8 +42,15 @@ class GeometricPlanner:
 
         obj =  state.dynamic_objects[type_of_agent][str(agent_num)]
         
-        traj = Trajectory(mode = 'xyv', fsm=0)
-        for p in self.plan(obj.x, obj.y, obj.vel, obj.angle, obj.destination[0], obj.destination[1], 1, obj.destination[3]):
+        target1 = sorted(self.optional_targets, key=lambda p: (p[0]-obj.x)**2 + (p[1]-obj.y)**2)[0]
+        target2 = sorted(self.optional_targets, key=lambda p: (p[0]-obj.destination[0])**2 + (p[1]-obj.destination[1])**2)[0]
+
+        traj = Trajectory(mode = 'xyv')
+        for p in self.plan(obj.x, obj.y, obj.vel, obj.angle, target1[0], target1[1], 1, target1[2]):
+            traj.add_point(p)
+        for p in self.plan(target1[0], target1[1], 1, target1[2], target2[0], target2[1], 1, target2[2]):
+            traj.add_point(p)
+        for p in self.plan(target2[0], target2[1], 1, target2[2], obj.destination[0], obj.destination[1], 1, obj.destination[3]):
             traj.add_point(p)
 
         obj.trajectory = traj
