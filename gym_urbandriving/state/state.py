@@ -75,7 +75,7 @@ class PositionState:
                     self.dynamic_objects['background_cars'][str(car_index)] = car
                     self.dynamic_objects['background_cars'][str(car_index)].destination = self.assign_goal_states(start)
                     break
-        
+
         if self.agent_config['use_traffic_lights']:
             self.dynamic_objects['traffic_lights'] = {}
             for i, traffic_light in enumerate(self.state_config['traffic_lights']):
@@ -86,15 +86,16 @@ class PositionState:
     def assign_goal_states(self, start_lane):
         """
         Assigns a random goal state to a car
-        #TODO Prevent u-turns. Simple heuristic goal has to be at least x distance away
         """
-        choice = random.choice(self.goal_states)
+        goal_choices = deepcopy(self.goal_states)
+        del goal_choices[start_lane]
+        choice = random.choice(goal_choices)
+
         return [choice['x'], choice['y'], choice['vel'], np.deg2rad(choice['angle_deg'])]
 
     def create_agents(self):
         """
         Creates agents for objects in the scene
-        #TODO: Move this to env
         """
         agent_mappings = {}
         for k, v in six.iteritems(self.agent_config['agent_mappings']):
