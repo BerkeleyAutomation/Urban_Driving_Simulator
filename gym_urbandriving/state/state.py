@@ -75,6 +75,7 @@ class PositionState:
                     self.dynamic_objects['background_cars'][str(car_index)] = car
                     self.dynamic_objects['background_cars'][str(car_index)].destination = self.assign_goal_states(start)
                     break
+        
         if self.agent_config['use_traffic_lights']:
             self.dynamic_objects['traffic_lights'] = {}
             for i, traffic_light in enumerate(self.state_config['traffic_lights']):
@@ -194,6 +195,7 @@ class PositionState:
         for coll in dynamic_collisions:
             if (agentnum in coll) and (type_of_agent in coll):
                 return True
+
         return False
 
     def min_dist_to_coll(self, agentnum,type_of_agent = 'background_cars'):

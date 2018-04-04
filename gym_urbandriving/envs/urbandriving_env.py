@@ -66,7 +66,7 @@ class UrbanDrivingEnv(gym.Env):
             self._reset()
 
 
-    def _step(self, action, background_simplified=False):
+    def _step(self, action, background_simplified=False,supervisor=False):
         """
         The step function accepts a control for the 0th agent in the scene. Then, it queries
         all the background agents to determine their actions. Then, it updates the scene
@@ -97,21 +97,18 @@ class UrbanDrivingEnv(gym.Env):
         background_traffic_actions = []
      
         ### GET ALL ACTIONS ####
-
     
         for agent in self.current_state.bg_agents['background_cars']:
-            if background_simplified:
-                background_car_actions.append(agent.eval_policy(self.current_state,simplified=True))
-            else:
-                background_car_actions.append(agent.eval_policy(self.current_state))
+            background_car_actions.append(agent.eval_policy(self.current_state,simplified=background))
 
         for agent in self.current_state.bg_agents['traffic_lights']:
             background_traffic_actions.append(agent.eval_policy(self.current_state))
 
-        if not background_simplified:
-            for i,agent in enumerate(self.current_state.bg_agents['controlled_cars']):
-                controlled_car_actions.append(agent.eval_policy(action[i],self.current_state))
         
+        for i,agent in enumerate(self.current_state.bg_agents['controlled_cars']):
+            controlled_car_actions.append(agent.eval_policy(action[i],self.current_state,simplified=background_simplified))
+
+
 
         ####UPDATE ALL POLICIES#########
         for index, dobj in self.current_state.dynamic_objects['background_cars'].items():
@@ -120,9 +117,9 @@ class UrbanDrivingEnv(gym.Env):
         for index, dobj in self.current_state.dynamic_objects['traffic_lights'].items():
             dobj.step(background_traffic_actions[int(index)])
 
-        if not background_simplified:
-            for i, dobj in self.current_state.dynamic_objects['controlled_cars'].items():
-                dobj.step(controlled_car_actions[int(i)].get_value())
+        
+        for i, dobj in self.current_state.dynamic_objects['controlled_cars'].items():
+            dobj.step(controlled_car_actions[int(i)].get_value())
 
         self.current_state.time += 1
         dynamic_coll, static_coll, controlled_car_collisions = self.current_state.get_collisions()
@@ -143,9 +140,24 @@ class UrbanDrivingEnv(gym.Env):
             assert(self.visualizer)
             self._render()
             observations = [self.visualizer.get_bitmap()] * len(state.dynamic_objects['controlled_cars'])
+        if self.visualizer:
+            self._render()
 
         return observations, reward, done, info_dict
 
+    def get_initial_observations(self):
+        if self.observation_type == 'raw':
+            observations = [state] * len(state.dynamic_objects['controlled_cars'])
+        elif self.observation_type == 'Q-LIDAR':
+            observations = []
+            for key in self.current_state.dynamic_objects['controlled_cars'].keys():
+                observations.append(self.featurizer.featurize(self.current_state, key))
+        elif self.observation_type == 'bmp':
+            assert(self.visualizer)
+            self._render()
+            observations = [self.visualizer.get_bitmap()] * len(state.dynamic_objects['controlled_cars'])
+
+        return
 
     def _reset(self, new_state=None):
         """
@@ -161,7 +173,6 @@ class UrbanDrivingEnv(gym.Env):
             self.init_state = new_state
             self.statics_rendered = False
         if self.randomize:
-            
             self.init_state.randomize()
 
         self.current_state = deepcopy(self.init_state)
@@ -193,6 +204,9 @@ class UrbanDrivingEnv(gym.Env):
                                    traffic_trajectories = traffic_trajectories,
                                    transparent_surface = transparent_surface)
             self.statics_rendered = True
+
+    def get_current_state(self):
+        return self.current_state
 
     def get_state_copy(self):
         return deepcopy(self.current_state)
