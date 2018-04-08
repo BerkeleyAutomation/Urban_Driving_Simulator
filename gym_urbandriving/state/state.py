@@ -80,7 +80,23 @@ class PositionState:
             self.dynamic_objects['traffic_lights'] = {}
             for i, traffic_light in enumerate(self.state_config['traffic_lights']):
                 self.dynamic_objects['traffic_lights'][str(i)] = TrafficLight(**traffic_light)
+        if self.agent_config['use_pedestrians']:
+            self.dynamic_objects['crosswalk_lights'] = {}
+            for i, crosswalk_light in enumerate(self.state_config['crosswalk_lights']):
+                self.dynamic_objects['crosswalk_lights'][str(i)] = CrosswalkLight(**crosswalk_light)
+            self.dynamic_objects['pedestrians'] = {}
+            start_sidewalks = [s for s in self.static_objects if type(s) == Sidewalk]
+
+            for ped_index in range(self.agent_config['number_of_pedestrians']):
+                while True:
+                    start = np.random.random_integers(0, len(start_sidewalks) - 1)
+                    sidewalk = start_sidewalks[start]
+                    ped = sidewalk.generate_man()
+                    if not self.is_in_collision(ped):
+                        self.dynamic_objects['pedestrians'][str(ped_index)] = ped
+                        break
         #TODO Add pedestrians
+
         self.create_agents()
 
     def assign_goal_states(self, start_lane):
@@ -103,7 +119,7 @@ class PositionState:
                             "TrafficLight":TrafficLight,
                             "CrosswalkLight":CrosswalkLight}[k]] = {"PlanningPursuitAgent":PlanningPursuitAgent,
                                                                     "TrafficLightAgent":TrafficLightAgent,
-                                                                    "CrosswalkLightAgent":CrosswalkLightAgent, 
+                                                                    "CrosswalkLightAgent":CrosswalkLightAgent,
                                                                     "NullAgent": NullAgent}[v]
 
 
@@ -124,7 +140,7 @@ class PositionState:
             self.bg_agents['controlled_cars'].append(agent)
 
     def is_in_collision(self,car):
-        
+
         for obj in self.static_objects:
           if car.collides(obj):
               return True

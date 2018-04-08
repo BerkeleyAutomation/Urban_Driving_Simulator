@@ -34,6 +34,16 @@
         { "x": 560, "y": 600, "init_color":"red"  , "angle_deg":-90 },
         { "x": 440, "y": 400, "init_color":"red"  , "angle_deg":90 }
     ],
+    "crosswalk_lights": [
+        { "x": 375, "y": 390, "init_color":"red"  , "angle_deg":-90 , "time_in_color":80},
+        { "x": 390, "y": 375, "init_color":"white", "angle_deg":0 },
+        { "x": 610, "y": 625, "init_color":"white", "angle_deg":-180 },
+        { "x": 625, "y": 610, "init_color":"red"  , "angle_deg":90  , "time_in_color":80},
+        { "x": 375, "y": 610, "init_color":"red"  , "angle_deg":90  , "time_in_color":80},
+        { "x": 390, "y": 625, "init_color":"white", "angle_deg":0 },
+        { "x": 625, "y": 390, "init_color":"red"  , "angle_deg":-90 , "time_in_color":80},
+        { "x": 610, "y": 375, "init_color":"white", "angle_deg":-180 }
+    ],
     "goal_states": [
         { "x":550, "y":100, "vel":2, "angle_deg":90 },
         { "x":450, "y":900, "vel":2, "angle_deg":-90 },
