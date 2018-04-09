@@ -99,7 +99,7 @@ class UrbanDrivingEnv(gym.Env):
         ### GET ALL ACTIONS ####
     
         for agent in self.current_state.bg_agents['background_cars']:
-            background_car_actions.append(agent.eval_policy(self.current_state,simplified=background))
+            background_car_actions.append(agent.eval_policy(self.current_state,simplified=background_simplified))
 
         for agent in self.current_state.bg_agents['traffic_lights']:
             background_traffic_actions.append(agent.eval_policy(self.current_state))
