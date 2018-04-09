@@ -1,7 +1,7 @@
 import gym
 from copy import deepcopy
 import numpy as np
-from gym_urbandriving.assets import TrafficLight, Terrain, Street, Lane, Sidewalk, Car, CrosswalkLight
+from gym_urbandriving.assets import TrafficLight, Terrain, Street, Lane, Sidewalk, Car, CrosswalkLight, Pedestrian
 from gym_urbandriving.agents import *
 import json
 import os
@@ -117,10 +117,12 @@ class PositionState:
         for k, v in six.iteritems(self.agent_config['agent_mappings']):
             agent_mappings[{"Car":Car,
                             "TrafficLight":TrafficLight,
-                            "CrosswalkLight":CrosswalkLight}[k]] = {"PlanningPursuitAgent":PlanningPursuitAgent,
-                                                                    "TrafficLightAgent":TrafficLightAgent,
-                                                                    "CrosswalkLightAgent":CrosswalkLightAgent,
-                                                                    "NullAgent": NullAgent}[v]
+                            "CrosswalkLight":CrosswalkLight,
+                            "Pedestrian":Pedestrian}[k]] = {"PlanningPursuitAgent":PlanningPursuitAgent,
+                                                            "TrafficLightAgent":TrafficLightAgent,
+                                                            "CrosswalkLightAgent":CrosswalkLightAgent,
+                                                            "NullAgent": NullAgent,
+                                                            "PedestrianAgent":PedestrianAgent}[v]
 
 
         self.bg_agents = {}
