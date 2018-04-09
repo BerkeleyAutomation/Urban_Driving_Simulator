@@ -23,7 +23,7 @@ class SteeringAction:
         """
 
 
-		self.box = Box(low=np.array([-1,-5.0]),high=np.array([3,5.0]))
+		self.box = Box(low=np.array([-3,-1.0]),high=np.array([3,1.0]))
 
 		self.controls = np.array([steering,acceleration])
 

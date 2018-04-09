@@ -13,4 +13,3 @@ from gym_urbandriving.agents.supervisor.velocity_supervisor import VelocitySuper
 from gym_urbandriving.agents.supervisor.steering_supervisor import SteeringSupervisor
 
 from gym_urbandriving.agents.tele_op.keyboard_agent import KeyboardAgent
-from gym_urbandriving.agents.tele_op.null_agent import NullAgent
