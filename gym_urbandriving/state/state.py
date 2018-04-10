@@ -211,6 +211,7 @@ class PositionState:
 
     def collides_any_dynamic(self, agentnum,type_of_agent = 'background_cars'):
         dynamic_collisions, static_collisions, _ = self.get_collisions()
+
         for coll in dynamic_collisions:
             if (agentnum in coll) and (type_of_agent in coll):
                 return True
