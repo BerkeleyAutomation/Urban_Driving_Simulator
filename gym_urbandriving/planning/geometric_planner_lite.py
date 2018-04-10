@@ -3,6 +3,16 @@ import math
 from gym_urbandriving.planning import Trajectory
 
 class GeometricPlanner:
+    """
+    This class plans for all agents in a scene using bezier curves. Velocities behavior is undefined. 
+
+    Parameters
+    ----------
+    optional_targets: list
+        List of [x,y,a] optional targets to help guide planning. 
+    """
+
+    #TODO: remove other parameters when we end up ditching OMPL
     def __init__(self,state, inter_point_d=1.0, planning_time=1.0, optional_targets = None, num_cars = 0):
         if optional_targets is None:
             self.optional_targets = [[450,375,-np.pi/2],
@@ -16,6 +26,9 @@ class GeometricPlanner:
 
     def plan(self,x0,y0,v0,a0,x1,y1,v1,a1):
         def interpolate(p0,p1,p2,p3,t):
+            """
+            Bezier curve interpolation using deCasteljau's algorithm
+            """
             return [p0[0]*1.0*((1-t)**3) + p1[0]*3.0*t*(1-t)**2 + p2[0]*3.0*(t**2)*(1-t) + p3[0]*1.0*(t**3), p0[1]*1.0*((1-t)**3) + p1[1]*3.0*t*(1-t)**2 + p2[1]*3.0*(t**2)*(1-t) + p3[1]*1.0*(t**3)]
 
         distance_between_points = math.sqrt((x0-x1)**2+(y0-y1)**2)
