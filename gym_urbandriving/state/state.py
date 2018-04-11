@@ -76,15 +76,18 @@ class PositionState:
                     self.dynamic_objects['background_cars'][str(car_index)].destination = self.assign_goal_states(start)
                     break
 
+        self.dynamic_objects['traffic_lights'] = {}
         if self.agent_config['use_traffic_lights']:
-            self.dynamic_objects['traffic_lights'] = {}
+
             for i, traffic_light in enumerate(self.state_config['traffic_lights']):
                 self.dynamic_objects['traffic_lights'][str(i)] = TrafficLight(**traffic_light)
+        self.dynamic_objects['crosswalk_lights'] = {}
+        self.dynamic_objects['pedestrians'] = {}        
         if self.agent_config['use_pedestrians']:
-            self.dynamic_objects['crosswalk_lights'] = {}
+
             for i, crosswalk_light in enumerate(self.state_config['crosswalk_lights']):
                 self.dynamic_objects['crosswalk_lights'][str(i)] = CrosswalkLight(**crosswalk_light)
-            self.dynamic_objects['pedestrians'] = {}
+
             start_sidewalks = [s for s in self.static_objects if type(s) == Sidewalk]
 
             for ped_index in range(self.agent_config['number_of_pedestrians']):
