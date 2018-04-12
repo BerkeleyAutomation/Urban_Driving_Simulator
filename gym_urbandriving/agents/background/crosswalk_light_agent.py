@@ -20,7 +20,7 @@ class CrosswalkLightAgent:
         self.agentnum = agentnum
 
     def eval_policy(self, state):
-        obj = state.dynamic_objects[self.agentnum]
+        obj = state.dynamic_objects['crosswalk_lights'][str(self.agentnum)]
         assert(type(obj) == CrosswalkLight)
         if obj.time_in_color < self.color_times[obj.color]:
             return None

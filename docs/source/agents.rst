@@ -34,3 +34,10 @@ Used for a human supervisor to operate the vehicle. Currently, the use of keyboa
 
 .. autoclass:: gym_urbandriving.agents.tele_op.keyboard_agent.KeyboardAgent
    :members: eval_policy
+
+Pedestrian
+^^^^^^^^^^
+FLUIDS also packages a basic pedestrian controller for controling the movement of background pedestrians. Pedestrians display simple behavior, walking forwards unless blocked by a crosswalk signal.
+
+.. autoclass:: gym_urbandriving.agents.supervisor.pedestrian_supervisor.PedestrianAgent
+   :members: eval_policy
