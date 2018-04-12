@@ -203,12 +203,15 @@ class PositionState:
         bool
             True if this object is colliding
         """
+
         dynamic_collisions, static_collisions, _ = self.get_collisions()
         for coll in dynamic_collisions:
-            if (agentnum in coll) and (type_of_agent in coll):
+            id1, id2, t1, t2 = coll
+            if (agentnum, type_of_agent) in [(id1, t1), (id2, t2)]:
                 return True
         for coll in static_collisions:
-            if (agentnum in coll) and (type_of_agent in coll):
+            id1, id2, t1, t2 = coll
+            if (agentnum, type_of_agent) is (id1, t1):
                 return True
         return False
 
