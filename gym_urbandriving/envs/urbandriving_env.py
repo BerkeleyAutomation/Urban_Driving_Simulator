@@ -95,7 +95,9 @@ class UrbanDrivingEnv(gym.Env):
         background_car_actions = []
         controlled_car_actions = []
         background_traffic_actions = []
-     
+        pedestrian_actions = []
+        crosswalk_light_actions = []
+        
         ### GET ALL ACTIONS ####
     
         for agent in self.current_state.bg_agents['background_cars']:
@@ -104,9 +106,12 @@ class UrbanDrivingEnv(gym.Env):
         for agent in self.current_state.bg_agents['traffic_lights']:
             background_traffic_actions.append(agent.eval_policy(self.current_state))
 
-        
         for i,agent in enumerate(self.current_state.bg_agents['controlled_cars']):
             controlled_car_actions.append(agent.eval_policy(action[i],self.current_state,simplified=background_simplified))
+        for i,agent in enumerate(self.current_state.bg_agents['pedestrians']):
+            pedestrian_actions.append(agent.eval_policy(self.current_state))
+        for i,agent in enumerate(self.current_state.bg_agents['crosswalk_lights']):
+            crosswalk_light_actions.append(agent.eval_policy(self.current_state))
 
 
 
@@ -117,9 +122,13 @@ class UrbanDrivingEnv(gym.Env):
         for index, dobj in self.current_state.dynamic_objects['traffic_lights'].items():
             dobj.step(background_traffic_actions[int(index)])
 
-        
         for i, dobj in self.current_state.dynamic_objects['controlled_cars'].items():
             dobj.step(controlled_car_actions[int(i)].get_value())
+
+        for i, dobj in self.current_state.dynamic_objects['pedestrians'].items():
+            dobj.step(pedestrian_actions[int(i)])
+        for i, dobj in self.current_state.dynamic_objects['crosswalk_lights'].items():
+            dobj.step(crosswalk_light_actions[int(i)])
 
         self.current_state.time += 1
         dynamic_coll, static_coll, controlled_car_collisions = self.current_state.get_collisions()
