@@ -20,7 +20,7 @@ class TrafficLight(Rectangle):
               "red" : "traffic_red.png"}
     def __init__(self, x, y, angle=0, init_color="green", angle_deg=0, time_in_color = 0):
         angle = np.deg2rad(angle_deg % 360) if angle_deg else angle
-        Rectangle.__init__(self, x, y, 15, 15, angle)
+        Rectangle.__init__(self, x, y, 15, 25, angle)
         self.time_in_color = time_in_color
         self.color = init_color
 
