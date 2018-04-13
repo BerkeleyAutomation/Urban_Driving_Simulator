@@ -8,6 +8,7 @@ from gym_urbandriving.planning import Trajectory
 import scipy as sc
 import scipy.interpolate
 from scipy.interpolate import UnivariateSpline
+from skimage import transform
 from gym_urbandriving.actions import VelocityAction
 
 

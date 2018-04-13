@@ -1,10 +1,12 @@
+from gym_urbandriving.actions import SteeringAction
+
 class Agent(object):
     """
     Base Class of agent. 
     """
     def __init__(self, agent_num=0):
         """
-        Initializes the PlanningPursuitAgent Class
+        Initializes the Agent Class
 
         Parameters
         ----------
@@ -14,9 +16,9 @@ class Agent(object):
         """
         return
 
-    def eval_policy(self, state):
+    def eval_policy(self, state, simplified=None):
         """
-        Returns action based on current state
+        Always returns the action (0, 0). 
 
         Parameters
         ----------
@@ -25,7 +27,7 @@ class Agent(object):
 
         Returns
         -------
-        None
+        SteeringAction(0, 0)
         """
-        return None
+        return SteeringAction(0, 0)
 

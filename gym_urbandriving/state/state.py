@@ -124,9 +124,8 @@ class PositionState:
                             "Pedestrian":Pedestrian}[k]] = {"PlanningPursuitAgent":PlanningPursuitAgent,
                                                             "TrafficLightAgent":TrafficLightAgent,
                                                             "CrosswalkLightAgent":CrosswalkLightAgent,
-                                                            "NullAgent": NullAgent,
+                                                            "Agent": Agent,
                                                             "PedestrianAgent":PedestrianAgent}[v]
-
 
         self.bg_agents = {}
         for key in self.dynamic_objects.keys():
