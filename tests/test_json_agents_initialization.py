@@ -4,7 +4,7 @@ import gym_urbandriving as uds
 from gym_urbandriving import *
 from gym_urbandriving.agents import *
 from gym_urbandriving.assets import *
-from gym_urbandriving.planning import Trajectory
+from gym_urbandriving.utils import Trajectory
 import numpy as np
 
 with open('configs/default_config.json') as json_data_file:

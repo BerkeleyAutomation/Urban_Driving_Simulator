@@ -1,5 +1,5 @@
 import numpy as np
-from gym_urbandriving.planning import Trajectory
+from gym_urbandriving.utils import Trajectory
 
 """
 Test our trajectory class for various modes. 

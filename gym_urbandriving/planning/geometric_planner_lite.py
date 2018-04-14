@@ -1,6 +1,6 @@
 import numpy as np
 import math
-from gym_urbandriving.planning import Trajectory
+from gym_urbandriving.utils import Trajectory
 
 class GeometricPlanner:
     """
