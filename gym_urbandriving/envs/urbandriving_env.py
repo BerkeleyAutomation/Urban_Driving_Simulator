@@ -3,7 +3,7 @@ from copy import deepcopy
 from gym_urbandriving.agents import *
 import gym_urbandriving as uds
 import numpy as np
-import IPython
+
 from gym_urbandriving.assets import Car, TrafficLight, CrosswalkLight
 from gym_urbandriving.utils.featurizer import Featurizer
 

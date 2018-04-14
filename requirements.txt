@@ -7,4 +7,3 @@ scipy
 ray
 scikit-image
 opencv-python
-ipython

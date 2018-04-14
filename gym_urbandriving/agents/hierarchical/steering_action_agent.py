@@ -5,7 +5,6 @@ from gym_urbandriving.planning import VelocityMPCPlanner,GeometricPlanner
 from copy import deepcopy
 import gym_urbandriving as uds
 from gym_urbandriving.actions import SteeringAction
-import IPython
 
 class SteeringActionAgent(PursuitAgent):
     """
