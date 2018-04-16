@@ -29,10 +29,10 @@
         { "x":200, "y":550, "xdim":400, "ydim":100, "angle_deg":0 }
     ],
     "traffic_lights": [
-        { "x": 600, "y": 440, "init_color":"green", "angle_deg":0},
-        { "x": 400, "y": 560, "init_color":"green", "angle_deg":-180 },
-        { "x": 560, "y": 600, "init_color":"red"  , "angle_deg":-90 },
-        { "x": 440, "y": 400, "init_color":"red"  , "angle_deg":90 }
+        { "x": 600, "y": 450, "init_color":"green", "angle_deg":0},
+        { "x": 400, "y": 550, "init_color":"green", "angle_deg":-180 },
+        { "x": 550, "y": 600, "init_color":"red"  , "angle_deg":-90 },
+        { "x": 450, "y": 400, "init_color":"red"  , "angle_deg":90 }
     ],
     "crosswalk_lights": [
         { "x": 375, "y": 390, "init_color":"red"  , "angle_deg":-90 , "time_in_color":80},
