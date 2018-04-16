@@ -56,7 +56,7 @@ class PlanningPursuitAgent(PursuitAgent):
      
         if self.not_initiliazed:
             
-            geoplanner = GeometricPlanner(deepcopy(state), inter_point_d=40.0, planning_time=0.1)
+            geoplanner = GeometricPlanner(state, inter_point_d=40.0, planning_time=0.1)
 
             geoplanner.plan_for_agents(state,type_of_agent='background_cars',agent_num=self.agent_num)
             self.not_initiliazed = False
@@ -64,7 +64,7 @@ class PlanningPursuitAgent(PursuitAgent):
             print(simplified)
 
         if not simplified:
-            target_vel = VelocityMPCPlanner().plan(deepcopy(state), self.agent_num)
+            target_vel = VelocityMPCPlanner().plan(state, self.agent_num)
             state.dynamic_objects['background_cars'][str(self.agent_num)].trajectory.set_vel(target_vel)
 
         action = super(PlanningPursuitAgent, self).eval_policy(state)

@@ -61,7 +61,7 @@ class VelocityActionAgent(PursuitAgent):
            raise Exception('Action is not of type VelocityAction')
 
         if self.not_initiliazed:
-            geoplanner = GeometricPlanner(deepcopy(state), inter_point_d=40.0, planning_time=0.1)
+            geoplanner = GeometricPlanner(state, inter_point_d=40.0, planning_time=0.1)
 
             geoplanner.plan_for_agents(state,type_of_agent='controlled_cars',agent_num=self.agent_num)
             self.not_initiliazed = False
