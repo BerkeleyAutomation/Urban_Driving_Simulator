@@ -2,7 +2,6 @@ import numpy as np
 from gym_urbandriving.utils.PID import PIDController
 from gym_urbandriving.agents import PursuitAgent
 from gym_urbandriving.planning import VelocityMPCPlanner,GeometricPlanner
-from copy import deepcopy
 import gym_urbandriving as uds
 
 class VelocitySupervisor(PursuitAgent):
