@@ -9,6 +9,6 @@ setup(name='gym_urbandriving',
                         "numpy",
                         "pygame",
                         "scikit-image", 
-                        "opencv-python"
+                        "opencv-python",
                         "codecov"]
 )
