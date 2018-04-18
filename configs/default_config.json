@@ -13,11 +13,12 @@
         "state_space":"Q-LIDAR",
         "use_traffic_lights":true,
         "use_pedestrians":false,
-        "number_of_pedestrians":0,
+        "number_of_pedestrians":4,
         "agent_mappings":{
             "Car":"PlanningPursuitAgent",
             "TrafficLight":"TrafficLightAgent",
-            "CrosswalkLight":"CrosswalkLightAgent"
+            "CrosswalkLight":"CrosswalkLightAgent",
+            "Pedestrian":"PedestrianAgent"
         }
     },
 

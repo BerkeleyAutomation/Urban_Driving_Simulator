@@ -4,7 +4,7 @@ Observations are generated for each controlled car in the scene. The type of obs
 
 Raw
 ^^^
-A pointer to the raw environment, giving agents full access to the scene, and all other objects in the scene.
+A copy of the the raw environment, giving agents full access to the scene, and all other objects in the scene. Using this observation type should be avoided, as duplicating the environment incurs a significant performance penalty.
 
 Q-LIDAR
 ^^^^^^^

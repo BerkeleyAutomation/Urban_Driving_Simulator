@@ -15,7 +15,6 @@ from gym_urbandriving.agents import KeyboardAgent
 def f():
     config = json.load(open('configs/default_config.json'))
     config['environment']['visualize'] = True
-    config['agents']['background_cars'] = 3
     env = uds.UrbanDrivingEnv(config_data=config)
     
     env._reset()

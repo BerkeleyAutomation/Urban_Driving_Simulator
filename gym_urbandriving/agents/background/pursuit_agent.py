@@ -1,5 +1,5 @@
 import numpy as np
-from gym_urbandriving.utils.PID import PIDController
+from gym_urbandriving.utils import PIDController
 from gym_urbandriving.agents import Agent
 from gym_urbandriving.actions import SteeringAction
 
@@ -40,18 +40,14 @@ class PursuitAgent(Agent):
             target_loc = p[:2].tolist()
             target_vel = p[2]
 
-            #while (((obj.y-p[1])**2+(p[0]-obj.x)**2)<400 and not obj.trajectory.is_empty()):
-            if 't' in obj.trajectory.mode:
+            while obj.contains_point((p[0], p[1])) and not obj.trajectory.is_empty():
                 p = obj.trajectory.pop()
-            else:
-                while obj.contains_point((p[0], p[1])) and not obj.trajectory.is_empty():
-                    p = obj.trajectory.pop()
-                    target_loc = p[:2].tolist()
-                    target_vel = p[2]
+                target_loc = p[:2].tolist()
+                target_vel = p[2]
+
         else:
             return SteeringAction(steering=0.0, acceleration=0.0)
-            #target_loc = obj.destination
-            #target_vel = 0
+
 
         ac2 = np.arctan2(obj.y-target_loc[1], target_loc[0]-obj.x)
 

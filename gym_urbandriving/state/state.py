@@ -1,7 +1,7 @@
 import gym
 from copy import deepcopy
 import numpy as np
-from gym_urbandriving.assets import TrafficLight, Terrain, Street, Lane, Sidewalk, Car, CrosswalkLight
+from gym_urbandriving.assets import TrafficLight, Terrain, Street, Lane, Sidewalk, Car, CrosswalkLight, Pedestrian
 from gym_urbandriving.agents import *
 import json
 import os
@@ -76,11 +76,30 @@ class PositionState:
                     self.dynamic_objects['background_cars'][str(car_index)].destination = self.assign_goal_states(start)
                     break
 
+        self.dynamic_objects['traffic_lights'] = {}
         if self.agent_config['use_traffic_lights']:
-            self.dynamic_objects['traffic_lights'] = {}
+
             for i, traffic_light in enumerate(self.state_config['traffic_lights']):
                 self.dynamic_objects['traffic_lights'][str(i)] = TrafficLight(**traffic_light)
+        self.dynamic_objects['crosswalk_lights'] = {}
+        self.dynamic_objects['pedestrians'] = {}        
+        if self.agent_config['use_pedestrians']:
+
+            for i, crosswalk_light in enumerate(self.state_config['crosswalk_lights']):
+                self.dynamic_objects['crosswalk_lights'][str(i)] = CrosswalkLight(**crosswalk_light)
+
+            start_sidewalks = [s for s in self.static_objects if type(s) == Sidewalk]
+
+            for ped_index in range(self.agent_config['number_of_pedestrians']):
+                while True:
+                    start = np.random.random_integers(0, len(start_sidewalks) - 1)
+                    sidewalk = start_sidewalks[start]
+                    ped = sidewalk.generate_man()
+                    if not self.is_in_collision(ped):
+                        self.dynamic_objects['pedestrians'][str(ped_index)] = ped
+                        break
         #TODO Add pedestrians
+
         self.create_agents()
 
     def assign_goal_states(self, start_lane):
@@ -101,11 +120,12 @@ class PositionState:
         for k, v in six.iteritems(self.agent_config['agent_mappings']):
             agent_mappings[{"Car":Car,
                             "TrafficLight":TrafficLight,
-                            "CrosswalkLight":CrosswalkLight}[k]] = {"PlanningPursuitAgent":PlanningPursuitAgent,
-                                                                    "TrafficLightAgent":TrafficLightAgent,
-                                                                    "CrosswalkLightAgent":CrosswalkLightAgent, 
-                                                                    "NullAgent": NullAgent}[v]
-
+                            "CrosswalkLight":CrosswalkLight,
+                            "Pedestrian":Pedestrian}[k]] = {"PlanningPursuitAgent":PlanningPursuitAgent,
+                                                            "TrafficLightAgent":TrafficLightAgent,
+                                                            "CrosswalkLightAgent":CrosswalkLightAgent,
+                                                            "Agent": Agent,
+                                                            "PedestrianAgent":PedestrianAgent}[v]
 
         self.bg_agents = {}
         for key in self.dynamic_objects.keys():
@@ -124,7 +144,7 @@ class PositionState:
             self.bg_agents['controlled_cars'].append(agent)
 
     def is_in_collision(self,car):
-        
+
         for obj in self.static_objects:
           if car.collides(obj):
               return True
@@ -182,19 +202,24 @@ class PositionState:
         bool
             True if this object is colliding
         """
+
         dynamic_collisions, static_collisions, _ = self.get_collisions()
         for coll in dynamic_collisions:
-            if (agentnum in coll) and (type_of_agent in coll):
+            id1, id2, t1, t2 = coll
+            if (agentnum, type_of_agent) in [(id1, t1), (id2, t2)]:
                 return True
         for coll in static_collisions:
-            if (agentnum in coll) and (type_of_agent in coll):
+            id1, id2, t1, t2 = coll
+            if (agentnum, type_of_agent) is (id1, t1):
                 return True
         return False
 
     def collides_any_dynamic(self, agentnum,type_of_agent = 'background_cars'):
         dynamic_collisions, static_collisions, _ = self.get_collisions()
+
         for coll in dynamic_collisions:
-            if (agentnum in coll) and (type_of_agent in coll):
+            id1, id2, t1, t2 = coll
+            if (agentnum, type_of_agent) in [(id1, t1), (id2, t2)]:
                 return True
 
         return False

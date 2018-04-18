@@ -1,8 +1,7 @@
 import numpy as np
-from gym_urbandriving.utils.PID import PIDController
+from gym_urbandriving.utils import PIDController
 from gym_urbandriving.agents import PursuitAgent
 from gym_urbandriving.planning import VelocityMPCPlanner,GeometricPlanner
-from copy import deepcopy
 import gym_urbandriving as uds
 
 class VelocitySupervisor(PursuitAgent):
@@ -55,14 +54,14 @@ class VelocitySupervisor(PursuitAgent):
         """
 
         if self.not_initiliazed:
-            geoplanner = GeometricPlanner(deepcopy(state), inter_point_d=40.0, planning_time=0.1)
+            geoplanner = GeometricPlanner(state, inter_point_d=40.0, planning_time=0.1)
 
             geoplanner.plan_for_agents(state,type_of_agent='controlled_cars',agent_num=self.agent_num)
             self.not_initiliazed = False
            
 
         if not simplified:
-            target_vel = VelocityMPCPlanner().plan(deepcopy(state), self.agent_num, type_of_agent = "controlled_cars")
+            target_vel = VelocityMPCPlanner().plan(state, self.agent_num, type_of_agent = "controlled_cars")
         else:
             target_vel = state.dynamic_objects['controlled_cars'][str(self.agent_num)].trajectory.get_vel()
             ###IF END OF THE TRAJECTORY THE CAR SHOULD KEEP GOING

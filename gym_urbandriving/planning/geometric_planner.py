@@ -3,11 +3,12 @@ from ompl import base as ob
 from ompl import geometric as og
 import numpy as np
 from copy import deepcopy
-from gym_urbandriving.planning import Trajectory
+from gym_urbandriving.utils import Trajectory
 
 import scipy as sc
 import scipy.interpolate
 from scipy.interpolate import UnivariateSpline
+from skimage import transform
 from gym_urbandriving.actions import VelocityAction
 
 

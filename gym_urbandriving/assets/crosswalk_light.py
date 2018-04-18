@@ -1,5 +1,6 @@
 from gym_urbandriving.assets.primitives.rectangle import Rectangle
 from gym_urbandriving.assets.primitives.shape import Shape
+import numpy as np
 
 class CrosswalkLight(Rectangle):
     """
@@ -16,10 +17,12 @@ class CrosswalkLight(Rectangle):
     """
     colors = {"white" : "cross_white.png",
               "red" : "cross_red.png"}
-    def __init__(self, x, y, angle, initial_color="red", time_in_color = 0):
+    def __init__(self, x, y, angle=0, init_color="red", angle_deg=None, time_in_color=0):
+        if (angle_deg is not None):
+            angle = np.deg2rad(angle_deg)
         Rectangle.__init__(self, x, y, 15, 15, angle)
         self.time_in_color = time_in_color
-        self.color = initial_color
+        self.color = init_color
 
     def step(self, action):
         self.time_in_color += 1
