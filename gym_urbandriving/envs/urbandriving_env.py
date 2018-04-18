@@ -140,7 +140,7 @@ class UrbanDrivingEnv(gym.Env):
         info_dict = {"saved_actions": action}
 
         if self.observation_type == 'raw':
-            observations = [state] * len(state.dynamic_objects['controlled_cars'])
+            observations = [deepcopy(state) for i in state.dynamic_objects['controlled_cars']]
         elif self.observation_type == 'Q-LIDAR':
             observations = []
             for key in self.current_state.dynamic_objects['controlled_cars'].keys():
