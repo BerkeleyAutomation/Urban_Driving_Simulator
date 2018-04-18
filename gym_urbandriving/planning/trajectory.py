@@ -117,9 +117,10 @@ class Trajectory(object):
             self.stopped = False
 
     def get_vel(self):
-        if target_vel == None:
-            return
         v_index = self.mode.index('v')
+
+        if self.is_empty():
+            return VelocityAction(4.0)
         
         return VelocityAction(self._trajectory[-1][v_index])
         

@@ -161,11 +161,6 @@ class GeometricPlanner:
             sply = np.poly1d(np.polyfit(np.arange(npoints), yp, deg=4))
             splx = sc.interpolate.interp1d(np.arange(npoints), xp, 'cubic')
             sply = sc.interpolate.interp1d(np.arange(npoints), yp, 'cubic')
-            #splx = UnivariateSpline(np.arange(npoints), points[:,0])
-            #sply = UnivariateSpline(np.arange(npoints), points[:,1])
-            #splx.set_smoothing_factor(0.9)
-            #sply.set_smoothing_factor(0.9)
-
 
             xn = splx(np.linspace(0,npoints-1,200))
             yn = sply(np.linspace(0,npoints-1,200))

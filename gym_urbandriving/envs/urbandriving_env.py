@@ -99,7 +99,7 @@ class UrbanDrivingEnv(gym.Env):
         ### GET ALL ACTIONS ####
     
         for agent in self.current_state.bg_agents['background_cars']:
-            background_car_actions.append(agent.eval_policy(self.current_state,simplified=background))
+            background_car_actions.append(agent.eval_policy(self.current_state,simplified=background_simplified))
 
         for agent in self.current_state.bg_agents['traffic_lights']:
             background_traffic_actions.append(agent.eval_policy(self.current_state))
@@ -119,6 +119,8 @@ class UrbanDrivingEnv(gym.Env):
 
         
         for i, dobj in self.current_state.dynamic_objects['controlled_cars'].items():
+            if controlled_car_actions[int(i)] == None:
+                IPython.embed()
             dobj.step(controlled_car_actions[int(i)].get_value())
 
         self.current_state.time += 1
@@ -157,7 +159,7 @@ class UrbanDrivingEnv(gym.Env):
             self._render()
             observations = [self.visualizer.get_bitmap()] * len(state.dynamic_objects['controlled_cars'])
 
-        return
+        return observations
 
     def _reset(self, new_state=None):
         """
@@ -199,7 +201,7 @@ class UrbanDrivingEnv(gym.Env):
             window = [0, self.current_state.dimensions[0],
                       0, self.current_state.dimensions[1]]
             self.visualizer.render(self.current_state, window,
-                                   rerender_statics=not self.statics_rendered,
+                                   rerender_statics= not self.statics_rendered,
                                    waypoints=waypoints,
                                    traffic_trajectories = traffic_trajectories,
                                    transparent_surface = transparent_surface)

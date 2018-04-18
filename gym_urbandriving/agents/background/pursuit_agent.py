@@ -49,7 +49,7 @@ class PursuitAgent(Agent):
                     target_loc = p[:2].tolist()
                     target_vel = p[2]
         else:
-            return None
+            return SteeringAction(steering=0.0, acceleration=0.0)
             #target_loc = obj.destination
             #target_vel = 0
 
