@@ -59,7 +59,27 @@ class Trajectory(object):
         expanded_p = [p[self.dimensions_used.index(i)] if (i in self.dimensions_used) else np.nan for i in range(7)]
         self._trajectory = np.append(self._trajectory, [expanded_p], axis=0)
 
-    def get_point(self, index):
+    def get_next_point(self, t):
+        """
+        Returns next point taking into account time.
+        Specifically, returns the first point with time equal to or greater than specified time, or None if no points are left.  
+
+        Returns
+        ----------
+        point : np array
+        """   
+        assert ('t' in self.mode)
+        t_index = self.mode.index('t')
+        res = self.first()
+        while (res[t_index] < t and not self.is_empty()):
+            self.pop()
+            res = self.first()
+
+        if self.is_empty():
+            return None
+        return res
+
+    def get_point(self, index, t = None):
         return self._trajectory[index][self.dimensions_used]
 
     def get_renderable_points(self):
