@@ -21,6 +21,8 @@ class PositionState:
         self.start_lanes = []
         self.goal_states = []
         self.agent_config = data['agents']
+        self.dynamic_collisions, self.static_collisions, self.controlled_car_collisions = [], [], []
+        self.last_coll = -1
 
         if 'state' in data['environment']:
             state_config = data['environment']['state']
@@ -166,7 +168,10 @@ class PositionState:
         list
             The corresponding list for collisions between dynamic objects and static objects
         """
-        dynamic_collisions, static_collisions, controlled_car_collisions = [], [], []
+        if self.last_coll == self.time:
+            return self.dynamic_collisions, self.static_collisions, self.controlled_car_collisions
+        self.dynamic_collisions, self.static_collisions, self.controlled_car_collisions = [], [], []
+        self.last_coll = self.time
 
         #TODO Fix this. Controlled cars can't collide with background cars
         for key in self.dynamic_objects.keys():
@@ -175,17 +180,17 @@ class PositionState:
 
                 for j, sobj in enumerate(self.static_objects):
                     if dobj.collides(sobj):
-                        static_collisions.append([i, j, key, 'static'])
+                        self.static_collisions.append([i, j, key, 'static'])
 
                 for inner_key in self.dynamic_objects.keys():
                     for j, dobj1 in self.dynamic_objects[inner_key].items():
                         j = int(j)
                         if (not (i == j and key == inner_key)) and dobj.collides(dobj1):
-                            dynamic_collisions.append([i, j,key, inner_key])
+                            self.dynamic_collisions.append([i, j,key, inner_key])
                             if key == 'controlled_cars':
-                                controlled_car_collisions.append([i, j,key, inner_key])
+                                self.controlled_car_collisions.append([i, j,key, inner_key])
 
-        return dynamic_collisions, static_collisions, controlled_car_collisions
+        return self.dynamic_collisions, self.static_collisions, self.controlled_car_collisions
 
 
     def collides_any(self, agentnum,type_of_agent = 'background_cars'):

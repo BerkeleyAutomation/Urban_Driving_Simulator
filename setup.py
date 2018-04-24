@@ -1,14 +1,17 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(name='gym_urbandriving',
-      version='0.0.1',
+      version='0.0.3',
       install_requires=["gym<=0.9.5",
                         "image",
                         "scipy",
                         "shapely",
                         "numpy",
                         "pygame",
-                        "scikit-image", 
+                        "scikit-image",
                         "opencv-python",
-                        "codecov"]
+                        "codecov"],
+      include_package_data=True,
+      packages = find_packages()
+      
 )
