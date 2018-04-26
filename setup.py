@@ -10,7 +10,8 @@ setup(name='gym_urbandriving',
                         "pygame",
                         "scikit-image",
                         "opencv-python",
-                        "codecov"],
+                        "codecov",
+                        "ipython"],
       include_package_data=True,
       packages = find_packages()
       
