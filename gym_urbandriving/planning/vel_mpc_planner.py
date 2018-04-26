@@ -28,9 +28,9 @@ class VelocityMPCPlanner:
                 done = state_copy.collides_any_dynamic(agent_num,type_of_agent = type_of_agent)
                 if done:
                     break
-            if not done:
-                return VelocityAction(4.0)
-            return VelocityAction(0.0)
+            if done:
+                return VelocityAction(0.0)
+            return VelocityAction(4.0)
 
 
         elif not state_copy.dynamic_objects[type_of_agent][str(agent_num)].trajectory.stopped:
