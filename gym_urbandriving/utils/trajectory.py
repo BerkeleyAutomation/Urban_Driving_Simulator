@@ -41,6 +41,7 @@ class Trajectory(object):
             else:
                 raise ValueError()
         self.fsm = fsm
+        print("MADE NEW TRAJECTORY")
         self.stopped = True
 
     def get_matrix(self):
@@ -91,6 +92,7 @@ class Trajectory(object):
         v_index = self.mode.index('v')
         for i in range(self.npoints()):
             self._trajectory[i][v_index] = target_vel.get_value()
+
         if target_vel.get_value() == 0.0:
             self.stopped = True
         else:
