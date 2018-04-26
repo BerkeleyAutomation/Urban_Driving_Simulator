@@ -62,11 +62,11 @@ class VelocitySupervisor(PursuitAgent):
 
         if not simplified:
             target_vel = VelocityMPCPlanner().plan(state, self.agent_num, type_of_agent = "controlled_cars")
-        else:
-            target_vel = state.dynamic_objects['controlled_cars'][str(self.agent_num)].trajectory.get_vel()
-            ###IF END OF THE TRAJECTORY THE CAR SHOULD KEEP GOING
-            if target_vel == None:
-                return VelocityAction(4.0)
+        # else:
+        #     target_vel = state.dynamic_objects['controlled_cars'][str(self.agent_num)].trajectory.get_vel()
+        #     ###IF END OF THE TRAJECTORY THE CAR SHOULD KEEP GOING
+        #     if target_vel == None:
+        #         return VelocityAction(4.0)
             
             
 
