@@ -8,3 +8,4 @@ ray
 scikit-image
 opencv-python
 codecov
+ipython
