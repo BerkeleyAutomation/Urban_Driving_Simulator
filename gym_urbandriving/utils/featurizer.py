@@ -7,6 +7,7 @@ from gym_urbandriving.assets import Terrain, Lane, Street, Sidewalk,\
     Pedestrian, Car, TrafficLight
 
 import os
+import IPython
 
 
 
@@ -94,31 +95,34 @@ class Featurizer(object):
                         min_coll_angle = 0
                         #min_coll_acc = 0
                         #min_coll_ang_vel = 0
-            for did, dobj in enumerate(current_state.dynamic_objects):
-                if car is not dobj and car.can_collide(dobj) \
-                   and type(dobj) is not TrafficLight and linestring.intersects(dobj.get_shapely_obj()):
-                    isect = list(linestring.intersection(dobj.get_shapely_obj()).coords)[0]
-                    d = distance((x, y), isect)
-                    if (d < min_coll_d):
-                        min_coll_d = d
-                        min_coll_type = type(dobj)
-                        min_coll_vel = dobj.vel
-                        min_coll_angle = (angle - dobj.angle) % (2 * np.pi)
+            for indx, key in enumerate(current_state.dynamic_objects):
+                for did,agent_num in enumerate(current_state.dynamic_objects[key]):
+                    dobj = current_state.dynamic_objects[key][agent_num]
+                    if car is not dobj and car.can_collide(dobj) \
+                       and type(dobj) is not TrafficLight and linestring.intersects(dobj.get_shapely_obj()):
+                        isect = list(linestring.intersection(dobj.get_shapely_obj()).coords)[0]
+                        d = distance((x, y), isect)
+                        if (d < min_coll_d):
+                            min_coll_d = d
+                            min_coll_type = type(dobj)
+                            min_coll_vel = dobj.vel
+                            min_coll_angle = (angle - dobj.angle) % (2 * np.pi)
 
 
             #print(min_coll_d, min_coll_type, 180 * min_coll_angle / np.pi, min_coll_vel)
             features.extend([min_coll_d, np.sin(min_coll_angle), np.cos(min_coll_angle), min_coll_vel])
-        for dobj in current_state.dynamic_objects:
-            if type(dobj) is TrafficLight and light_cone.intersects(dobj.get_shapely_obj()):
-                if np.abs((dobj.angle + np.pi) % (2 * np.pi) - angle) < np.pi / 4:
-                    
-                    d = distance((x, y), (dobj.x, dobj.y))
-                    if (d < min_light_d):
-                        min_light_d = d
-                        min_light_state = dobj.color
+            
+
+        for indx, key in enumerate(current_state.dynamic_objects):
+                for did,agent_num in enumerate(current_state.dynamic_objects[key]):
+                    dobj = current_state.dynamic_objects[key][agent_num]
+                    if type(dobj) is TrafficLight and light_cone.intersects(dobj.get_shapely_obj()):
+                        if np.abs((dobj.angle + np.pi) % (2 * np.pi) - angle) < np.pi / 4:
+                            d = distance((x, y), (dobj.x, dobj.y))
+                            if (d < min_light_d):
+                                min_light_d = d
+                                min_light_state = dobj.color
+
         features.extend([min_light_d, {'red':1,'yellow':0.5,'green':0, None:-1}[min_light_state]])
-        #print(min_light_d, min_light_state)
-        #print(x, y, vel)
-#        print(features)
-        #print(len(features))
+       
         return features

@@ -2,6 +2,7 @@ import gym
 from copy import deepcopy
 from gym_urbandriving.agents import *
 import gym_urbandriving as uds
+import IPython
 import numpy as np
 
 from gym_urbandriving.assets import Car, TrafficLight, CrosswalkLight
