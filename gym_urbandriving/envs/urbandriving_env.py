@@ -7,7 +7,7 @@ import numpy as np
 
 from gym_urbandriving.assets import Car, TrafficLight, CrosswalkLight
 from gym_urbandriving.utils.featurizer import Featurizer
-
+from gym_urbandriving.planning.reward_fn import default_reward_function
 class UrbanDrivingEnv(gym.Env):
     """
     This class controls the evolution of a world state.
@@ -38,7 +38,7 @@ class UrbanDrivingEnv(gym.Env):
     def __init__(self,
                  config_data=None,
                  init_state= None,
-                 reward_fn=lambda state: 1 if len(state.get_collisions()[2]) == 0 else 0,
+                 reward_fn=default_reward_function,
                  randomize=False):
         
         self.reward_fn = reward_fn
