@@ -36,7 +36,7 @@ class Featurizer(object):
         pass
 
 
-    def featurize(self, current_state, controlled_key):
+    def featurize(self, current_state, controlled_key,type_of_agent='controlled_cars'):
         """
         Returns a Numpy array of a Q-LIDAR representation of the state
         
@@ -52,7 +52,7 @@ class Featurizer(object):
         Numpy array. For each ray projected into the scene, adds distance \
         to collision, angle to collision, and velocity of intersected object
         """
-        car = current_state.dynamic_objects['controlled_cars'][controlled_key]
+        car = current_state.dynamic_objects[type_of_agent][controlled_key]
 
         x, y, angle, vel = car.get_state()
 
