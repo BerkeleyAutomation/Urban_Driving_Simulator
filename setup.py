@@ -11,7 +11,8 @@ setup(name='gym_urbandriving',
                         "scikit-image",
                         "opencv-python",
                         "codecov",
-                        "ipython"],
+                        "ipython",
+                        "sklearn"],
       include_package_data=True,
       packages = find_packages()
       

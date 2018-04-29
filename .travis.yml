@@ -18,7 +18,7 @@ script:
   - python tests/test_traj_class.py #or py.test for Python version 3.5 and below
   - python tests/test_pedestrians.py #or py.test for Python version 3.5 and below
   - python tests/test_neural_velocity_supervisor.py
-  - python tests/test_neural_velocity_background.py
+  - python tests/test_neural_velocity_background_agent.py
   - cd docs && make html
 
 after_success:
