@@ -66,7 +66,7 @@ class UrbanDrivingEnv(gym.Env):
             self._reset()
 
 
-    def _step(self, action, background_simplified=False,supervisor=False):
+    def _step(self, action, background_simplified=False, supervisor=False):
         """
         The step function accepts a control for the 0th agent in the scene. Then, it queries
         all the background agents to determine their actions. Then, it updates the scene

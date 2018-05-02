@@ -3,7 +3,7 @@ import gym_urbandriving as uds
 from gym_urbandriving.actions import VelocityAction
 
 class VelocityMPCPlanner:
-    def __init__(self, lookahead=10):
+    def __init__(self, lookahead=12):
         self.lookahead = lookahead
 
 

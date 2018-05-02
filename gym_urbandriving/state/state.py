@@ -220,12 +220,24 @@ class PositionState:
         return False
 
     def collides_any_dynamic(self, agentnum,type_of_agent = 'background_cars'):
-        dynamic_collisions, static_collisions, _ = self.get_collisions()
+        """
+        uncached collision checker for velocity mpc planner
+        """
+        i, dobj = agentnum, self.dynamic_objects[type_of_agent][str(agentnum)]
 
-        for coll in dynamic_collisions:
-            id1, id2, t1, t2 = coll
-            if (agentnum, type_of_agent) in [(id1, t1), (id2, t2)]:
-                return True
+        for key in self.dynamic_objects.keys():
+            for j, dobj1 in self.dynamic_objects[key].items():
+                j = int(j)
+
+                if (not (i == j and key == type_of_agent)) and dobj.collides(dobj1):
+                    if key != 'background_cars':
+                        return True
+
+                    diffangle = (dobj.angle- dobj1.angle)
+                    diffangle = diffangle if diffangle<np.pi else diffangle-2*np.pi
+
+                    if (dobj1.right_of_way < dobj.right_of_way or abs(diffangle) < np.pi/4): # if other car has right of way or you are travelling in same lane
+                        return True
 
         return False
 

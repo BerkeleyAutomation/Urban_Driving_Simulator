@@ -9,6 +9,7 @@ class DynamicShape():
         self.l_f = l_f
         self.max_vel = max_vel
         self.dynamics_model = dynamics_model
+        self.right_of_way = 0
    
     def point_model_step(self, action, x, y, v, a, info_dict=None):
         """
