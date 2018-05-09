@@ -36,7 +36,7 @@ class Featurizer(object):
         pass
 
 
-    def featurize(self, current_state, controlled_key):
+    def featurize(self, current_state, controlled_key,type_of_agent='controlled_cars'):
         """
         Returns a Numpy array of a Q-LIDAR representation of the state
         
@@ -52,7 +52,7 @@ class Featurizer(object):
         Numpy array. For each ray projected into the scene, adds distance \
         to collision, angle to collision, and velocity of intersected object
         """
-        car = current_state.dynamic_objects['controlled_cars'][controlled_key]
+        car = current_state.dynamic_objects[type_of_agent][controlled_key]
 
         x, y, angle, vel = car.get_state()
 
@@ -112,16 +112,15 @@ class Featurizer(object):
             #print(min_coll_d, min_coll_type, 180 * min_coll_angle / np.pi, min_coll_vel)
             features.extend([min_coll_d, np.sin(min_coll_angle), np.cos(min_coll_angle), min_coll_vel])
             
-
         for indx, key in enumerate(current_state.dynamic_objects):
-                for did,agent_num in enumerate(current_state.dynamic_objects[key]):
-                    dobj = current_state.dynamic_objects[key][agent_num]
-                    if type(dobj) is TrafficLight and light_cone.intersects(dobj.get_shapely_obj()):
-                        if np.abs((dobj.angle + np.pi) % (2 * np.pi) - angle) < np.pi / 4:
-                            d = distance((x, y), (dobj.x, dobj.y))
-                            if (d < min_light_d):
-                                min_light_d = d
-                                min_light_state = dobj.color
+            for did,agent_num in enumerate(current_state.dynamic_objects[key]):
+                dobj = current_state.dynamic_objects[key][agent_num]
+                if type(dobj) is TrafficLight and light_cone.intersects(dobj.get_shapely_obj()):
+                    if np.abs((dobj.angle + np.pi) % (2 * np.pi) - angle) < np.pi / 4:
+                        d = distance((x, y), (dobj.x, dobj.y))
+                        if (d < min_light_d):
+                            min_light_d = d
+                            min_light_state = dobj.color
 
         features.extend([min_light_d, {'red':1,'yellow':0.5,'green':0, None:-1}[min_light_state]])
        
