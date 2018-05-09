@@ -1,7 +1,7 @@
 import numpy as np
 from gym_urbandriving.utils import PIDController
 from gym_urbandriving.agents import PursuitAgent
-from gym_urbandriving.planning import VelocityMPCPlanner,GeometricPlanner
+from gym_urbandriving.planning import VelocityMPCPlanner,GeometricPlanner,VelocityNeuralPlanner
 import gym_urbandriving as uds
 
 class SteeringSupervisor(PursuitAgent):
@@ -35,7 +35,7 @@ class SteeringSupervisor(PursuitAgent):
         
 
         
-    def eval_policy(self, state,simplified = False):
+    def eval_policy(self, state):
         """
         Returns action based on current world state
 
@@ -58,9 +58,9 @@ class SteeringSupervisor(PursuitAgent):
             self.not_initiliazed = False
             
 
-        if not simplified:
-            target_vel = VelocityMPCPlanner().plan(state, self.agent_num,type_of_agent = "controlled_cars")
-            state.dynamic_objects['controlled_cars'][str(self.agent_num)].trajectory.set_vel(target_vel)
+       
+        target_vel = VelocityNeuralPlanner().plan(state, self.agent_num,type_of_agent = "controlled_cars")
+        state.dynamic_objects['controlled_cars'][str(self.agent_num)].trajectory.set_vel(target_vel)
 
         return super(SteeringSupervisor, self).eval_policy(state,type_of_agent = 'controlled_cars')
 
