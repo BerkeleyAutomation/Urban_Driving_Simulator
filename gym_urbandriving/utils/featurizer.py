@@ -55,6 +55,8 @@ class Featurizer(object):
         car = current_state.dynamic_objects[type_of_agent][controlled_key]
 
         x, y, angle, vel = car.get_state()
+        goal = car.destination
+        goalx, goaly = goal[0], goal[1]
 
         min_light_d = LIGHT_DISTANCE
         min_light_state = None
@@ -68,8 +70,15 @@ class Featurizer(object):
 
 
         #print(goal_d, goal_a)
-        features = [vel]
-        #print(goalx, goaly)
+
+        gangle = (np.arctan((y - goaly) / (goalx - x)) % (2 * np.pi))
+        if (goalx - x < 0):
+            gangle = gangle + np.pi
+        gangle = (gangle - angle) % (2 * np.pi)
+        gd = distance((x, y), (goalx, goaly))
+
+        features = [vel, np.sin(gangle), np.cos(gangle), gd]
+
 
         for arc_delta in self.arc_deltas:
             arc_angle = angle + arc_delta
