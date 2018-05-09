@@ -7,6 +7,7 @@ import time
 import numpy as np
 import shapely
 import cv2
+import six
 
 COLORS = [(255, 0, 0),
           (0, 255, 0),
@@ -206,7 +207,8 @@ class PyGameVisualizer:
 
 
     def render(self, state, valid_area,
-               rerender_statics=False, waypoints=[],traffic_trajectories = [], transparent_surface = None):
+               rerender_statics=False, waypoints=[],traffic_trajectories = [], transparent_surface = None,
+               lidar_points=[]):
         """
         Renders the state and waypoints with lazy re-rerendering of static objects as needed.
 
@@ -244,7 +246,37 @@ class PyGameVisualizer:
                 if not dobj.trajectory is None and ('x' in dobj.trajectory.mode and 'y' in dobj.trajectory.mode):
                     self.render_waypoints(dobj.trajectory.get_renderable_points(), valid_area, index)
 
+        if lidar_points:
+            self.render_lidar(state, valid_area, lidar_points)
+
         pygame.display.flip()
+
+    def render_lidar(self, state, valid_area, lidar_points):
+        new_surface = pygame.Surface((valid_area[1] - valid_area[0],
+                                      valid_area[3] - valid_area[2]),
+                                     pygame.SRCALPHA)
+        for k, p in six.iteritems(lidar_points):
+            rays = p[1:-2]
+            n_rays = int(len(rays) / 4)
+            angle = -np.pi / 2
+            car = state.dynamic_objects['controlled_cars'][k]
+            for i in range(n_rays):
+                ray = rays[i*4:i*4+4]
+
+                x, y, ca, vel = car.get_state()
+                arc_angle = ca + angle
+                beam_distance = ray[0]
+                pygame.draw.line(new_surface, (0, 255, 0), (x, y), (x + beam_distance * np.cos(arc_angle),
+                                                                    y - beam_distance * np.sin(arc_angle)), 2)
+                angle += np.pi / (n_rays - 1)
+            tld = p[-2]
+            tlc = p[-1]
+            pygame.draw.circle(new_surface, {-1:(0, 0, 0),
+                                             0:(0, 255, 0),
+                                             0.5:(255, 255, 0),
+                                             1:(255, 0, 0)}[tlc], car.get_pos().astype(int), 5)
+        new_surface = pygame.transform.scale(new_surface, (self.screen_dim))
+        self.surface.blit(new_surface, (0, 0), None)
 
     def draw_rectangle(self, rect, surface):
         obj = pygame.image.load(rect.get_sprite())

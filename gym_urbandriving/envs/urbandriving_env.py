@@ -52,12 +52,13 @@ class UrbanDrivingEnv(gym.Env):
                 self.visualizer = None
             self.max_time = config_data['environment']['max_time']
             self.observation_type = config_data['recorded_data']['state_space']
+            self.visualize_lidar = config_data['environment']['visualize_lidar']
             assert(self.observation_type in {'Q-LIDAR', 'raw', 'bmp'})
         else:
             self.init_state = init_state
             self.visualizer = None
         self.featurizer = Featurizer()
-
+        self.lidar_points = {}
 
 
         self.randomize = randomize
@@ -98,7 +99,7 @@ class UrbanDrivingEnv(gym.Env):
         background_traffic_actions = []
         pedestrian_actions = []
         crosswalk_light_actions = []
-        
+        self.lidar_points = {}
         ### GET ALL ACTIONS ####
     
         for agent in self.current_state.bg_agents['background_cars']:
@@ -147,7 +148,9 @@ class UrbanDrivingEnv(gym.Env):
         elif self.observation_type == 'Q-LIDAR':
             observations = []
             for key in self.current_state.dynamic_objects['controlled_cars'].keys():
-                observations.append(self.featurizer.featurize(self.current_state, key))
+                obs = self.featurizer.featurize(self.current_state, key)
+                observations.append(obs)
+                self.lidar_points[key] = obs
         elif self.observation_type == 'bmp':
             assert(self.visualizer)
             self._render()
@@ -163,7 +166,8 @@ class UrbanDrivingEnv(gym.Env):
         elif self.observation_type == 'Q-LIDAR':
             observations = []
             for key in self.current_state.dynamic_objects['controlled_cars'].keys():
-                observations.append(self.featurizer.featurize(self.current_state, key))
+                obs = self.featurizer.featurize(self.current_state, key)
+                observations.append(obs)
         elif self.observation_type == 'bmp':
             assert(self.visualizer)
             self._render()
@@ -213,8 +217,9 @@ class UrbanDrivingEnv(gym.Env):
             self.visualizer.render(self.current_state, window,
                                    rerender_statics= not self.statics_rendered,
                                    waypoints=waypoints,
-                                   traffic_trajectories = traffic_trajectories,
-                                   transparent_surface = transparent_surface)
+                                   traffic_trajectories=traffic_trajectories,
+                                   transparent_surface=transparent_surface,
+                                   lidar_points=self.lidar_points if self.visualize_lidar else [])
             self.statics_rendered = True
 
     def get_current_state(self):
