@@ -29,7 +29,7 @@ class PyGameVisualizer:
 
     """
 
-    def __init__(self, screen_dim):
+    def __init__(self, config, screen_dim):
         """
         Initializes pygame and its drawing surface.
 
@@ -41,6 +41,7 @@ class PyGameVisualizer:
         """
 
         pygame.init()
+        self.config = config
         self.screen_dim = screen_dim
         self.surface = pygame.display.set_mode(screen_dim)
         self.drawfns = {Rectangle:self.draw_rectangle,
@@ -255,18 +256,24 @@ class PyGameVisualizer:
         new_surface = pygame.Surface((valid_area[1] - valid_area[0],
                                       valid_area[3] - valid_area[2]),
                                      pygame.SRCALPHA)
+
         for k, p in six.iteritems(lidar_points):
-            rays = p[4:-2]
+            if self.config['agents']['state_space_config']['goal_position']:
+                rays = p[4:-2]
+            else:
+                rays = p[1:-2]
             n_rays = int(len(rays) / 4)
             angle = -np.pi / 2
             car = state.dynamic_objects['controlled_cars'][k]
             x, y, ca, vel = car.get_state()
-            ga = np.arctan2(p[1], p[2])
-            dga = p[3]
-            ga = (ga + ca)
+            if self.config['agents']['state_space_config']['goal_position']:
+                ga = np.arctan2(p[1], p[2])
+                dga = p[3]
+                ga = (ga + ca)
 
-            pygame.draw.line(new_surface, (255, 0, 0), (x, y), (x + dga * np.cos(ga),
-                                                                y - dga * np.sin(ga)), 2)
+                pygame.draw.line(new_surface, (255, 0, 0), (x, y), (x + dga * np.cos(ga),
+                                                                    y - dga * np.sin(ga)), 2)
+                
 
             for i in range(n_rays):
                 ray = rays[i*4:i*4+4]

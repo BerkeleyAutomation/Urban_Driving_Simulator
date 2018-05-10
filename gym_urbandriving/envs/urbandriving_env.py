@@ -36,7 +36,7 @@ class UrbanDrivingEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
     def __init__(self,
-                 config_data=None,
+                 config_data={},
                  init_state= None,
                  reward_fn=default_reward_function,
                  randomize=False):
@@ -44,10 +44,11 @@ class UrbanDrivingEnv(gym.Env):
         self.reward_fn = reward_fn
         self.max_time = 500
         self.observation_type = 'raw'
+        self.featurizer = Featurizer(config_data)
         if config_data:
             self.init_state = uds.state.PositionState(config_data)
             if config_data['environment']['visualize']:
-                self.visualizer = uds.PyGameVisualizer((800, 800))
+                self.visualizer = uds.PyGameVisualizer(config_data, (800, 800))
             else:
                 self.visualizer = None
             self.max_time = config_data['environment']['max_time']
@@ -57,7 +58,7 @@ class UrbanDrivingEnv(gym.Env):
         else:
             self.init_state = init_state
             self.visualizer = None
-        self.featurizer = Featurizer()
+
         self.lidar_points = {}
 
 
