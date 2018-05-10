@@ -31,13 +31,11 @@ class Featurizer(object):
         How many "LIDAR" beams to project around the car
     """
     def __init__(self, config_data={}, beam_distance=300, n_arcs=9):
-        if Featurizer.global_config and not config_datar:
+        if Featurizer.global_config and not config_data:
             config_data = Featurizer.global_config
         self.arc_deltas = np.arange(n_arcs + 1) / (float(n_arcs) / 2) - 1
         self.arc_deltas = [i*np.pi/2 for i in self.arc_deltas]
         self.beam_distance = beam_distance
-        if 'agents' in config_data and 'state_space_config' in config_data['agents']:
-            self.config = config_data['agents']['state_space_config']
         Featurizer.global_config = config_data
 
 
@@ -81,8 +79,7 @@ class Featurizer(object):
             gangle = gangle + np.pi
         gangle = (gangle - angle) % (2 * np.pi)
         gd = distance((x, y), (goalx, goaly))
-
-        if self.config['goal_position']:
+        if Featurizer.global_config['agents']['state_space_config']['goal_position']:
             features = [vel, np.sin(gangle), np.cos(gangle), gd]
         else:
             features = [vel]
