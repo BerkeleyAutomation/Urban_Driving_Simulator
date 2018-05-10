@@ -73,8 +73,10 @@ class Featurizer(object):
 
 
         #print(goal_d, goal_a)
-
-        gangle = (np.arctan((y - goaly) / (goalx - x)) % (2 * np.pi))
+        if (goalx == x):
+            gangle = 0
+        else:
+            gangle = (np.arctan((y - goaly) / (goalx - x)) % (2 * np.pi))
         if (goalx - x < 0):
             gangle = gangle + np.pi
         gangle = (gangle - angle) % (2 * np.pi)
