@@ -18,8 +18,6 @@ def distance(p1, p2):
     return ((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2)**0.5
 
 class Featurizer(object):
-    global_config = None
-
     """
     Object to convert a state observation into a Q-LIDAR observation.
 
@@ -31,12 +29,12 @@ class Featurizer(object):
         How many "LIDAR" beams to project around the car
     """
     def __init__(self, config_data={}, beam_distance=300, n_arcs=9):
-        if Featurizer.global_config and not config_data:
-            config_data = Featurizer.global_config
+        
+        self.config_data = config_data
         self.arc_deltas = np.arange(n_arcs + 1) / (float(n_arcs) / 2) - 1
         self.arc_deltas = [i*np.pi/2 for i in self.arc_deltas]
         self.beam_distance = beam_distance
-        Featurizer.global_config = config_data
+
 
 
     def featurize(self, current_state, controlled_key,type_of_agent='controlled_cars'):
@@ -81,7 +79,7 @@ class Featurizer(object):
             gangle = gangle + np.pi
         gangle = (gangle - angle) % (2 * np.pi)
         gd = distance((x, y), (goalx, goaly))
-        if Featurizer.global_config['agents']['state_space_config']['goal_position']:
+        if self.config_data['goal_position']:
             features = [vel, np.sin(gangle), np.cos(gangle), gd]
         else:
             features = [vel]

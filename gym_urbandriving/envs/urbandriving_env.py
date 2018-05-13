@@ -44,8 +44,9 @@ class UrbanDrivingEnv(gym.Env):
         self.reward_fn = reward_fn
         self.max_time = 500
         self.observation_type = 'raw'
-        self.featurizer = Featurizer(config_data)
+
         if config_data:
+            self.featurizer = Featurizer(config_data['agents']['state_space_config'])
             self.init_state = uds.state.PositionState(config_data)
             if config_data['environment']['visualize']:
                 self.visualizer = uds.PyGameVisualizer(config_data, (800, 800))
