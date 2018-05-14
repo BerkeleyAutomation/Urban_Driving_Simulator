@@ -28,12 +28,13 @@ class Featurizer(object):
     n_arcs :
         How many "LIDAR" beams to project around the car
     """
-    def __init__(self, beam_distance=300, n_arcs=9):
-
+    def __init__(self, config_data={}, beam_distance=300, n_arcs=9):
+        
+        self.config_data = config_data
         self.arc_deltas = np.arange(n_arcs + 1) / (float(n_arcs) / 2) - 1
         self.arc_deltas = [i*np.pi/2 for i in self.arc_deltas]
         self.beam_distance = beam_distance
-        pass
+
 
 
     def featurize(self, current_state, controlled_key,type_of_agent='controlled_cars'):
@@ -55,6 +56,8 @@ class Featurizer(object):
         car = current_state.dynamic_objects[type_of_agent][controlled_key]
 
         x, y, angle, vel = car.get_state()
+        goal = car.destination
+        goalx, goaly = goal[0], goal[1]
 
         min_light_d = LIGHT_DISTANCE
         min_light_state = None
@@ -68,8 +71,19 @@ class Featurizer(object):
 
 
         #print(goal_d, goal_a)
-        features = [vel]
-        #print(goalx, goaly)
+        if (goalx == x):
+            gangle = 0
+        else:
+            gangle = (np.arctan((y - goaly) / (goalx - x)) % (2 * np.pi))
+        if (goalx - x < 0):
+            gangle = gangle + np.pi
+        gangle = (gangle - angle) % (2 * np.pi)
+        gd = distance((x, y), (goalx, goaly))
+        if self.config_data['goal_position']:
+            features = [vel, np.sin(gangle), np.cos(gangle), gd]
+        else:
+            features = [vel]
+
 
         for arc_delta in self.arc_deltas:
             arc_angle = angle + arc_delta
