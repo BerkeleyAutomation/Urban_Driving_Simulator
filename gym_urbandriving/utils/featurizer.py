@@ -5,13 +5,10 @@ import os
 import gym_urbandriving as uds
 from gym_urbandriving.assets import Terrain, Lane, Street, Sidewalk,\
     Pedestrian, Car, TrafficLight
-
 import os
 import IPython
 
-
-
-LIGHT_ARC = np.pi / 16
+LIGHT_ARC = np.pi / 8
 LIGHT_DISTANCE = 300
 
 def distance(p1, p2):
