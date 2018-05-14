@@ -19,8 +19,13 @@ env = uds.UrbanDrivingEnv(data)
 observations,reward,done,info_dict = env.step(action)
 assert(len(observations) == 2)
 assert(len(observations[0]) == len(observations[1]))
+orig_len = len(observations[0])
 state = env.current_state
 
 assert(state.dynamic_objects['controlled_cars']['0'].vel == 0.0)
 
-
+data['agents']['state_space_config']['goal_position'] = True
+env = uds.UrbanDrivingEnv(data)
+observations,reward,done,info_dict = env.step(action)
+assert(len(observations) == 2)
+assert(len(observations[0]) == len(observations[1]) == orig_len + 3)

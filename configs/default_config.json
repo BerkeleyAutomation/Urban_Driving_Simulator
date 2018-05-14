@@ -3,7 +3,7 @@
     "environment":{
         "state": "four_way_intersection",
         "visualize": false,
-        "visualize_lidar": false,
+        "visualize_lidar": true,
         "max_time":500
     },
 
@@ -12,6 +12,9 @@
         "background_cars":3,
         "action_space":"steering",
         "state_space":"Q-LIDAR",
+        "state_space_config":{
+            "goal_position":false
+        },
         "use_traffic_lights":true,
         "use_pedestrians":false,
         "number_of_pedestrians":4,
@@ -29,3 +32,4 @@
         "all_cars":false
     }
 }
+ 
