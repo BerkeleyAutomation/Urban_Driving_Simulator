@@ -87,5 +87,18 @@ In the above code, we have the supervisors interact with the world for five time
 
 :download:`Download <../../examples/state_design_tutorial.py>`
 
+Using the Neural Velocity Supervisor
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The default supervisor can be slow with a large number of cars in the scene. We trained a neural supervisor which can be enabled in the config file.
+
+::
+   
+   "agents"{
+       ...
+       "agent_mappings":{
+           "Car":"NeuralPursuitAgent",
+           ...
+       }
+   }
 
 .. _`Ray`: http://ray.readthedocs.io/en/latest/
