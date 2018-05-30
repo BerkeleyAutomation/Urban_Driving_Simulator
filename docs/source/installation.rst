@@ -2,7 +2,14 @@ Installation
 ============
 
 Install FLUIDS
-^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^
+
+::
+   
+   pip3 install gym-urbandriving
+
+Install FLUIDS from Source
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 These commands install gym-urbandriving and its requirements in the current Python environment. 
 ::
    
@@ -14,7 +21,7 @@ These commands install gym-urbandriving and its requirements in the current Pyth
 Optional OMPL Install
 ^^^^^^^^^^^^^^^^^^^^^
 
-Additional trajecotry generation features are available if OMPL (Open Motion Planning Library) is installed. The following is the installation instructino for Mac users.
+Additional trajectory generation features are available if OMPL (Open Motion Planning Library) is installed. The following is the installation instructino for Mac users.
 
 Install Macports https://www.macports.org/install.php (Note macports is very heavily tied to xcode to guarantee this to work you will need to have xcode installed)
 With macports installed perform the following three lines of code
