@@ -88,6 +88,8 @@ class Car(Rectangle, DynamicShape):
             self.x, self.y, self.vel, self.angle = self.reeds_shepp_model_step(action, self.x, self.y, self.vel, self.angle)
         else:
             self.x, self.y, self.vel, self.angle = self.point_model_step(action, self.x, self.y, self.vel, self.angle)
+        while self.trajectory and (self.contains_point(self.trajectory.first())):
+            self.trajectory.pop()
 
     def set_pos(self, x, y, vel, angle):
         self.shapely_obj = None
