@@ -3,7 +3,7 @@
     "environment":{
         "state": "four_way_intersection",
         "visualize": true,
-        "visualize_lidar": true,
+        "visualize_lidar": false,
         "max_time":500
     },
 

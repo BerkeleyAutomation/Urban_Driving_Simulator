@@ -15,6 +15,7 @@ data['agents']['action_space'] = "velocity"
 data['agents']['state_space'] = 'raw'
 data['use_pedestrians'] = True
 data['number_of_pedestrians'] = 4
+data['environment']['visualize'] = False
 sup = VelocitySupervisor(agent_num = 0)
 
 

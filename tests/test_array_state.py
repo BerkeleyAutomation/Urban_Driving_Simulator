@@ -11,7 +11,7 @@ import IPython
 with open('configs/default_config.json') as json_data_file:
     data = json.load(json_data_file)
 data['agents']['controlled_cars'] = 2
-data['environment']['visualize'] = True
+data['environment']['visualize'] = False
 data['recorded_data']['state_space'] = 'bmp'
 
 action = [np.array([0.0,0.0])] * 2

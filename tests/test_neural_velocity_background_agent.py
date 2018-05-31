@@ -15,7 +15,7 @@ data['agents']['action_space'] = "velocity"
 data['agents']['state_space'] = 'raw'
 data['agents']['action_space'] = "steering"
 data['agents']['agent_mappings']['Car'] = "NeuralPursuitAgent"
-
+data['environment']['visualize'] = False
 
 sup = SteeringSupervisor(agent_num = 0)
 
