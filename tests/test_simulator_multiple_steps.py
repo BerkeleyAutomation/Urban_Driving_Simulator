@@ -11,7 +11,7 @@ from gym_urbandriving.actions import SteeringAction
 with open('configs/default_config.json') as json_data_file:
   data = json.load(json_data_file)
   data['agents']['background_cars'] = 0
-
+  data['environment']['visualize'] = False
   env = uds.UrbanDrivingEnv(data)
 
   state = env.current_state

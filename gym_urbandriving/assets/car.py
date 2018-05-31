@@ -30,7 +30,7 @@ class Car(Rectangle, DynamicShape):
     vel : float
         Forwards velocity of car
     max_vel : float
-        Maximum allowable velocity of this car
+        Maximum allowable velocity of this carst
     xdim : float
         Length of car
     ydim : float
@@ -67,6 +67,9 @@ class Car(Rectangle, DynamicShape):
             return self.x > state.dimensions[0]
         else:
             return self.contains_point(self.destination[:2])
+
+    def passed_goal(self):
+        return self.trajectory.npoints() == 0
 
     def step(self, action):
         """

@@ -18,7 +18,7 @@ class NeuralPursuitAgent(PursuitAgent):
 
     """
 
-    def __init__(self, agent_num=0):
+    def __init__(self, agent_num=0,noise=0,omission_prob=0):
         """
         Initializes the PlanningPursuitAgent Class
 
@@ -34,7 +34,7 @@ class NeuralPursuitAgent(PursuitAgent):
         self.PID_steer = PIDController(2.0, 0, 0)
         self.not_initiliazed = True
         self.count = 0
-        self.vnp = VelocityNeuralPlanner()
+        self.vnp = VelocityNeuralPlanner(noise=noise,omission_prob=omission_prob)
 
         
         

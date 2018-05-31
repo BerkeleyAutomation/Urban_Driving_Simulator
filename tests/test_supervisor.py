@@ -12,7 +12,8 @@ with open('configs/default_config.json') as json_data_file:
 
 
 data['agents']['action_space'] = "velocity"
-data['recorded_data']['state_space'] = 'raw'
+data['agents']['state_space'] = 'raw'
+data['environment']['visualize'] = False
 sup = VelocitySupervisor(agent_num = 0)
 
 

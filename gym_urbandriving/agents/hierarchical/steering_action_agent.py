@@ -56,7 +56,8 @@ class SteeringActionAgent(PursuitAgent):
         if simplified:
             return SteeringAction(0.0,0.0)
 
-        if not isinstance(action,SteeringAction):
+        if action and not isinstance(action,SteeringAction):
+            print(action)
             raise Exception('Actions is Not of Type Steering Action')
 
         return action

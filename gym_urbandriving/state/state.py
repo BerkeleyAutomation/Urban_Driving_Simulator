@@ -128,7 +128,9 @@ class PositionState:
                                                             "CrosswalkLightAgent":CrosswalkLightAgent,
                                                             "Agent": Agent,
                                                             "PedestrianAgent":PedestrianAgent,
-                                                            "NeuralPursuitAgent":NeuralPursuitAgent}[v]
+                                                            "NeuralPursuitAgent":lambda i:NeuralPursuitAgent(i,
+                                                                                                             noise=self.agent_config['bg_state_space_config']['noise'],
+                                                                                                             omission_prob=self.agent_config['bg_state_space_config']['omission_prob'])}[v]
 
         self.bg_agents = {}
         for key in self.dynamic_objects.keys():
