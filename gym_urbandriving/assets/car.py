@@ -37,7 +37,7 @@ class Car(Rectangle, DynamicShape):
         Width of car
 
     """
-    def __init__(self, x, y, xdim=80, ydim=40, angle=0.0, vel=0.0,
+    def __init__(self, x, y, xdim=70, ydim=35, angle=0.0, vel=0.0,
                  max_vel=5, mass=100.0, dynamics_model="kinematic", destination=None,
                  trajectory=None):
         Rectangle.__init__(self, x, y, xdim, ydim, angle, mass=mass, sprite="blue_car.png")
@@ -67,6 +67,9 @@ class Car(Rectangle, DynamicShape):
             return self.x > state.dimensions[0]
         else:
             return self.contains_point(self.destination[:2])
+
+    def passed_goal(self):
+        return self.trajectory.npoints() == 0
 
     def step(self, action):
         """

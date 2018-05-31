@@ -128,7 +128,9 @@ class PositionState:
                                                             "CrosswalkLightAgent":CrosswalkLightAgent,
                                                             "Agent": Agent,
                                                             "PedestrianAgent":PedestrianAgent,
-                                                            "NeuralPursuitAgent":NeuralPursuitAgent}[v]
+                                                            "NeuralPursuitAgent":lambda i:NeuralPursuitAgent(i,
+                                                                                                             noise=self.agent_config['bg_state_space_config']['noise'],
+                                                                                                             omission_prob=self.agent_config['bg_state_space_config']['omission_prob'])}[v]
 
         self.bg_agents = {}
         for key in self.dynamic_objects.keys():
@@ -138,6 +140,7 @@ class PositionState:
                     obj = self.dynamic_objects[key][index]
                     if type(obj) in agent_mappings:
                         self.bg_agents[key].append(agent_mappings[type(obj)](i))
+                        print(agent_mappings[type(obj)])
         self.bg_agents['controlled_cars'] = []
         for i in range(self.agent_config['controlled_cars']):
             action_space = self.agent_config['action_space']

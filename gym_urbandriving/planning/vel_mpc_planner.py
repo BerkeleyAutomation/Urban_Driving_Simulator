@@ -24,7 +24,7 @@ class VelocityMPCPlanner:
             for t in range(self.lookahead):
                 
                 state_copy, reward, done, info_dict = testing_env._step(empty_actions,background_simplified = True)
-                state_copy = state_copy[0]
+                state_copy = testing_env.current_state
                 done = state_copy.collides_any_dynamic(agent_num,type_of_agent = type_of_agent)
                 if done:
                     break
@@ -36,7 +36,7 @@ class VelocityMPCPlanner:
         elif not state_copy.dynamic_objects[type_of_agent][str(agent_num)].trajectory.stopped:
             for t in range(self.lookahead):
                 state_copy, reward, done, info_dict = testing_env._step(empty_actions,background_simplified = True)
-                state_copy = state_copy[0]
+                state_copy = testing_env.current_state
                 done = state_copy.collides_any_dynamic(agent_num,type_of_agent = type_of_agent)
                 if done:
                     break
