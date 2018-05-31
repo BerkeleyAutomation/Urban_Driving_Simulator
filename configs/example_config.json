@@ -22,9 +22,9 @@
             "omission_prob":0
         },
         "use_traffic_lights":true,
-        "number_of_pedestrians":4,
+        "number_of_pedestrians":0,
         "agent_mappings":{
-            "Car":"NeuralPursuitAgent",
+            "Car":"PlanningPursuitAgent",
             "TrafficLight":"TrafficLightAgent",
             "CrosswalkLight":"CrosswalkLightAgent",
             "Pedestrian":"PedestrianAgent"

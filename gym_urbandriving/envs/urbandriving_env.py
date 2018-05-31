@@ -141,7 +141,8 @@ class UrbanDrivingEnv(gym.Env):
         state = self.current_state
         reward = self.reward_fn(self.current_state)
 
-        done = (self.current_state.time == self.max_time) or len(dynamic_coll) or len(static_coll)
+        #done = (self.current_state.time == self.max_time) or len(dynamic_coll) or len(static_coll)
+        done = self.current_state.time == self.max_time
 
         info_dict = {"saved_actions": action}
 
@@ -164,7 +165,7 @@ class UrbanDrivingEnv(gym.Env):
 
     def get_initial_observations(self):
         if self.observation_type == 'raw':
-            observations = [state] * len(state.dynamic_objects['controlled_cars'])
+            observations = [self.current_state] * len(self.current_state.dynamic_objects['controlled_cars'])
         elif self.observation_type == 'Q-LIDAR':
             observations = []
             for key in self.current_state.dynamic_objects['controlled_cars'].keys():
