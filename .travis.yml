@@ -18,7 +18,6 @@ script:
   - python tests/test_pedestrians.py #or py.test for Python version 3.5 and below
   - python tests/test_neural_velocity_supervisor.py
   - python tests/test_neural_velocity_background_agent.py
-  - python tests/test_array_state.py
   - cd docs && make html
 
 after_success:

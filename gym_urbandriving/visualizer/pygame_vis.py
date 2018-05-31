@@ -54,7 +54,9 @@ class PyGameVisualizer:
         """
         Returns the current displayed visualization as a bitmap array
         """
-        return pygame.surfarray.pixels3d(self.surface)
+        ns = pygame.Surface.copy(self.surface)
+        arr = pygame.surfarray.pixels3d(ns)
+        return arr
     def render_statics(self, state, valid_area):
         """
         Renders the static objects of the state such as sidewalks and streets.
@@ -232,7 +234,7 @@ class PyGameVisualizer:
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT: sys.exit()
-
+            
 
         self.render_statics(state, valid_area)
         self.render_dynamics(state, valid_area)
