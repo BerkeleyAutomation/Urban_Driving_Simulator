@@ -30,14 +30,14 @@ class Car(Rectangle, DynamicShape):
     vel : float
         Forwards velocity of car
     max_vel : float
-        Maximum allowable velocity of this car
+        Maximum allowable velocity of this carst
     xdim : float
         Length of car
     ydim : float
         Width of car
 
     """
-    def __init__(self, x, y, xdim=70, ydim=35, angle=0.0, vel=0.0,
+    def __init__(self, x, y, xdim=80, ydim=40, angle=0.0, vel=0.0,
                  max_vel=5, mass=100.0, dynamics_model="kinematic", destination=None,
                  trajectory=None):
         Rectangle.__init__(self, x, y, xdim, ydim, angle, mass=mass, sprite="blue_car.png")
