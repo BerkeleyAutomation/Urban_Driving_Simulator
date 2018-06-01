@@ -14,7 +14,7 @@ These commands install gym-urbandriving and its requirements in the current Pyth
 ::
    
    git clone https://github.com/BerkeleyAutomation/Urban_Driving_Simulator.git
-   cd gym-urbandriving
+   cd Urban_Driving_Simulator
    pip3 install -e .
 
 
