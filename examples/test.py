@@ -13,19 +13,31 @@ from gym_urbandriving.actions import SteeringAction
 
 config = json.load(open('configs/example_config.json'))
 config['environment']['visualize'] = True
-# config['agents']["number_of_pedestrians"] = 4
-# config['agents']['agent_mappings']['Car'] = 'NeuralPursuitAgent'
-# config['agents']['state_space'] = 'raw'
+
+#COMMENT OUT TO ADD PEDESTIRANS 
+#config['agents']["number_of_pedestrians"] = 4
+
+#COMMENT OUT TO USE NEURAL BASED PLANNER 
+config['agents']['agent_mappings']['Car'] = 'NeuralPursuitAgent'
+
+#COMMENT OUT FOR RAW STATE SPACE 
+config['agents']['state_space'] = 'raw'
+
+#COMMENT OUT TO CHANGE ACTION SPACE
 # config['agents']['action_space'] = 'velocity'
+
 env = uds.UrbanDrivingEnv(config_data=config)
     
 env._reset()
 env._render()
+
 obs = env.get_initial_observations()
 
 # Car 0 will be controlled by our KeyboardAgent
 agent = KeyboardAgent()
-# agent = SteeringSupervisor()
+
+#COMMENT OUT TO CHANGE SUPERVISOR 
+#agent = SteeringSupervisor()
 # agent = VelocitySupervisor()
 
 # Simulation loop
