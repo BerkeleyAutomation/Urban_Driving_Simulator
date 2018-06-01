@@ -22,7 +22,7 @@ The "state" flag specifies the layout of the roads, terrain, and sidewalks in th
 
 The "visualize" and "visualize_lidar" flags enable the graphical display, which is optional.
 
-The "max_time" field specifies tha maximum number of ticks the simulation will run before resetting. This is useful for performing many roll-outs back-to-back.
+The "max_time" field specifies the maximum number of ticks the simulation will run before resetting. This is useful for performing many roll-outs back-to-back.
 
 ::
 
