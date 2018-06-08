@@ -1,5 +1,7 @@
-Urban Driving Simulator Documentation
+FLUIDS Documentation
 ===================================================
+
+FLUIDS - a First-Order Local Urban Intersection Driving Simulator. :download:`Read our paper <CASE18_0350_MS.pdf>`
 
 .. image:: FLUIDS.png
 

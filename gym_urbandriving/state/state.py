@@ -85,8 +85,7 @@ class PositionState:
                 self.dynamic_objects['traffic_lights'][str(i)] = TrafficLight(**traffic_light)
         self.dynamic_objects['crosswalk_lights'] = {}
         self.dynamic_objects['pedestrians'] = {}        
-        if self.agent_config['use_pedestrians']:
-
+        if self.agent_config['number_of_pedestrians']:
             for i, crosswalk_light in enumerate(self.state_config['crosswalk_lights']):
                 self.dynamic_objects['crosswalk_lights'][str(i)] = CrosswalkLight(**crosswalk_light)
 
@@ -128,7 +127,9 @@ class PositionState:
                                                             "CrosswalkLightAgent":CrosswalkLightAgent,
                                                             "Agent": Agent,
                                                             "PedestrianAgent":PedestrianAgent,
-                                                            "NeuralPursuitAgent":NeuralPursuitAgent}[v]
+                                                            "NeuralPursuitAgent":lambda i:NeuralPursuitAgent(i,
+                                                                                                             noise=self.agent_config['bg_state_space_config']['noise'],
+                                                                                                             omission_prob=self.agent_config['bg_state_space_config']['omission_prob'])}[v]
 
         self.bg_agents = {}
         for key in self.dynamic_objects.keys():

@@ -30,7 +30,7 @@ class Car(Rectangle, DynamicShape):
     vel : float
         Forwards velocity of car
     max_vel : float
-        Maximum allowable velocity of this car
+        Maximum allowable velocity of this carst
     xdim : float
         Length of car
     ydim : float
@@ -68,6 +68,9 @@ class Car(Rectangle, DynamicShape):
         else:
             return self.contains_point(self.destination[:2])
 
+    def passed_goal(self):
+        return self.trajectory.npoints() == 0
+
     def step(self, action):
         """
         Updates this object given this action input
@@ -85,6 +88,8 @@ class Car(Rectangle, DynamicShape):
             self.x, self.y, self.vel, self.angle = self.reeds_shepp_model_step(action, self.x, self.y, self.vel, self.angle)
         else:
             self.x, self.y, self.vel, self.angle = self.point_model_step(action, self.x, self.y, self.vel, self.angle)
+        while self.trajectory and (self.contains_point(self.trajectory.first())):
+            self.trajectory.pop()
 
     def set_pos(self, x, y, vel, angle):
         self.shapely_obj = None

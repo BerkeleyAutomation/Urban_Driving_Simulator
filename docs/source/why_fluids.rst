@@ -1,6 +1,8 @@
 Why FLUIDS?
 =============
-When car drives through an intersection it requires determining both the controls necessary to reach a goal state, but also predicting how other drivers will respond based solely on noisy sensor observations. The challenges of this task make it an interesting benchmark for Reinforcement and Imitation learning algorithms because it requires continuous actions, multi-agent planning and hierarchical behaviors. FLUIDS seeks to capture these challenges in a light weight simulator, which allows for easy prototyping and benchmarking new algorithms. 
+To study and compare Reinforcement and Imitation Learning algorithms, the most commonly used benchmarks are OpenAI Gym, Mujoco, and ATARI games. However, these benchmarks generally fail to capture real-life challenges to learning algorithms, including multi-agent interactions, noisy sensors, and generalization. FLUIDS aims to fill this gap by providing a fast, birds-eye simulation of cars and pedestrians in an urban driving setting. Below, we highlight several notable capabilities of FLUIDS.
+
+.. When car drives through an intersection it requires determining both the controls necessary to reach a goal state, but also predicting how other drivers will respond based solely on noisy sensor observations. The challenges of this task make it an interesting benchmark for Reinforcement and Imitation learning algorithms because it requires continuous actions, multi-agent planning and hierarchical behaviors. FLUIDS seeks to capture these challenges in a light weight simulator, which allows for easy prototyping and benchmarking new algorithms. 
 
 
 

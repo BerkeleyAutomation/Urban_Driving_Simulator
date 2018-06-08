@@ -53,7 +53,7 @@ class UrbanDrivingEnv(gym.Env):
             else:
                 self.visualizer = None
             self.max_time = config_data['environment']['max_time']
-            self.observation_type = config_data['recorded_data']['state_space']
+            self.observation_type = config_data['agents']['state_space']
             self.visualize_lidar = config_data['environment']['visualize_lidar']
             assert(self.observation_type in {'Q-LIDAR', 'raw', 'bmp'})
         else:
@@ -127,8 +127,8 @@ class UrbanDrivingEnv(gym.Env):
             dobj.step(background_traffic_actions[int(index)])
 
         for i, dobj in self.current_state.dynamic_objects['controlled_cars'].items():
-            if controlled_car_actions[int(i)] == None:
-                IPython.embed()
+            # if controlled_car_actions[int(i)] == None:
+            #     IPython.embed()
             dobj.step(controlled_car_actions[int(i)].get_value())
 
         for i, dobj in self.current_state.dynamic_objects['pedestrians'].items():
@@ -141,7 +141,8 @@ class UrbanDrivingEnv(gym.Env):
         state = self.current_state
         reward = self.reward_fn(self.current_state)
 
-        done = (self.current_state.time == self.max_time) or len(dynamic_coll) or len(static_coll)
+        #done = (self.current_state.time == self.max_time) or len(dynamic_coll) or len(static_coll)
+        done = self.current_state.time == self.max_time
 
         info_dict = {"saved_actions": action}
 
@@ -164,7 +165,7 @@ class UrbanDrivingEnv(gym.Env):
 
     def get_initial_observations(self):
         if self.observation_type == 'raw':
-            observations = [state] * len(state.dynamic_objects['controlled_cars'])
+            observations = [self.current_state] * len(self.current_state.dynamic_objects['controlled_cars'])
         elif self.observation_type == 'Q-LIDAR':
             observations = []
             for key in self.current_state.dynamic_objects['controlled_cars'].keys():

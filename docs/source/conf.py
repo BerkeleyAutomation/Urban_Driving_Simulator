@@ -57,8 +57,8 @@ source_suffix = ['.rst', '.md']
 master_doc = 'index'
 
 # General information about the project.
-project = 'FLUIDS'
-copyright = '2017, Andrew Cui, Jerry Zhao, Michael Laskey, Berkeley AUTOLAB'
+project = 'FLUIDS - First-order Local Urban Intersection Driving Simulator'
+copyright = '2018, Andrew Cui, Jerry Zhao, Michael Laskey, Berkeley AUTOLAB'
 author = 'Andrew Cui, Jerry Zhao, Michael Laskey, Berkeley AUTOLAB'
 
 # The version info for the project you're documenting, acts as replacement for

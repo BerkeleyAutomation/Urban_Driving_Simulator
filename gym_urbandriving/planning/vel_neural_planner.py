@@ -7,12 +7,12 @@ import numpy as np
 import os
 
 class VelocityNeuralPlanner:
-        def __init__(self, lookahead=10):
+        def __init__(self, lookahead=10,noise=0,omission_prob=0):
 
                 basedir = os.path.dirname(__file__)
                 file_path = basedir+'/models/model.npy'
                 data =  np.load(file_path)
-                featurizer_config = {"goal_position":False}
+                featurizer_config = {"goal_position":False, "noise":noise, "omission_prob":omission_prob}
                 self.model = data.all()
                 self.featurizer = Featurizer(config_data=featurizer_config)
 
@@ -20,5 +20,4 @@ class VelocityNeuralPlanner:
 
                 feature = self.featurizer.featurize(state,str(agent_num),type_of_agent)
                 action = self.model.predict(np.array([feature]))
-
                 return VelocityAction(action[0])

@@ -78,9 +78,13 @@ class Featurizer(object):
         gd = distance((x, y), (goalx, goaly))
         if self.config_data['goal_position']:
             features = [vel, np.sin(gangle), np.cos(gangle), gd]
+            features[0] += np.random.randn() * 5 * self.config_data['noise']
+            features[1] += np.random.randn() * 0.2 * self.config_data['noise']
+            features[2] += np.random.randn() * 0.2 * self.config_data['noise']
+            features[3] += np.random.randn() * 100 * self.config_data['noise']
         else:
             features = [vel]
-
+            features[0] += np.random.randn() * 5 * self.config_data['noise']
 
         for arc_delta in self.arc_deltas:
             arc_angle = angle + arc_delta
@@ -94,33 +98,36 @@ class Featurizer(object):
             #min_coll_acc = 0
             #min_coll_ang_vel = 0
 
-
-            for sobj in current_state.static_objects:
-                if car.can_collide(sobj) and linestring.intersects(sobj.get_shapely_obj()):
-                    isect = list(linestring.intersection(sobj.get_shapely_obj()).coords)[0]
-                    d = distance((x, y), isect)
-                    if (d < min_coll_d):
-                        min_coll_d = d
-                        min_coll_type = type(sobj)
-                        min_coll_vel = 0
-                        min_coll_angle = 0
-                        #min_coll_acc = 0
-                        #min_coll_ang_vel = 0
-            for indx, key in enumerate(current_state.dynamic_objects):
-                for did,agent_num in enumerate(current_state.dynamic_objects[key]):
-                    dobj = current_state.dynamic_objects[key][agent_num]
-                    if car is not dobj and car.can_collide(dobj) \
-                       and type(dobj) is not TrafficLight and linestring.intersects(dobj.get_shapely_obj()):
-                        isect = list(linestring.intersection(dobj.get_shapely_obj()).coords)[0]
+            if np.random.random() > self.config_data['omission_prob']:
+                for sobj in current_state.static_objects:
+                    if car.can_collide(sobj) and linestring.intersects(sobj.get_shapely_obj()):
+                        isect = list(linestring.intersection(sobj.get_shapely_obj()).coords)[0]
                         d = distance((x, y), isect)
                         if (d < min_coll_d):
                             min_coll_d = d
-                            min_coll_type = type(dobj)
-                            min_coll_vel = dobj.vel
-                            min_coll_angle = (angle - dobj.angle) % (2 * np.pi)
+                            min_coll_type = type(sobj)
+                            min_coll_vel = 0
+                            min_coll_angle = 0
+                            #min_coll_acc = 0
+                            #min_coll_ang_vel = 0
+                for indx, key in enumerate(current_state.dynamic_objects):
+                    for did,agent_num in enumerate(current_state.dynamic_objects[key]):
+                        dobj = current_state.dynamic_objects[key][agent_num]
+                        if car is not dobj and car.can_collide(dobj) \
+                           and type(dobj) is not TrafficLight and linestring.intersects(dobj.get_shapely_obj()):
+                            isect = list(linestring.intersection(dobj.get_shapely_obj()).coords)[0]
+                            d = distance((x, y), isect)
+                            if (d < min_coll_d):
+                                min_coll_d = d
+                                min_coll_type = type(dobj)
+                                min_coll_vel = dobj.vel
+                                min_coll_angle = (angle - dobj.angle) % (2 * np.pi)
 
 
             #print(min_coll_d, min_coll_type, 180 * min_coll_angle / np.pi, min_coll_vel)
+            min_coll_d += np.random.randn() * 25 * self.config_data['noise']
+            min_coll_angle += np.random.randn() * 0.5 * self.config_data['noise']
+            min_coll_vel += np.random.randn() * 3 * self.config_data['noise']
             features.extend([min_coll_d, np.sin(min_coll_angle), np.cos(min_coll_angle), min_coll_vel])
             
         for indx, key in enumerate(current_state.dynamic_objects):
