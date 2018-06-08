@@ -6,7 +6,10 @@ from gym_urbandriving.assets.terrain import Terrain
 from gym_urbandriving.assets.sidewalk import Sidewalk
 from gym_urbandriving.assets.pedestrian import Pedestrian
 from gym_urbandriving.assets.traffic_light import TrafficLight
+from gym_urbandriving.actions import VelocityAction
 
+
+from copy import deepcopy
 from gym import spaces
 import numpy as np
 
@@ -88,7 +91,7 @@ class Car(Rectangle, DynamicShape):
             self.x, self.y, self.vel, self.angle = self.reeds_shepp_model_step(action, self.x, self.y, self.vel, self.angle)
         else:
             self.x, self.y, self.vel, self.angle = self.point_model_step(action, self.x, self.y, self.vel, self.angle)
-        while self.trajectory and (self.contains_point(self.trajectory.first())):
+        while self.trajectory and self.trajectory.npoints() and (self.contains_point(self.trajectory.first())):
             self.trajectory.pop()
 
     def set_pos(self, x, y, vel, angle):
@@ -130,3 +133,24 @@ class Car(Rectangle, DynamicShape):
             a = abs(self.angle % (2*np.pi) - other.angle % (2*np.pi)) % (2*np.pi)
             return a > np.pi / 2  and a < 3*np.pi / 2
         return False
+
+
+    def get_future_locations(self, horizon=6):
+        from gym_urbandriving.agents import PursuitAgent
+        variables = []
+        for vel in [0.0, 4.0]:
+            copy_car = deepcopy(self)
+            vel_action = VelocityAction(vel)
+            copy_car.trajectory.set_vel(vel_action)
+            fake_agent = PursuitAgent(0)
+            class FakeState:
+                dynamic_objects = {"background_cars": {"0":copy_car}}
+
+            fake_state = FakeState()
+            start_obj = copy_car.get_shapely_obj()
+            for i in range(horizon):
+                steering_action = fake_agent.eval_policy(fake_state)
+                copy_car.step(steering_action.get_value())
+                start_obj = start_obj.union(copy_car.get_shapely_obj())
+            variables.append((vel_action, start_obj))
+        return variables
