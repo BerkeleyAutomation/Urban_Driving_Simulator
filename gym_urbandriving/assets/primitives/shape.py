@@ -3,6 +3,7 @@ from copy import deepcopy
 import shapely.geometry
 import os
 import IPython
+import pygame
 import numpy.linalg as LA
 
 SPRITE_DIR = "gym_urbandriving/visualizer/sprites/"
@@ -15,9 +16,11 @@ class Shape(object):
         self.y = y
         self.angle = angle % (2*np.pi)
         self.mass = mass
-        self.sprite = SPRITE_DIR + sprite
-        self.sprite = sprite
+        basedir = os.path.dirname(__file__)
+        filename = os.path.join(basedir, "../../visualizer/sprites/", sprite)
+        self.sprite = pygame.image.load(filename)
         self.static = static
+        self.pygame_sprite = None
         self.shapely_obj = None
 
     def get_pos(self):
@@ -40,9 +43,7 @@ class Shape(object):
         return self.get_shapely_obj().distance(other.get_shapely_obj())
 
     def get_sprite(self):
-        basedir = os.path.dirname(__file__)
-        filename = os.path.join(basedir, "../../visualizer/sprites/", self.sprite)
-        return filename
+        return self.sprite
 
     def __deepcopy__(self, memo):
         cls = self.__class__
@@ -51,6 +52,8 @@ class Shape(object):
         for k, v in self.__dict__.items():
             if k is "shapely_obj":
                 setattr(result, k, None)
+            elif k is "sprite":
+                setattr(result, k, self.sprite)
             else:
                 setattr(result, k, deepcopy(v, memo))
         return result

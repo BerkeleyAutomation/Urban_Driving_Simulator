@@ -12,10 +12,6 @@ class VelocityCSPPlanner:
 
 
     def plan(self, state, agent_num,type_of_agent = "background_cars"):
-        
-      state_copy = deepcopy(state)
-      testing_env = uds.UrbanDrivingEnv(init_state=state_copy,
-                                        randomize=False)
 
   
       future_cs, back_cs = state.get_all_future_locations()

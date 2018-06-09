@@ -1,7 +1,8 @@
 from gym_urbandriving.assets.primitives.rectangle import Rectangle
 from gym_urbandriving.assets.primitives.shape import Shape
 import numpy as np
-
+import os
+import pygame
 class CrosswalkLight(Rectangle):
     """
     Represents a static traffic light in the scene
@@ -23,6 +24,12 @@ class CrosswalkLight(Rectangle):
         Rectangle.__init__(self, x, y, 15, 15, angle)
         self.time_in_color = time_in_color
         self.color = init_color
+        basedir = os.path.dirname(__file__)
+        self.sprite = {c : pygame.image.load(os.path.join(basedir,
+                                                           "../visualizer/sprites/",
+                                                           self.colors[c]))
+                       for c in self.colors }
+
 
     def step(self, action):
         self.time_in_color += 1
@@ -36,6 +43,4 @@ class CrosswalkLight(Rectangle):
         return False
 
     def get_sprite(self):
-        self.sprite = self.colors[self.color]
-        return Shape.get_sprite(self)
-        
+        return self.sprite[self.color]
