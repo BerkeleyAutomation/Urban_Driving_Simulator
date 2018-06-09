@@ -5,6 +5,7 @@ from gym_urbandriving.agents.background.crosswalk_light_agent import CrosswalkLi
 from gym_urbandriving.agents.background.pursuit_agent import PursuitAgent
 from gym_urbandriving.agents.background.planning_pursuit_agent import PlanningPursuitAgent
 from gym_urbandriving.agents.background.neural_pursuit_agent import NeuralPursuitAgent
+from gym_urbandriving.agents.background.csp_pursuit_agent import CSPPursuitAgent
 
 from gym_urbandriving.agents.hierarchical.velocity_action_agent import VelocityActionAgent
 from gym_urbandriving.agents.hierarchical.steering_action_agent import SteeringActionAgent

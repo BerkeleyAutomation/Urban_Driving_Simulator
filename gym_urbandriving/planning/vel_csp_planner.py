@@ -16,4 +16,7 @@ class VelocityCSPPlanner:
 
        ####MAKE BLOB DICT#### 
 
+       if not state['csp_solved']: 
+
+            state['csp_solved'] = True 
        ###SOLVE FOR CSP
