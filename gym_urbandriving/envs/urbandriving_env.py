@@ -161,7 +161,7 @@ class UrbanDrivingEnv(gym.Env):
         if self.visualizer:
             self._render()
 
-        
+        self.current_state.solve_for_velocity = True
         return observations, reward, done, info_dict
 
     def get_initial_observations(self):

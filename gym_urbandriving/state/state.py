@@ -24,6 +24,8 @@ class PositionState:
         self.dynamic_collisions, self.static_collisions, self.controlled_car_collisions = [], [], []
         self.last_coll = -1
 
+        self.solve_for_velocity = True
+
         if 'state' in data['environment']:
             state_config = data['environment']['state']
             basedir = os.path.dirname(__file__)

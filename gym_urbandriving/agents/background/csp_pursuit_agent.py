@@ -64,8 +64,12 @@ class CSPPursuitAgent(PursuitAgent):
             print(simplified)
 
         else:
-            target_vel = self.vnp.plan(state, self.agent_num)
-            state.dynamic_objects['background_cars'][str(self.agent_num)].trajectory.set_vel(target_vel)
+            if state.solve_for_velocity:
+                target_vel = self.vnp.plan(state, self.agent_num)
+                state.solve_for_velocity = False
+            # else:
+            #     target_vel = VelcoityAction(0)
+            #     state.dynamic_objects['background_cars'][str(self.agent_num)].trajectory.set_vel(target_vel)
 
         action = super(CSPPursuitAgent, self).eval_policy(state)
         return action
