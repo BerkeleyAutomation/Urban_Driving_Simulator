@@ -12,6 +12,7 @@ from gym_urbandriving.actions import VelocityAction
 from copy import deepcopy
 from gym import spaces
 import numpy as np
+import time
 
 class Car(Rectangle, DynamicShape):
     """
@@ -91,8 +92,13 @@ class Car(Rectangle, DynamicShape):
             self.x, self.y, self.vel, self.angle = self.reeds_shepp_model_step(action, self.x, self.y, self.vel, self.angle)
         else:
             self.x, self.y, self.vel, self.angle = self.point_model_step(action, self.x, self.y, self.vel, self.angle)
-        while self.trajectory and self.trajectory.npoints() and (self.contains_point(self.trajectory.first())):
+
+        
+
+        while self.trajectory and self.trajectory.npoints() and (self.contains_point_numpy(self.trajectory.first())):
+
             self.trajectory.pop()
+
 
     def set_pos(self, x, y, vel, angle):
         self.shapely_obj = None
@@ -136,7 +142,11 @@ class Car(Rectangle, DynamicShape):
 
 
     def get_future_locations(self, horizon=6):
+        
+
         from gym_urbandriving.agents import PursuitAgent
+
+
         variables = []
         for vel in [0.0, 4.0]:
             copy_car = deepcopy(self)
@@ -148,9 +158,22 @@ class Car(Rectangle, DynamicShape):
 
             fake_state = FakeState()
             start_obj = copy_car.get_shapely_obj()
+            start = time.time()
             for i in range(horizon):
+                
+      
                 steering_action = fake_agent.eval_policy(fake_state)
+
+
                 copy_car.step(steering_action.get_value())
+
+
                 start_obj = start_obj.union(copy_car.get_shapely_obj())
+
+
+
             variables.append((vel_action, start_obj))
+
+
+
         return variables

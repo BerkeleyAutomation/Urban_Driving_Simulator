@@ -63,10 +63,10 @@ class CSPPursuitAgent(PursuitAgent):
             print("MADE PLAN")
             print(simplified)
 
-        if not simplified:
+        else:
             target_vel = self.vnp.plan(state, self.agent_num)
             state.dynamic_objects['background_cars'][str(self.agent_num)].trajectory.set_vel(target_vel)
 
-        action = super(NeuralPursuitAgent, self).eval_policy(state)
+        action = super(CSPPursuitAgent, self).eval_policy(state)
         return action
 

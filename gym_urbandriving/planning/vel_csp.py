@@ -1,11 +1,7 @@
-
 import constraint as csp
 
 
 class VelCSP():
-
-	def __init__(self,num_cars):
-
 
 	def solve_csp(blob_dict):
 

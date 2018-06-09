@@ -2,4 +2,6 @@ from gym_urbandriving.planning.vel_mpc_planner import VelocityMPCPlanner
 from gym_urbandriving.planning.vel_neural_planner import VelocityNeuralPlanner
 from gym_urbandriving.planning.ped_vel_planner import PedestrianVelPlanner
 from gym_urbandriving.planning.geometric_planner_lite import GeometricPlanner
+from gym_urbandriving.planning.vel_csp import VelCSP
+from gym_urbandriving.planning.vel_csp_planner import VelocityCSPPlanner
 #from gym_urbandriving.planning.geometric_planner import GeometricPlanner

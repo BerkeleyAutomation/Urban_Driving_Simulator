@@ -2,6 +2,8 @@ import numpy as np
 from copy import deepcopy
 import shapely.geometry
 import os
+import IPython
+import numpy.linalg as LA
 
 SPRITE_DIR = "gym_urbandriving/visualizer/sprites/"
 
@@ -26,6 +28,13 @@ class Shape(object):
 
     def contains_point(self, point):
         return self.get_shapely_obj().contains(shapely.geometry.Point(point))
+
+    def contains_point_numpy(self,point):
+
+        c = np.array([self.x,self.y])
+        p = np.array([point[0],point[1]])
+
+        return LA.norm(c-p,ord=np.inf) < 40
 
     def dist_to(self, other):
         return self.get_shapely_obj().distance(other.get_shapely_obj())

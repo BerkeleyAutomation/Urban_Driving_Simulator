@@ -119,6 +119,7 @@ class PositionState:
         """
         agent_mappings = {}
         for k, v in six.iteritems(self.agent_config['agent_mappings']):
+            print(self.agent_config['agent_mappings'])
             agent_mappings[{"Car":Car,
                             "TrafficLight":TrafficLight,
                             "CrosswalkLight":CrosswalkLight,
@@ -259,7 +260,7 @@ class PositionState:
     #     return min_dist
 
     def get_all_future_locations(self):
-        controlled_futures = {k:obj.get_future_locations() for k, obj in six.iteritems(self.dynamic_objects['controlled_cars'])}
+        controlled_futures = None#{k:obj.get_future_locations() for k, obj in six.iteritems(self.dynamic_objects['controlled_cars'])}
         background_futures = {k:obj.get_future_locations() for k, obj in six.iteritems(self.dynamic_objects['background_cars'])}
         return controlled_futures, background_futures
         
