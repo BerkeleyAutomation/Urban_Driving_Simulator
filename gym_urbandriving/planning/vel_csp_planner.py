@@ -16,7 +16,9 @@ class VelocityCSPPlanner:
   
       future_cs, back_cs = state.get_all_future_locations()
      
-      self.solve_csp(back_cs)
+      best_solution = self.solve_csp(back_cs)
+
+      return best_solution
   
 
 
@@ -57,5 +59,6 @@ class VelocityCSPPlanner:
           best_solution = solution
           value = cur_value
 
+      print(best_solution['0'][0].get_value())
       return best_solution
 

@@ -25,6 +25,7 @@ class PositionState:
         self.last_coll = -1
 
         self.solve_for_velocity = True
+        self.background_velocity = {}
 
         if 'state' in data['environment']:
             state_config = data['environment']['state']
