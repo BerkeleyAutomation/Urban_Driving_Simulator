@@ -236,34 +236,9 @@ class PositionState:
 
         return False
 
-    # def min_dist_to_coll(self, agentnum,type_of_agent = 'background_cars'):
-    #     """
-    #     Returns the minimum distance between the object with id agentnum and a collideable object.
-
-    #     Parameters
-    #     ----------
-    #     agentnum : int
-    #         The index of the object to query
-
-    #     Returns
-    #     -------
-    #     float
-    #         Distance to nearest collideable object
-    #     """
-    #     min_dist = np.finfo('f').max
-    #     obj = self.dynamic_objects[type_of_agent][agentnum]
-    #     for j, sobj in enumerate(self.static_objects):
-    #         if obj.can_collide(sobj):
-    #             min_dist = min(min_dist, obj.dist_to(sobj))
-
-    #     for key in self.dynamic_objects.keys():
-    #         for j, dobj in enumerate(self.dynamic_objects):
-    #             if j != agentnum and obj.can_collide(dobj):
-    #                 min_dist = min(min_dist, obj.dist_to(dobj))
-    #     return min_dist
 
     def get_all_future_locations(self):
-        controlled_futures = None#{k:obj.get_future_locations() for k, obj in six.iteritems(self.dynamic_objects['controlled_cars'])}
+        controlled_futures = {k:obj.get_future_locations() for k, obj in six.iteritems(self.dynamic_objects['controlled_cars'])}
         background_futures = {k:obj.get_future_locations() for k, obj in six.iteritems(self.dynamic_objects['background_cars'])}
         return controlled_futures, background_futures
         

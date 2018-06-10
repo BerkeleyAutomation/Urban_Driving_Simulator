@@ -61,19 +61,12 @@ class CSPPursuitAgent(PursuitAgent):
 
             geoplanner.plan_for_agents(state,type_of_agent='background_cars',agent_num=self.agent_num)
             self.not_initiliazed = False
-            print("MADE PLAN")
-            print(simplified)
 
         else:
             if state.solve_for_velocity:
-                solution = self.vnp.plan(state, self.agent_num)
-                state.solve_for_velocity = False
-                state.background_velocity = solution
-
-            
+                self.vnp.plan(state, self.agent_num)
+ 
             target_vel = state.background_velocity[str(self.agent_num)][0]
-            print("GIVEN TARGET")
-            print(target_vel)
             state.dynamic_objects['background_cars'][str(self.agent_num)].trajectory.set_vel(target_vel)
 
         action = super(CSPPursuitAgent, self).eval_policy(state)
