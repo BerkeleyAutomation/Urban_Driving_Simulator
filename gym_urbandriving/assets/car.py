@@ -142,7 +142,7 @@ class Car(Rectangle, DynamicShape):
 
 
 
-    def get_future_locations(self, horizon=12):
+    def get_future_locations(self, horizon=12, use_fast=True):
         from gym_urbandriving.agents import PursuitAgent
 
         variables = []
@@ -157,10 +157,13 @@ class Car(Rectangle, DynamicShape):
         start_obj = self.get_shapely_obj()
         for vel in [0.0, 4.0]:
             vel_action = VelocityAction(vel)
+            start_obj = self.get_shapely_obj()
             self.trajectory.set_vel(vel_action)
             for i in range(horizon):
                 steering_action = fake_agent.eval_policy(fake_state)
                 self.step(steering_action.get_value())
+                if not use_fast:
+                    start_obj = start_obj.union(self.get_shapely_obj())
             variables.append((vel_action, start_obj.union(self.get_shapely_obj())))
 
             self.shapely_obj = None
