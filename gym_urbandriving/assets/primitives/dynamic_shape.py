@@ -1,7 +1,6 @@
 import numpy as np
 from scipy.integrate import odeint
 
-from  numba import  jit
 import IPython
 
 
