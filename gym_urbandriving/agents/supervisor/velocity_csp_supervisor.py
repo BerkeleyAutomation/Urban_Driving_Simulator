@@ -1,12 +1,12 @@
 import numpy as np
 from gym_urbandriving.utils import PIDController
 from gym_urbandriving.agents import PursuitAgent
-from gym_urbandriving.planning import VelocityMPCPlanner,GeometricPlanner,VelocityCSPPlanner
+from gym_urbandriving.planning import VelocityCSPPlanner,GeometricPlanner
 import gym_urbandriving as uds
 
-class SteeringSupervisor(PursuitAgent):
+class VelocityCSPSupervisor(PursuitAgent):
     """
-    Superivsor agent which implements the planning stack to obtain steering level supervision of
+    Superivsor agent which implements the planning stack to obtain velocity level supervision of
     which the car should follow. 
 
     Attributes
@@ -19,7 +19,7 @@ class SteeringSupervisor(PursuitAgent):
 
     def __init__(self, agent_num=0):
         """
-        Initializes the SteeringSupervisor Class
+        Initializes the VelocitySupervisor Class
 
         Parameters
         ----------
@@ -32,24 +32,26 @@ class SteeringSupervisor(PursuitAgent):
         self.PID_acc = PIDController(1.0, 0, 0)
         self.PID_steer = PIDController(2.0, 0, 0)
         self.not_initiliazed = True
-        self.vnp = VelocityCSPPlanner()
+        self.vnp = VelocityNeuralPlanner()
+        
         
 
         
-    def eval_policy(self, state):
+    def eval_policy(self, state,simplified = False):
         """
-        Returns action based on current world state
+        Returns action based next state in trajectory. 
 
         Parameters
         ----------
         state : PositionState
             State of the world, unused
-        action : float
-            Target velocity for car to travel at 
+
+        simplified: bool
+            specifies whether or not to use a simplified greedy model for look ahead planning
 
         Returns
-        -------
-        SteeringAction
+        --------
+        float specifying target velocity
         """
 
         if self.not_initiliazed:
@@ -57,16 +59,15 @@ class SteeringSupervisor(PursuitAgent):
 
             geoplanner.plan_for_agents(state,type_of_agent='controlled_cars',agent_num=self.agent_num)
             self.not_initiliazed = False
+
         else:
             if state.solve_for_velocity:
                 self.vnp.plan(state, self.agent_num)
- 
 
             
             target_vel = state.control_velocity[str(self.agent_num)][0]
-            state.dynamic_objects['controlled_cars'][str(self.agent_num)].trajectory.set_vel(target_vel)
-            
 
-        return super(SteeringSupervisor, self).eval_policy(state,type_of_agent = 'controlled_cars')
+
+        return target_vel
 
 

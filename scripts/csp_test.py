@@ -31,11 +31,10 @@ env._render()
 
 obs = env.get_initial_observations()
 
-# Car 0 will be controlled by our KeyboardAgent
-agent = KeyboardAgent()
+
 
 #COMMENT OUT TO CHANGE SUPERVISOR 
-#agent = SteeringSupervisor()
+agent = SteeringSupervisor()
 # agent = VelocitySupervisor()
 
 # Simulation loop

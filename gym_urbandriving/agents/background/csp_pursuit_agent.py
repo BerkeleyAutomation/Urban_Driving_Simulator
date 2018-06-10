@@ -3,6 +3,7 @@ from gym_urbandriving.utils import PIDController
 from gym_urbandriving.agents import PursuitAgent
 from gym_urbandriving.planning import VelocityCSPPlanner,GeometricPlanner
 import gym_urbandriving as uds
+import IPython
 
 class CSPPursuitAgent(PursuitAgent):
     """
@@ -60,11 +61,12 @@ class CSPPursuitAgent(PursuitAgent):
 
             geoplanner.plan_for_agents(state,type_of_agent='background_cars',agent_num=self.agent_num)
             self.not_initiliazed = False
-            print("MADE PLAN")
-            print(simplified)
 
         else:
-            target_vel = self.vnp.plan(state, self.agent_num)
+            if state.solve_for_velocity:
+                self.vnp.plan(state, self.agent_num)
+ 
+            target_vel = state.background_velocity[str(self.agent_num)][0]
             state.dynamic_objects['background_cars'][str(self.agent_num)].trajectory.set_vel(target_vel)
 
         action = super(CSPPursuitAgent, self).eval_policy(state)

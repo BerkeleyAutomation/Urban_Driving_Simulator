@@ -16,11 +16,11 @@ plt.style.use('fivethirtyeight')
 with open('configs/default_config.json') as json_data_file:
     data = json.load(json_data_file)
 
+data['environment']['visualize'] = False
 
 data['agents']['action_space'] = "velocity"
-data['recorded_data']['state_space'] = 'raw'
 data['agents']['action_space'] = "steering"
-data['agents']['agent_mappings']['Car'] = "NeuralPursuitAgent"
+data['agents']['agent_mappings']['Car'] = "CSPPursuitAgent"
 
 time_taken_neural = []
 
@@ -66,7 +66,7 @@ for j in range(7):
 	time_taken_planner.append(stop-start)
 
 
-plt.plot(time_taken_neural,label = 'IL' )
+plt.plot(time_taken_neural,label = 'CSP' )
 plt.plot(time_taken_planner,label = 'Planner' )
 plt.legend()
 
