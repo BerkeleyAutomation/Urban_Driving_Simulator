@@ -45,3 +45,7 @@ class TrafficLight(Rectangle):
     def get_sprite(self):
         return self.sprite[self.color]
         
+    def get_future_locations(self, horizon=5):
+        if self.color == "red" or self.color == "yellow":
+            return True
+        return False

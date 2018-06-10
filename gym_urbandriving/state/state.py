@@ -262,7 +262,9 @@ class PositionState:
     def get_all_future_locations(self):
         controlled_futures = None#{k:obj.get_future_locations() for k, obj in six.iteritems(self.dynamic_objects['controlled_cars'])}
         background_futures = {k:obj.get_future_locations() for k, obj in six.iteritems(self.dynamic_objects['background_cars'])}
-        return controlled_futures, background_futures
+        pedestrian_blobs = {k:obj.get_future_locations() for k, obj in six.iteritems(self.dynamic_objects["pedestrians"])}
+        light_states = {k:obj.get_future_locations() for k, obj in six.iteritems(self.dynamic_objects["traffic_lights"])}
+        return controlled_futures, background_futures, pedestrian_blobs, light_states
         
     def get_observations(self, observation_type):
         """
@@ -278,3 +280,15 @@ class PositionState:
         float
             Distance to nearest collideable object
         """
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        result = cls.__new__(cls)
+        memo[id(self)] = result
+        for k, v in self.__dict__.items():
+            if k in {"dynamic_collisions", "static_collisions", "controlled_car_collisions"}:
+                setattr(result, k, None)
+            elif k in {"agent_config"}:
+                setattr(result, k, v)
+            else:
+                setattr(result, k, deepcopy(v, memo))
+        return result
