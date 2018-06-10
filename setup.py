@@ -12,7 +12,8 @@ setup(name='gym_urbandriving',
                         "opencv-python",
                         "codecov",
                         "ipython",
-                        "sklearn"],
+                        "sklearn",
+                        "cython"],
       include_package_data=True,
       packages = find_packages()
       
