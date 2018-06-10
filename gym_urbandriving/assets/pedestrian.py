@@ -32,6 +32,7 @@ class Pedestrian(Circle, DynamicShape):
         self.acc = acc
         self.mass = mass
         self.angle = angle
+        self.last_action = None
 
 
     def step(self, action, info_dict=None):
@@ -46,6 +47,7 @@ class Pedestrian(Circle, DynamicShape):
            Contains information about the environment.
         """
         self.shapely_obj = None
+        self.last_action = action
         if self.dynamics_model == "kinematic":
             self.x, self.y, self.vel, self.angle = self.kinematic_model_step(action, self.x, self.y, self.vel, self.angle)
         elif self.dynamics_model == "reeds_shepp":
@@ -60,7 +62,7 @@ class Pedestrian(Circle, DynamicShape):
             state: 1x3 array, contains x, y, angle of car.
             info_dict: dict, contains information about car.
         """
-        return self.x,self.y,self.x_dim,self.y_dim,self.angle
+        return self.x,self.y,self.angle
 
 
     def can_collide(self, other):
@@ -77,3 +79,15 @@ class Pedestrian(Circle, DynamicShape):
                 return True
 
         return False
+
+    def get_future_locations(self, horizon=5):
+        from gym_urbandriving.agents import PedestrianAgent
+        
+        copy_state = self.get_state()
+        start_obj = self.get_shapely_obj()
+        for i in range(horizon):
+            self.step(self.last_action)
+        r = start_obj.union(self.get_shapely_obj())
+        self.shapely_obj = None
+        self.x, self.y, self.angle = copy_state
+        return r
