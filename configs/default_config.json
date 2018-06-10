@@ -9,7 +9,7 @@
 
     "agents":{
         "controlled_cars":1,
-        "background_cars":1,
+        "background_cars":5,
         "action_space":"steering",
         "state_space":"Q-LIDAR",
         "state_space_config":{
