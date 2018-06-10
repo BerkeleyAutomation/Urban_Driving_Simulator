@@ -1,7 +1,9 @@
 import numpy as np
 from scipy.integrate import odeint
-
+from scipy.integrate import ode
 import IPython
+import time
+from gym_urbandriving.assets.primitives.integrator_c import *
 
 
 class DynamicShape():
@@ -101,9 +103,12 @@ class DynamicShape():
         # Differential equations
         ode_state = [x, y, v, rad_angle]
         aux_state = (action_acc, action_steer)
-        t = np.arange(0.0, 1.5, 0.5)
-        #IPython.embed()
-        delta_ode_state = odeint(integrator, ode_state, t, args=aux_state)
+        t = [0.0,1.0]
+
+        model = Model(action_acc,action_steer,self.l_r,self.l_f)
+        delta_ode_state = odeint(model, ode_state, t)
+
+
         x, y, vel, angle = delta_ode_state[-1]
 
         # Update car

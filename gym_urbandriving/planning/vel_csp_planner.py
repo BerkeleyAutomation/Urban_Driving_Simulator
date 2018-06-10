@@ -14,9 +14,10 @@ class VelocityCSPPlanner:
     def plan(self, state, agent_num,type_of_agent = "background_cars"):
 
 
-
+      start = time.time()
       control_csp, back_csp, ped_csp, light_csp = state.get_all_future_locations()
-
+      end = time.time()
+      print(end-start)
      
       best_solution = self.solve_csp(back_csp,control_csp)
 

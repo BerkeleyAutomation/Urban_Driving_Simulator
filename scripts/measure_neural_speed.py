@@ -48,22 +48,22 @@ data['agents']['agent_mappings']['Car'] = "PlanningPursuitAgent"
 time_taken_planner = []
 
 
-for j in range(7):
-	data['agents']['background_cars'] = j
-	sup = SteeringSupervisor(agent_num = 0)
+# for j in range(7):
+# 	data['agents']['background_cars'] = j
+# 	sup = SteeringSupervisor(agent_num = 0)
 
-	env = uds.UrbanDrivingEnv(data)
-	state = env.current_state
+# 	env = uds.UrbanDrivingEnv(data)
+# 	state = env.current_state
 
-	action = sup.eval_policy(state)
+# 	action = sup.eval_policy(state)
 
-	obs,reward,done,info_dict = env.step([action])
+# 	obs,reward,done,info_dict = env.step([action])
 
-	start = time.time()
-	obs,reward,done,info_dict = env.step([action])
-	stop = time.time()
+# 	start = time.time()
+# 	obs,reward,done,info_dict = env.step([action])
+# 	stop = time.time()
 
-	time_taken_planner.append(stop-start)
+# 	time_taken_planner.append(stop-start)
 
 
 plt.plot(time_taken_neural,label = 'CSP' )
