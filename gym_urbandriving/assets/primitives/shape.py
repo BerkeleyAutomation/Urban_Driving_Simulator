@@ -24,7 +24,8 @@ class Shape(object):
         self.shapely_obj = None
 
     def get_pos(self):
-        return np.array([self.x, self.y])
+        return (self.x,self.y)
+        #return np.array([self.x, self.y])
 
     def intersect(self, other):
         return self.get_shapely_obj().intersects(other.get_shapely_obj())
@@ -34,10 +35,10 @@ class Shape(object):
 
     def contains_point_numpy(self,point):
 
-        c = np.array([self.x,self.y])
-        p = np.array([point[0],point[1]])
+        a = abs(self.x - point[0])
+        b = abs(self.y - point[1])
 
-        return LA.norm(c-p,ord=np.inf) < 40
+        return max(a,b) < 40
 
     def dist_to(self, other):
         return self.get_shapely_obj().distance(other.get_shapely_obj())

@@ -23,8 +23,8 @@ class SteeringAction:
         """
 
 
-        self.box = Box(low=np.array([-3,-1.0]),high=np.array([3,1.0]))
-        self.controls = np.array([steering,acceleration])
+        #self.box = Box(low=np.array([-3,-1.0]),high=np.array([3,1.0]))
+        self.controls = (steering,acceleration)
 
 
 
@@ -37,14 +37,3 @@ class SteeringAction:
             steering and acceleration in numpy array shape (2,)
         """
         return self.controls
-
-    def sample(self):
-        """
-        Samples a random control in this class using the OpenAI Box class
-
-        Returns
-        ----------
-        steering and acceleration in numpy array shape (2,)
-        """
-
-        return self.box.sample()

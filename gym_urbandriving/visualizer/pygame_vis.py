@@ -133,14 +133,18 @@ class PyGameVisualizer:
         for obj1id, obj2id, k1, k2 in dynamic_collisions:
             obj1 = state.dynamic_objects[k1][str(obj1id)]
             obj2 = state.dynamic_objects[k2][str(obj2id)]
-            pygame.draw.circle(new_surface, (255, 0, 255), obj1.get_pos().astype(int), 5)
-            pygame.draw.circle(new_surface, (255, 0, 255), obj2.get_pos().astype(int), 5)
+            point1 = obj1.get_pos()
+            point2 = obj2.get_pos()
+            pygame.draw.circle(new_surface, (255, 0, 255), [(int)(point1[0]), (int)(point1[1])], 5)
+            pygame.draw.circle(new_surface, (255, 0, 255), [(int)(point2[0]), (int)(point2[1])], 5)
         for obj1id, obj2id, k, _ in static_collisions:
             obj1id, obj2id = str(obj1id), obj2id
             obj1 = state.dynamic_objects[k][obj1id]
             obj2 = state.static_objects[obj2id]
-            pygame.draw.circle(new_surface, (255, 0, 255), obj1.get_pos().astype(int), 5)
-            pygame.draw.circle(new_surface, (255, 0, 255), obj2.get_pos().astype(int), 5)
+            point1 = obj1.get_pos()
+            point2 = obj2.get_pos()
+            pygame.draw.circle(new_surface, (255, 0, 255), [(int)(point1[0]), (int)(point1[1])], 5)
+            pygame.draw.circle(new_surface, (255, 0, 255), [(int)(point2[0]), (int)(point2[1])], 5)
         new_surface = pygame.transform.scale(new_surface, (self.screen_dim))
         self.surface.blit(new_surface, (0, 0), None)
         return
@@ -244,10 +248,10 @@ class PyGameVisualizer:
             self.render_traffic_trajectories(traffic_trajectories, valid_area)
 
         
-        for key in state.dynamic_objects.keys():
-            for index,dobj in state.dynamic_objects[key].items():
-                if not dobj.trajectory is None and ('x' in dobj.trajectory.mode and 'y' in dobj.trajectory.mode):
-                    self.render_waypoints(dobj.trajectory.get_renderable_points(), valid_area, index)
+        # for key in state.dynamic_objects.keys():
+        #     for index,dobj in state.dynamic_objects[key].items():
+        #         if not dobj.trajectory is None and ('x' in dobj.trajectory.mode and 'y' in dobj.trajectory.mode):
+        #             self.render_waypoints(dobj.trajectory.get_renderable_points(), valid_area, index)
 
         if lidar_points:
             self.render_lidar(state, valid_area, lidar_points)

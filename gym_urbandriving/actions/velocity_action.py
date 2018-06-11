@@ -19,12 +19,9 @@ class VelocityAction:
             the desired velocity 
         """
 
-        self.box = Box(low=0.0,high=5.0,shape=(1,))
+        
 
-        self.velocity = np.array([velocity])
-
-        if not self.box.contains(self.velocity):
-            raise Exception('Velocity is Out of Bounds')
+        self.velocity = [velocity]
 
 
     def get_value(self):
@@ -36,13 +33,3 @@ class VelocityAction:
             float
         """
         return self.velocity[0]
-
-    def sample(self):
-        """
-        Samples a random control in this class using the OpenAI Box class
-
-        Returns
-        ----------
-        velocity in numpy array shape (1,)
-        """
-        return self.box.sample()

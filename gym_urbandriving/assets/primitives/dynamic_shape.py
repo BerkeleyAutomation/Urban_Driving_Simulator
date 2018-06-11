@@ -56,35 +56,6 @@ class DynamicShape():
             info_dict: dict, contains information about the environment.
         """
 
-
-        def integrator(state, t, acc, delta_f):
-            """
-            Calculates numerical values of differential
-            equation variables for dynamics.
-            SciPy ODE integrator calls this function.
-
-            :
-            state: 1x6 array, contains x, y, dx_body, dy_body, rad_angle, rad_dangle
-                of car.
-            t: float, timestep.
-            mu: float, friction coefficient.
-            delta_f: float, steering angle.
-            a_f: float, acceleration.
-
-            Returns:
-            output: list, contains dx, dy, ddx_body, ddy_body, dangle, ddangle.
-            """
-            x, y, vel, rad_angle = state
-
-            # Differential equations
-            beta = np.arctan((self.l_r / (self.l_f + self.l_r)) * np.tan(delta_f))
-            dx = vel * np.cos(rad_angle + beta)
-            dy = vel * -np.sin(rad_angle + beta)
-            dangle = (vel / self.l_r) * np.sin(beta)
-            dvel = acc
-            output = [dx, dy, dvel, dangle]
-            return output
-
         # Unpack actions, convert angles to radians
         if action is None:
             action_steer, action_acc = 0.0, 0.0
@@ -108,6 +79,7 @@ class DynamicShape():
         model = Model(action_acc,action_steer,self.l_r,self.l_f)
         delta_ode_state = odeint(model, ode_state, t)
 
+        #delta_ode_state = odeint(integrator, ode_state, args=(aux_state))
 
         x, y, vel, angle = delta_ode_state[-1]
 

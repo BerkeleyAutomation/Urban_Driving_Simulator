@@ -40,7 +40,7 @@ class PursuitAgent(Agent):
             target_loc = p[:2].tolist()
             target_vel = p[2]
 
-            while obj.contains_point((p[0], p[1])) and not obj.trajectory.is_empty():
+            while obj.contains_point_numpy((p[0], p[1])) and not obj.trajectory.is_empty():
                 p = obj.trajectory.pop()
                 target_loc = p[:2].tolist()
                 target_vel = p[2]

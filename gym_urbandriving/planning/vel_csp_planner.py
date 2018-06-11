@@ -14,10 +14,8 @@ class VelocityCSPPlanner:
     def plan(self, state, agent_num,type_of_agent = "background_cars"):
 
 
-      start = time.time()
-      control_csp, back_csp, ped_csp, light_csp = state.get_all_future_locations()
-      end = time.time()
-      print(end-start)
+      control_csp, back_csp, self.ped_csp, light_csp = state.get_all_future_locations()
+      
      
       best_solution = self.solve_csp(back_csp,control_csp)
 
@@ -46,6 +44,16 @@ class VelocityCSPPlanner:
           control_solution[key[0:-1]] = best_solution[key]
       return control_solution,background_solution
 
+
+    def check_peds(self,b_1):
+
+      for key in self.ped_csp.keys():
+        if b_1[1].intersects(self.ped_csp[key]):
+          return False
+        
+      return True
+
+
     def solve_csp(self,background_dict,control_dict):
 
       ''''
@@ -64,6 +72,10 @@ class VelocityCSPPlanner:
         var_name = key+"c"
         problem.addVariable(var_name,control_dict[key])
         variables.append(var_name)
+
+
+      for key in variables:
+        problem.addConstraint(self.check_peds, [key])
 
 
       for key_1 in variables:

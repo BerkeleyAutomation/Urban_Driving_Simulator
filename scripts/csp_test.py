@@ -38,7 +38,7 @@ agent = SteeringSupervisor()
 # agent = VelocitySupervisor()
 
 # Simulation loop
-while(True):
+for i in range(200):
     # Determine an action based on the current state.
     # For KeyboardAgent, this just gets keypresses
     action = agent.eval_policy(obs[0])
