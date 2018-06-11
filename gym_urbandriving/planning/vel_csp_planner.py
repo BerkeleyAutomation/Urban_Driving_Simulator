@@ -5,6 +5,7 @@ from gym_urbandriving.planning import VelCSP
 import constraint as csp
 import IPython
 import time
+import shapely
 
 class VelocityCSPPlanner:
     def __init__(self, lookahead=10):
@@ -13,8 +14,8 @@ class VelocityCSPPlanner:
 
     def plan(self, state, agent_num,type_of_agent = "background_cars"):
 
-
-      control_csp, back_csp, self.ped_csp, light_csp = state.get_all_future_locations()
+      self.state = state
+      control_csp, back_csp, self.ped_csp, self.light_csp = state.get_all_future_locations()
       
      
       best_solution = self.solve_csp(back_csp,control_csp)
@@ -53,6 +54,20 @@ class VelocityCSPPlanner:
         
       return True
 
+    def check_light(self,b_1):
+
+      for key in self.light_csp.keys():
+        if self.light_csp[key]:
+          x = self.state.dynamic_objects["traffic_lights"][key].x
+          y = self.state.dynamic_objects["traffic_lights"][key].y
+
+          if b_1[1].contains(shapely.geometry.Point((x,y))):
+            return False
+
+        
+      return True
+
+
 
     def solve_csp(self,background_dict,control_dict):
 
@@ -76,6 +91,9 @@ class VelocityCSPPlanner:
 
       for key in variables:
         problem.addConstraint(self.check_peds, [key])
+
+      for key in variables:
+        problem.addConstraint(self.check_light, [key])
 
 
       for key_1 in variables:
