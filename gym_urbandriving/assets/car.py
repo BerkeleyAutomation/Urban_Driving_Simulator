@@ -141,7 +141,7 @@ class Car(Rectangle, DynamicShape):
         return False
 
 
-    def get_future_locations(self, horizon=12, use_fast=True):
+    def get_future_locations(self, horizon=13, use_fast=True):
         from gym_urbandriving.agents import PursuitAgent
 
         variables = []

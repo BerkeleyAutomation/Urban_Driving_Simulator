@@ -61,7 +61,8 @@ class VelocityCSPPlanner:
           x = self.state.dynamic_objects["traffic_lights"][key].x
           y = self.state.dynamic_objects["traffic_lights"][key].y
 
-          if b_1[1].contains(shapely.geometry.Point((x,y))):
+          box = shapely.geometry.box(x-10, y-10, x+10, y+10) #= shapely.geometry.Point((x,y)).buffer(40)
+          if b_1[1].intersects(box):
             return False
 
         
@@ -89,8 +90,8 @@ class VelocityCSPPlanner:
         variables.append(var_name)
 
 
-      for key in variables:
-        problem.addConstraint(self.check_peds, [key])
+      # for key in variables:
+      #   problem.addConstraint(self.check_peds, [key])
 
       for key in variables:
         problem.addConstraint(self.check_light, [key])
