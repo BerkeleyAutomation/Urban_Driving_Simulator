@@ -17,6 +17,8 @@ class VelocityCSPPlanner:
       self.state = state
       control_csp, back_csp, self.ped_csp, self.light_csp = state.get_all_future_locations()
       
+      self.num_back_cars = len(back_csp)
+      self.num_cont_cars = len(control_csp)
      
       best_solution = self.solve_csp(back_csp,control_csp)
 
@@ -49,7 +51,7 @@ class VelocityCSPPlanner:
     def check_peds(self,b_1):
 
       for key in self.ped_csp.keys():
-        if b_1[1].intersects(self.ped_csp[key]):
+        if b_1[1].intersects(self.ped_csp[key]) and b_1[0].get_value() > 0:
           return False
         
       return True
@@ -62,7 +64,7 @@ class VelocityCSPPlanner:
           y = self.state.dynamic_objects["traffic_lights"][key].y
 
           box = shapely.geometry.box(x-10, y-10, x+10, y+10) #= shapely.geometry.Point((x,y)).buffer(40)
-          if b_1[1].intersects(box):
+          if b_1[1].intersects(box) and b_1[0].get_value() > 0:
             return False
 
         
@@ -90,8 +92,8 @@ class VelocityCSPPlanner:
         variables.append(var_name)
 
 
-      # for key in variables:
-      #   problem.addConstraint(self.check_peds, [key])
+      for key in variables:
+        problem.addConstraint(self.check_peds, [key])
 
       for key in variables:
         problem.addConstraint(self.check_light, [key])
@@ -113,14 +115,23 @@ class VelocityCSPPlanner:
 
       value = 0 
       best_solution = None
+
       for solution in solutions:
         cur_value = 0
         for key in solution.keys():
           cur_value += solution[key][0].get_value()
 
-        if cur_value > value:
+        if cur_value >= value:
           best_solution = solution
           value = cur_value
+
+      if best_solution == None:
+        best_solution = {}
+        print("NO SOLUTION")
+        for i in range(self.num_back_cars):
+          best_solution[str(i)+"b"] = (VelocityAction(0.0),None)
+        for i in range(self.num_cont_cars):
+          best_solution[str(i)+"c"] = (VelocityAction(0.0),None)
 
       return best_solution
 

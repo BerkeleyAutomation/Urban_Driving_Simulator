@@ -15,7 +15,8 @@ config = json.load(open('configs/default_config.json'))
 config['environment']['visualize'] = True
 
 #COMMENT OUT TO ADD PEDESTIRANS 
-#config['agents']["number_of_pedestrians"] = 4
+config['agents']["number_of_pedestrians"] = 0
+config['agents']["number_of_pedestrians"] = 4
 
 config['agents']['agent_mappings']['Car'] = 'CSPPursuitAgent'
 
