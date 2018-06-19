@@ -1,6 +1,5 @@
 import numpy as np
 from gym_urbandriving.actions import VelocityAction
-import IPython
 
 class Trajectory(object):
     """
@@ -23,11 +22,7 @@ class Trajectory(object):
         self._trajectory = np.zeros((0, 7))
         self.mode = mode
 
-        self.num_dimensions = len(mode)
         self.dimensions_used = []
-
-
-
         for c in mode:
             if 'x' == c:
                 self.dimensions_used.append(0)
@@ -46,7 +41,7 @@ class Trajectory(object):
             else:
                 raise ValueError()
         self.fsm = fsm
-
+        print("MADE NEW TRAJECTORY")
         self.stopped = True
 
     def get_matrix(self):
@@ -62,9 +57,7 @@ class Trajectory(object):
     def add_point(self, p):
         if p is None:
             return
-
-        #indx_lst = range(0:self.dimensions_used)
-        expanded_p = [p[self.dimensions_used[i]] if (i in self.dimensions_used) else np.nan for i in range(7)]
+        expanded_p = [p[self.dimensions_used.index(i)] if (i in self.dimensions_used) else np.nan for i in range(7)]
         self._trajectory = np.append(self._trajectory, [expanded_p], axis=0)
 
     def get_next_point(self, t):
@@ -97,10 +90,8 @@ class Trajectory(object):
         if target_vel == None:
             return
         v_index = self.mode.index('v')
-        v_value = target_vel.get_value()
-        self._trajectory[:self.npoints(),v_index] = v_value
-        # for i in range(self.npoints()):
-        #     self._trajectory[i][v_index] = v_value
+        for i in range(self.npoints()):
+            self._trajectory[i][v_index] = target_vel.get_value()
 
         if target_vel.get_value() == 0.0:
             self.stopped = True
@@ -120,7 +111,7 @@ class Trajectory(object):
             end  = self.npoints()
         res = []
         for i in range(start, end):
-            res.append(self._trajectory[i][0:self.dimensions_used].tolist())
+            res.append(self._trajectory[i][self.dimensions_used].tolist())
         return np.array(res)
 
     def add_interpolated_t(self):
@@ -134,10 +125,10 @@ class Trajectory(object):
         return self._trajectory.shape[0]
 
     def first(self):
-        return self._trajectory[0][0:self.num_dimensions]
+        return self._trajectory[0][self.dimensions_used]
 
     def last(self):
-        return self._trajectory[-1][0:self.num_dimensions]
+        return self._trajectory[-1][self.dimensions_used]
 
     def pop(self):
         first = self.first()
@@ -146,8 +137,3 @@ class Trajectory(object):
 
     def is_empty(self):
         return not self._trajectory.shape[0]
-
-    def quick_copy(self):
-        new_traj = Trajectory(mode=self.mode)
-        new_traj._trajectory = self._trajectory.copy()
-        return new_traj

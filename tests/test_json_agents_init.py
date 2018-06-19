@@ -10,6 +10,8 @@ import numpy as np
 with open('configs/default_config.json') as json_data_file:
     data = json.load(json_data_file)
 data['environment']['visualize'] = False
+data['agents']['controlled_cars'] = 1
+data['agents']['background_cars'] = 3
 state = uds.state.PositionState(data)
 
 

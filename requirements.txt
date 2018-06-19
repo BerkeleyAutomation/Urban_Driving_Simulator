@@ -10,3 +10,4 @@ opencv-python
 codecov
 ipython
 cython
+python-constraint

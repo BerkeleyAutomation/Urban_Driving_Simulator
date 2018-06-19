@@ -3,7 +3,12 @@ from scipy.integrate import odeint
 from scipy.integrate import ode
 import IPython
 import time
-from gym_urbandriving.assets.primitives.integrator_c import *
+try:
+    from gym_urbandriving.assets.primitives.integrator_c import *
+    cython_used = True
+except ImportError:
+    cython_used = False
+    print("FLUIDS Error: Cython integrator not built")
 
 
 class DynamicShape():
@@ -61,6 +66,34 @@ class DynamicShape():
             action_steer, action_acc = 0.0, 0.0
         else:
             action_steer, action_acc = action
+        def integrator(state, t, acc, delta_f):
+            """
+            Calculates numerical values of differential
+            equation variables for dynamics.
+            SciPy ODE integrator calls this function.
+
+            :
+            state: 1x6 array, contains x, y, dx_body, dy_body, rad_angle, rad_dangle
+                of car.
+            t: float, timestep.
+            mu: float, friction coefficient.
+            delta_f: float, steering angle.
+            a_f: float, acceleration.
+
+            Returns:
+            output: list, contains dx, dy, ddx_body, ddy_body, dangle, ddangle.
+            """
+            x, y, vel, rad_angle = state
+
+            # Differential equations
+            beta = np.arctan((self.l_r / (self.l_f + self.l_r)) * np.tan(delta_f))
+            dx = vel * np.cos(rad_angle + beta)
+            dy = vel * -np.sin(rad_angle + beta)
+            dangle = (vel / self.l_r) * np.sin(beta)
+            dvel = acc
+            output = [dx, dy, dvel, dangle]
+            return output
+
 
         action_steer = max(min(1, action_steer), -1)
         action_steer, rad_angle = np.radians(30*action_steer), a
@@ -76,10 +109,11 @@ class DynamicShape():
         aux_state = (action_acc, action_steer)
         t = [0.0,1.0]
 
-        model = Model(action_acc,action_steer,self.l_r,self.l_f)
-        delta_ode_state = odeint(model, ode_state, t)
-
-        #delta_ode_state = odeint(integrator, ode_state, args=(aux_state))
+        if cython_used:
+            model = Model(action_acc,action_steer,self.l_r,self.l_f)
+            delta_ode_state = odeint(model, ode_state, t)
+        else:
+            delta_ode_state = odeint(integrator, ode_state, t, args=(aux_state))
 
         x, y, vel, angle = delta_ode_state[-1]
 

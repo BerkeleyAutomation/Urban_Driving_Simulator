@@ -146,7 +146,7 @@ class Car(Rectangle, DynamicShape):
 
         variables = []
         copy_state = self.get_state()
-        copy_traj = self.trajectory.quick_copy()
+        copy_traj = deepcopy(self.trajectory)
         start_obj = self.get_shapely_obj()
 
         fake_agent = PursuitAgent(0)
@@ -167,5 +167,5 @@ class Car(Rectangle, DynamicShape):
 
             self.shapely_obj = None
             self.x, self.y, self.angle, self.vel = copy_state
-            self.trajectory = copy_traj.quick_copy()
+            self.trajectory = deepcopy(copy_traj)
         return variables
