@@ -2,7 +2,7 @@ import pygame
 import numpy as np
 
 from fluids.assets.shape import Shape
-from fluids.utils import Waypoint
+from fluids.assets.waypoint import Waypoint
 
 class Lane(Shape):
     def __init__(self, **kwargs):

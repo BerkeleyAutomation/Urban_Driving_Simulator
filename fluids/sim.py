@@ -3,13 +3,17 @@ import json
 import pygame
 from six import iteritems
 import constraint as csp
+from copy import deepcopy
+
 from shapely import speedups
+
+
 if speedups.available:
     speedups.enable()
 
 from fluids.state import State
 from fluids.assets import *
-from fluids.utils import fluids_assert, dist_reward, print
+from fluids.utils import fluids_assert, path_reward, print
 from fluids.actions import *
 from fluids.consts import *
 from fluids.obs import GridObservation
@@ -21,15 +25,15 @@ class FluidSim(object):
     def __init__(self,
                  state               =STATE_CITY,
                  visualization_level =1,
+                 render_on           =True,
                  controlled_cars     =1,
                  background_cars     =0,
                  background_peds     =0,
                  fps                 =30,
-                 randomize           =True,
-                 control_space       =CTRL_STEERING,
                  obs_space           =OBS_NONE,
+                 obs_args            ={},
                  background_control  =BACKGROUND_NULL,
-                 reward_fn           =REWARD_NONE,
+                 reward_fn           =REWARD_PATH,
                  screen_dim          =800):
 
         if state in [STATE_CITY]:
@@ -50,16 +54,19 @@ class FluidSim(object):
             self.surface     = pygame.display.set_mode(self.screen_dim)
         self.clock   = pygame.time.Clock()
 
-        self.randomize             = randomize
-        self.control_interpreter   = {CTRL_STEERING  : lambda a: a}[control_space]
         self.obs_space             = obs_space
-        self.reward_fn             = {REWARD_DIST    : dist_reward,
+        self.obs_args              = obs_args
+        self.reward_fn             = {REWARD_PATH    : path_reward,
                                       REWARD_NONE    : lambda s : 0}[reward_fn]
         self.background_control    = background_control
         self.vis_level             = visualization_level
-
+        self.render_on             = render_on
         self.fps                   = fps
+        self.last_keys_pressed     = None
         self.render()
+
+    def __del__(self):
+        pygame.quit()
 
     def render(self):
         if self.vis_level:
@@ -74,20 +81,28 @@ class FluidSim(object):
                 self.fps_surface = self.fps_font.render(str(int(self.clock.get_fps())), False, (0, 0, 0))
             self.surface.blit(self.fps_surface, (0, 0))
             pygame.display.flip()
+            pygame.event.pump()
+            self.last_keys_pressed = pygame.key.get_pressed()
         else:
             self.clock.tick(0)
             if not self.state.time % 60:
                 print("FPS: " + str(int(self.clock.get_fps())))    
 
         
-        
     def get_control_keys(self):
         return self.state.controlled_cars.keys()
 
-    def step(self, actions):
-        # Convert the hierarchical input into steering-acceleration
+    def step(self, actions={}):
         for k, v in iteritems(actions):
-            actions[k] = self.control_interpreter(v)
+            if type(v) == KeyboardAction:
+                if self.last_keys_pressed:
+                    keys = self.last_keys_pressed
+                    acc = 1 if keys[pygame.K_UP] else -1 if keys[pygame.K_DOWN] else 0
+                    steer = 1 if keys[pygame.K_LEFT] else -1 if keys[pygame.K_RIGHT] else 0
+                    actions[k] = SteeringAction(steer, acc)
+                else:
+                    actions[k] = None    
+            
 
         # Get background vehicle and pedestrian controls
         actions.update(self.get_background_actions())
@@ -99,20 +114,21 @@ class FluidSim(object):
         self.state.time += 1
 
 
-        # Get collisions and observations
-        collisions = self.state.get_controlled_collisions()
-        observations = {k:c.make_observation(self.obs_space)
+
+        observations = {k:c.make_observation(self.obs_space, **self.obs_args)
                         for k, c in iteritems(self.state.controlled_cars)}
-        reward = self.reward_fn(self.state)
-        self.render()
-        return collisions, observations, reward
+        reward_step = self.reward_fn(self.state)
+        #print(reward_step)
+        if self.render_on:
+            self.render()
+        return observations, reward_step
 
     def get_background_actions(self):
         if self.background_control == BACKGROUND_NULL or len(self.state.background_cars) == 0:
             return {}
 
-        futures = { k:o.get_future_shape() for k, o in iteritems(self.state.background_cars)}
-        futures_lights = [(o, o.get_future_color()) for o in self.state.type_map[TrafficLight]]
+        futures = { k:o.get_future_shape() for k, o in iteritems(self.state.type_map[Car])}
+        futures_lights = [(o, o.get_future_color()) for k, o in iteritems(self.state.type_map[TrafficLight])]
 
         keys = [k for k in futures]
         problem = csp.Problem()
@@ -142,6 +158,8 @@ class FluidSim(object):
 
 
         solution = problem.getSolution()
-        return {k:VelocityAction(v[0]*3) for k, v in iteritems(solution)}
+        return {k:VelocityAction(v[0]*3) for k, v in iteritems(solution) if k in self.state.background_cars}
 
         fluids_assert(False, "Not implemented")
+    def run_time(self):
+        return self.state.time

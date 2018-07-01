@@ -8,7 +8,7 @@ from fluids.obs.obs import FluidsObs
 from fluids.utils import rotation_array
 
 class GridObservation(FluidsObs):
-    def __init__(self, car, grid_dim=500, grid_size=59):
+    def __init__(self, car, grid_dim=500, grid_size=19):
         state = car.state
         self.car = car
         self.grid_dim = grid_dim

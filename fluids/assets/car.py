@@ -51,12 +51,18 @@ class Car(Shape):
         self.PID_steer      = PIDController(2.0, 0, 0)
         self.last_action    = SteeringAction(0, 0)
         self.last_obs       = None
+        self.last_distance  = 0
+        self.last_to_goal   = 0
 
     def make_observation(self, obs_space=OBS_NONE, **kwargs):
         if obs_space == OBS_NONE:
             self.last_obs = None
         elif obs_space == OBS_GRID:
             self.last_obs = GridObservation(self, **kwargs)
+        elif obs_space == OBS_BIRDSEYE:
+            self.last_obs = BirdsEyeObservation(self, **kwargs)
+        elif obs_space:
+            fluids_assert(False, "Observation space not legal")
         return self.last_obs
 
     def raw_step(self, steer, f_acc):
@@ -88,6 +94,25 @@ class Car(Shape):
 
 
     def step(self, action):
+
+        distance_to_next = self.dist_to(self.waypoints[0])
+        startx, starty = self.x, self.y
+
+        if action == None:
+            self.raw_step(0, 0)
+            self.last_action = action
+        elif type(action) == SteeringAction:
+            self.raw_step(*action.get_action())
+            self.last_action = action
+        elif type(action) == VelocityAction:
+            steer, acc = self.PIDController(action.get_action())
+            steer += np.random.randn() * 0.5 * steer
+            acc += np.random.randn() * 0.5 * acc / 5
+            self.raw_step(steer, acc)
+            self.last_action = action
+        elif type(action) == LastValidAction:
+            self.step(self.last_action)
+
         while len(self.waypoints) < self.planning_depth and len(self.waypoints) and len(self.waypoints[-1].nxt):
             next_waypoint = random.choice(self.waypoints[-1].nxt)
             line = shapely.geometry.LineString([(self.waypoints[-1].x, self.waypoints[-1].y),
@@ -95,33 +120,16 @@ class Car(Shape):
             self.trajectory.append(((self.waypoints[-1].x, self.waypoints[-1].y),
                                     (next_waypoint.x, next_waypoint.y), line))
             self.waypoints.append(next_waypoint)
-            
+
+        self.last_to_goal = distance_to_next - self.dist_to(self.waypoints[0])
+        self.last_distance = np.linalg.norm([self.x - startx, self.y - starty])
+        
         if len(self.waypoints) and self.intersects(self.waypoints[0]):
             self.waypoints.pop(0)
             if len(self.trajectory):
                 self.trajectory.pop(0)
 
-        if action == None:
-            self.raw_step(0, 0)
-            return
-        elif type(action) == SteeringAction:
-            self.raw_step(*action.get_action())
-            self.last_action = action
-            return
-        elif type(action) == VelocityAction:
-            steer, acc = self.PIDController(action.get_action())
-            steer += np.random.randn() * 0.5 * steer
-            acc += np.random.randn() * 0.5 * acc / 5
-            self.raw_step(steer, acc)
-            self.last_action = action
-            return
-        elif type(action) == LastValidAction:
-            self.step(self.last_action)
-            return
         return
-        self.raw_step(*self.PIDController(0))
-        return
-        raise NotImplementedError
 
     def PIDController(self, target_vel):
         if len(self.waypoints):
@@ -155,6 +163,7 @@ class Car(Shape):
                 return super(Car, self).can_collide(other)
             return False
         elif type(other) is TrafficLight:
+            return True
             if other.color == "red":
                 return super(Car, self).can_collide(other)
             return False
@@ -169,9 +178,10 @@ class Car(Shape):
         else:
             return self.shapely_obj.buffer(self.ydim*0.3, resolution=2)
 
-    def render(self, surface):
+    def render(self, surface, **kwargs):
         super(Car, self).render(surface)
-
+        if "waypoints" not in self.__dict__:
+            return
         if len(self.waypoints) and self.vis_level > 1:
             pygame.draw.line(surface,
                              (255, 0, 0),
@@ -194,6 +204,6 @@ class Car(Shape):
                                 traj_ob,
                                 5)
 
-                    
+
         if self.last_obs and self.vis_level > 2:
             self.last_obs.render(surface)

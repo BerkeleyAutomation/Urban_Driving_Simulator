@@ -3,6 +3,7 @@ import pygame
 import shapely.geometry
 
 import scipy.interpolate as si
+from fluids.assets.shape import Shape
 
 def plan(x0,y0,a0,x1,y1,a1):
     def interpolate(p0,p1,p2,p3,t):
@@ -25,20 +26,18 @@ def plan(x0,y0,a0,x1,y1,a1):
     res_path.append([x1, y1])
     return res_path
 
-class Waypoint(object):
+class Waypoint(Shape):
     def __init__(self, x, y, angle=0, nxt=None):
-        self.x     = x
-        self.y     = y
-        self.angle = angle
+
         self.radius = 0
         self.nxt   = nxt if nxt else []
         self.prv   = []
-        self.shapely_obj = shapely.geometry.Polygon([(x-1, y-1),
-                                                     (x+1, y-1),
-                                                     (x+1, y+1),
-                                                     (x-1, y+1)])
+        points = [(x-1, y-1),
+                  (x+1, y-1),
+                  (x+1, y+1),
+                  (x-1, y+1)]
 
-
+        super(Waypoint, self).__init__(angle=angle, points=points, color=(0, 255, 255))
 
     def smoothen(self, max_dangle=np.pi/5):
         all_news = []
@@ -59,15 +58,15 @@ class Waypoint(object):
         self.nxt = new_nxt
         return all_news
 
-    def render(self, surface):
+    def render(self, surface, **kwargs):
         pygame.draw.circle(surface,
                            (0, 255, 255),
                            (int(self.x), int(self.y)),
                            5)
-
-        for next_point in self.nxt:
-            pygame.draw.line(surface,
-                             (0, 255, 255),
-                             (int(self.x), int(self.y)),
-                             (int(next_point.x), int(next_point.y)),
-                             1)
+        if "nxt" in self.__dict__:
+            for next_point in self.nxt:
+                pygame.draw.line(surface,
+                                 (0, 255, 255),
+                                 (int(self.x), int(self.y)),
+                                 (int(next_point.x), int(next_point.y)),
+                                 1)

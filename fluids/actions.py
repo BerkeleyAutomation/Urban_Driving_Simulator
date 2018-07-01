@@ -2,6 +2,9 @@ class Action(object):
     def get_action(self):
         raise NotImplementedError
 
+class KeyboardAction(Action):
+    pass
+    
 class SteeringAction(Action):
     def __init__(self, steer, acc):
         self.steer = steer

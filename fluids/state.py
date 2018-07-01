@@ -31,8 +31,8 @@ class State(object):
         layout = json.load(open(os.path.join(basedir, "layouts", layout + ".json")))
         self.time             = 0
         self.objects          = {}
-        self.type_map         = {k:set() for k in [Terrain, Lane, Street, CrossWalk, Sidewalk,
-                                           TrafficLight, Car, CrossWalkLight, Pedestrian]}
+        self.type_map         = {k:{} for k in [Terrain, Lane, Street, CrossWalk, Sidewalk,
+                                                TrafficLight, Car, CrossWalkLight, Pedestrian]}
         self.static_objects   = {}
         self.dynamic_objects  = {}
         self.dimensions       = (layout['dimension_x'], layout['dimension_y'])
@@ -48,12 +48,13 @@ class State(object):
                    "Sidewalk"  : Sidewalk}[obj_info.pop('type')]
 
             obj = typ(state=self, vis_level=vis_level, **obj_info)
-            self.type_map[typ].add(obj)
+
             if typ == Lane:
                 lanes.append(obj)
             if typ == Sidewalk:
                 sidewalks.append(obj)
             key = get_id()
+            self.type_map[typ][key] = obj
             self.objects[key] = obj
             self.static_objects[key] = obj
 
@@ -65,10 +66,11 @@ class State(object):
                    "Pedestrian"    : Pedestrian}[obj_info.pop('type')]
 
             obj = typ(state=self, vis_level=vis_level, **obj_info)
-            self.type_map[typ].add(obj)
+
             key = get_id()
             if type == Car:
                 car_ids.append(key)
+            self.type_map[typ][key] = obj
             self.objects[key] = obj
             self.dynamic_objects[key] = obj
 
@@ -79,10 +81,10 @@ class State(object):
                 y = np.random.uniform(start.miny + 50, start.maxy - 50)
                 angle = start.angle + np.random.uniform(-0.1, 0.1)
                 car = Car(state=self, x=x, y=y, angle=angle, vis_level=vis_level)
-                min_d = min([car.dist_to(other) for other in self.type_map[Car]] + [np.inf])
+                min_d = min([car.dist_to(other) for k, other in iteritems(self.type_map[Car])] + [np.inf])
                 if min_d > 10 and not self.is_in_collision(car):
                     key = get_id()
-                    self.type_map[Car].add(car)
+                    self.type_map[Car][key] = car
                     self.objects[key] = car
                     car_ids.append(key)
                     self.dynamic_objects[key] = car
@@ -99,7 +101,7 @@ class State(object):
                 if not self.is_in_collision(ped):
                     key = get_id()
                     self.objects[key] = ped
-                    self.type_map[Pedestrian].add(ped)
+                    self.type_map[Pedestrian][key] = ped
                     self.dynamic_objects[key] = obj
                     break
 
@@ -108,10 +110,10 @@ class State(object):
             car.color = (155, 20, 20)
         self.background_cars = {k: self.objects[k] for k in car_ids[controlled_cars:]}
 
-        self.waypoints      = [lane.start_waypoint for lane in self.type_map[Lane]]
-        self.waypoints.extend([lane.end_waypoint for lane in self.type_map[Lane]])
+        self.waypoints      = [lane.start_waypoint for k, lane in iteritems(self.type_map[Lane])]
+        self.waypoints.extend([lane.end_waypoint   for k, lane in iteritems(self.type_map[Lane])])
 
-        for street in self.type_map[Street]:
+        for k, street in iteritems(self.type_map[Street]):
             for waypoint in self.waypoints:
                 if street.intersects(waypoint):
                     test_point = (waypoint.x + np.cos(waypoint.angle),
@@ -130,7 +132,7 @@ class State(object):
         for waypoint in self.waypoints:
             new_waypoints.extend(waypoint.smoothen())
         self.waypoints.extend(new_waypoints)
-        for car in self.type_map[Car]:
+        for k, car in iteritems(self.type_map[Car]):
             for waypoint in self.waypoints:
                 if car.intersects(waypoint):
                     while car.intersects(waypoint):
@@ -156,7 +158,7 @@ class State(object):
     def get_dynamic_surface(self):
         dynamic_surface = pygame.Surface(self.dimensions, pygame.SRCALPHA)
         for typ in [Pedestrian, TrafficLight, CrossWalkLight]:
-            for obj in self.type_map[typ]:
+            for k, obj in iteritems(self.type_map[typ]):
                 obj.render(dynamic_surface)
         for k, car in iteritems(self.background_cars):
             car.render(dynamic_surface)
@@ -176,7 +178,7 @@ class State(object):
         collideables = obj.collideables
         for ctype in collideables:
             if ctype in self.type_map:
-                for other in self.type_map[ctype]:
+                for k, other in iteritems(self.type_map[ctype]):
                     if obj.collides(other):
                         return True
         return False
@@ -185,7 +187,7 @@ class State(object):
         collideables = obj.collideables
         mind = 0
         for ctype in collideables:
-            for other in self.type_map[ctype]:
+            for k, other in iteritems(self.type_map[ctype]):
                 d = obj.dist_to(other)
                 if d < mind:
                     mind = d

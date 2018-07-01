@@ -54,7 +54,9 @@ class Shape(object):
         new_points = self.points - np.array([x, y])
         new_points = new_points.dot(rotation_array(-angle))
         new_points = new_points + np.array(offset)
-        return Shape(points=new_points[:,:2], color=self.color)
+        shape = Shape(points=new_points[:,:2], color=self.color)
+        shape.__class__ = type(self)
+        return shape
 
     def center_distance_to(self, other):
         return np.linalg.norm([self.x-other.x, self.y-other.y])
@@ -75,10 +77,11 @@ class Shape(object):
     def dist_to(self, other):
         return self.shapely_obj.distance(other.shapely_obj)
 
-    def render(self, surface):
+    def render(self, surface, border=4):
         if self.color:
             pygame.draw.polygon(surface, self.color, self.points)
-        pygame.draw.polygon(surface, (0, 0, 0), self.points, 4)
+        if border:
+            pygame.draw.polygon(surface, (0, 0, 0), self.points, border)
 
     def render_debug(self, surface, color=(255, 0, 0), width=10):
         pygame.draw.polygon(surface, color, self.points, width)

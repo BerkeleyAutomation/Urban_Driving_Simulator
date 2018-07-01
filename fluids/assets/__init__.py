@@ -8,4 +8,5 @@ from fluids.assets.car import Car
 from fluids.assets.traffic_light import TrafficLight
 from fluids.assets.crosswalk_light import CrossWalkLight
 from fluids.assets.crosswalk import CrossWalk
+from fluids.assets.waypoint import Waypoint
 from fluids.assets.shape import Shape
