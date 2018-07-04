@@ -9,7 +9,7 @@ from fluids.utils import rotation_array
 
 class BirdsEyeObservation(FluidsObs):
     def __init__(self, car, obs_dim=500):
-        from fluids.assets import Car, Lane, Sidewalk, Terrain, TrafficLight, Waypoint
+        from fluids.assets import Car, Lane, Sidewalk, Terrain, TrafficLight, Waypoint, PedCrossing
         state = car.state
         self.car = car
         self.grid_dim = obs_dim
@@ -34,7 +34,7 @@ class BirdsEyeObservation(FluidsObs):
         gd = self.grid_dim
         a0 = self.car.angle + np.pi / 2
         a1 = self.car.angle
-        for typ in [Terrain, Sidewalk, Lane, Car, TrafficLight, Waypoint]:
+        for typ in [Terrain, Sidewalk, Lane, Car, TrafficLight, Waypoint, PedCrossing]:
             if typ in collideable_map:
                 for obj in collideable_map[typ]:
                     rel_obj = obj.get_relative((self.car.x+gd/2*np.cos(a0)-gd/6*np.cos(a1),

@@ -2,7 +2,7 @@ from fluids.assets.terrain import Terrain
 from fluids.assets.street import Street
 from fluids.assets.lane import Lane
 from fluids.assets.sidewalk import Sidewalk
-from fluids.assets.sidewalksquare import SidewalkSquare
+from fluids.assets.pedcrossing import PedCrossing
 from fluids.assets.pedestrian import Pedestrian
 from fluids.assets.car import Car
 from fluids.assets.traffic_light import TrafficLight

@@ -25,14 +25,14 @@ def integrator(state, t, steer, acc, lr, lf):
 class Car(Shape):
     def __init__(self, vel=0, mass=400, max_vel=5,
                  planning_depth=4, **kwargs):
-        from fluids.assets import Lane, Car, Pedestrian, TrafficLight, Terrain, Sidewalk, SidewalkSquare
+        from fluids.assets import Lane, Car, Pedestrian, TrafficLight, Terrain, Sidewalk, PedCrossing
         collideables = [Lane,
                         Car,
                         Pedestrian,
                         TrafficLight,
                         Terrain,
                         Sidewalk,
-                        SidewalkSquare]
+                        PedCrossing]
         Shape.__init__(self,
                        collideables=collideables,
                        color=(20, 150, 250),
@@ -179,7 +179,7 @@ class Car(Shape):
             return self.shapely_obj.buffer(self.ydim*0.3, resolution=2)
 
     def render(self, surface, **kwargs):
-        super(Car, self).render(surface)
+        super(Car, self).render(surface, **kwargs)
         if "waypoints" not in self.__dict__:
             return
         if len(self.waypoints) and self.vis_level > 1:

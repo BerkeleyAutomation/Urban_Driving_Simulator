@@ -27,7 +27,7 @@ def plan(x0,y0,a0,x1,y1,a1):
     return res_path
 
 class Waypoint(Shape):
-    def __init__(self, x, y, angle=0, nxt=None):
+    def __init__(self, x, y, angle=0, nxt=None, **kwargs):
 
         self.radius = 0
         self.nxt   = nxt if nxt else []
@@ -37,7 +37,8 @@ class Waypoint(Shape):
                   (x+1, y+1),
                   (x-1, y+1)]
 
-        super(Waypoint, self).__init__(angle=angle, points=points, color=(0, 255, 255))
+
+        super(Waypoint, self).__init__(angle=angle, points=points, color=(0, 255, 255), **kwargs)
 
     def smoothen(self, max_dangle=np.pi/5):
         all_news = []
@@ -59,14 +60,18 @@ class Waypoint(Shape):
         return all_news
 
     def render(self, surface, **kwargs):
+        if 'color' in kwargs:
+            color = kwargs['color']
+        else:
+            color = self.color
         pygame.draw.circle(surface,
-                           (0, 255, 255),
+                           color,
                            (int(self.x), int(self.y)),
                            5)
         if "nxt" in self.__dict__:
             for next_point in self.nxt:
                 pygame.draw.line(surface,
-                                 (0, 255, 255),
+                                 color,
                                  (int(self.x), int(self.y)),
                                  (int(next_point.x), int(next_point.y)),
                                  1)

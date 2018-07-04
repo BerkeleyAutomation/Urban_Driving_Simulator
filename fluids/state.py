@@ -32,7 +32,7 @@ class State(object):
         self.time             = 0
         self.objects          = {}
         self.type_map         = {k:{} for k in [Terrain, Lane, Street, CrossWalk, Sidewalk,
-                                                TrafficLight, Car, CrossWalkLight, Pedestrian]}
+                                                TrafficLight, Car, CrossWalkLight, Pedestrian, PedCrossing]}
         self.static_objects   = {}
         self.dynamic_objects  = {}
         self.dimensions       = (layout['dimension_x'], layout['dimension_y'])
@@ -41,11 +41,12 @@ class State(object):
         lanes = []
         sidewalks = []
         for obj_info in layout['static_objects']:
-            typ = {"Terrain"   : Terrain,
-                   "Lane"      : Lane,
-                   "Street"    : Street,
-                   "CrossWalk" : CrossWalk,
-                   "Sidewalk"  : Sidewalk}[obj_info.pop('type')]
+            typ = {"Terrain"    : Terrain,
+                   "Lane"       : Lane,
+                   "Street"     : Street,
+                   "CrossWalk"  : CrossWalk,
+                   "PedCrossing": PedCrossing,
+                   "Sidewalk"   : Sidewalk}[obj_info.pop('type')]
 
             obj = typ(state=self, vis_level=vis_level, **obj_info)
 
@@ -141,7 +142,30 @@ class State(object):
                     car.waypoints = [waypoint]
                     break
 
-                    
+        self.ped_waypoints = []
+        for k, obj in iteritems(self.objects):
+            if type(obj) in {CrossWalk, Sidewalk}:
+                self.ped_waypoints.extend(obj.start_waypoints)
+                self.ped_waypoints.extend(obj.end_waypoints)
+        for k, cross in iteritems(self.type_map[PedCrossing]):
+            for waypoint in self.ped_waypoints:
+                if cross.intersects(waypoint):
+                    test_point = (waypoint.x + np.cos(waypoint.angle),
+                                  waypoint.y - np.sin(waypoint.angle))
+                    if cross.contains_point(test_point):
+                        cross.in_waypoints.append(waypoint)
+                    else:
+                        cross.out_waypoints.append(waypoint)
+            for in_p in cross.in_waypoints:
+                for out_p in cross.out_waypoints:
+                    dangle = (in_p.angle - out_p.angle) % (2 * np.pi)
+                    if dangle < 0.75*np.pi or dangle > 1.25*np.pi:
+                        in_p.nxt.append(out_p)
+
+        new_waypoints = []
+        for waypoint in self.ped_waypoints:
+            new_waypoints.extend(waypoint.smoothen())
+        self.ped_waypoints.extend(new_waypoints)
 
         if vis_level:
             self.static_surface = pygame.Surface(self.dimensions)
@@ -150,6 +174,8 @@ class State(object):
             if vis_level > 2:
                 for waypoint in self.waypoints:
                     waypoint.render(self.static_surface)
+                for waypoint in self.ped_waypoints:
+                    waypoint.render(self.static_surface, color=(255, 255, 0))
 
 
     def get_static_surface(self):
