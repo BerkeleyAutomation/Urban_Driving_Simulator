@@ -22,6 +22,28 @@ from fluids.obs import GridObservation
 
 
 class FluidSim(object):
+    """
+    This class controls the generation and simulation of the urban environment.
+
+    Parameters
+    ----------
+    state: str
+        Name of json layout file specifiying environment object positions. Default is "fluids_state_city"
+    visualization_level: int
+        0 is no visualization. Higher numbers turn on more debug visuals.
+    controlled_cars: int
+        Number of cars to accept external control for
+    background_cars: int
+        Number of cars to control with the background planner
+    background_peds: int
+        Number of pedestrians to control with the background planner
+    fps: int
+        If set to a positive number, caps the FPS of the simulator. If set to 0, FPS is unbound. Default is 30
+    obs_space: str
+        Controls what observation representation to return for controlled cars. fluids.BIRDSEYE or fluids.NONE
+    screen_dim: int
+        Height of the visualization screen. Default is 800
+    """
     def __init__(self,
                  state               =STATE_CITY,
                  visualization_level =1,
@@ -90,9 +112,31 @@ class FluidSim(object):
 
         
     def get_control_keys(self):
+        """
+        Returns
+        -------
+        list of keys
+            Keys for every controlled car in the scene
+        """
         return self.state.controlled_cars.keys()
 
     def step(self, actions={}):
+        """
+        Simulates one frame
+        
+        Parameters
+        ----------
+        actions : dict of (key -> action)
+            Keys in dict should correspond to controlled cars.
+            Action can be of type KeyboardAction, SteeringAction, or VelocityAction
+        
+        Returns
+        -------
+        dict of (key -> FluidsObs)
+            Dictionary mapping keys of controlled cars to FluidsObs object
+        int
+            Summed reward collected by all agents in this step
+        """
         for k, v in iteritems(actions):
             if type(v) == KeyboardAction:
                 if self.last_keys_pressed:
@@ -176,7 +220,7 @@ class FluidSim(object):
             k1 = ped_keys[k1x]
             ped1 = self.state.objects[k1]
             for fl, flc in futures_crosswalks:
-                if np.abs(ped1.angle - fl.angle) < np.pi / 2:
+                if abs(ped1.angle - fl.angle) < np.pi / 2:
                     if flc == "red" and ped1.intersects(fl):
                         problem.addConstraint(lambda k1v: not k1v[0], [k1])
 

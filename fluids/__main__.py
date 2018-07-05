@@ -11,7 +11,7 @@ parser.add_argument('-p', metavar='N', type=int, default=5,
                     help='Number of background pedestrians')
 parser.add_argument('-v', metavar='N', type=int, default=1,
                     help='Visualization level')
-parser.add_argument('--state', metavar='layout file', type=str, default=fluids.STATE_CITY,
+parser.add_argument('--state', metavar='file', type=str, default=fluids.STATE_CITY,
                     help='Layout file for state generation')
 
 args = parser.parse_args()
