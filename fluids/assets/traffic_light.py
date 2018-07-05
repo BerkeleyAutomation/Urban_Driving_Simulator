@@ -14,7 +14,7 @@ class TrafficLight(Shape):
         self.timer = {"red":0,
                       "green":200,
                       "yellow":350}[init_color]
-        self.no_collision_shape = Shape
+
         Shape.__init__(self, xdim=10, ydim=50, color=color, **kwargs)
 
 

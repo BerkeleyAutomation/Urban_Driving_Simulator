@@ -7,7 +7,7 @@ import pygame
 
 from fluids.consts import *
 from fluids.assets import *
-
+from fluids.utils import *
 
 basedir = os.path.dirname(__file__)
 
@@ -27,7 +27,7 @@ class State(object):
                  background_peds =0,
                  vis_level       =1):
 
-
+        fluids_print("Loading layout: " + layout)
         layout = json.load(open(os.path.join(basedir, "layouts", layout + ".json")))
         self.time             = 0
         self.objects          = {}
@@ -37,9 +37,11 @@ class State(object):
         self.dynamic_objects  = {}
         self.dimensions       = (layout['dimension_x'], layout['dimension_y'])
         self.vis_level        = vis_level
-        
+
+
         lanes = []
         sidewalks = []
+        fluids_print("Creating objects")
         for obj_info in layout['static_objects']:
             typ = {"Terrain"    : Terrain,
                    "Lane"       : Lane,
@@ -75,6 +77,7 @@ class State(object):
             self.objects[key] = obj
             self.dynamic_objects[key] = obj
 
+        fluids_print("Generating cars")
         for i in range(controlled_cars + background_cars):
             while True:
                 start = lanes[np.random.random_integers(0, len(lanes)-1)]
@@ -92,25 +95,13 @@ class State(object):
                     break
 
 
-        for i in range(background_peds):
-            while True:
-                start = sidewalks(np.random.random_integers(0, len(sidewalks)-1))
-                x = np.random.uniform(start.minx + 50, start.maxx - 50)
-                y = np.random.uniform(start.miny + 50, start.maxy - 50)
-                angle = start.angle + np.random.uniform(-0.1, 0.1) + np.random.randint() * np.pi
-                ped = Pedestrian(state=self, x=x, y=y, angle=angle, vis_level=vis_level)
-                if not self.is_in_collision(ped):
-                    key = get_id()
-                    self.objects[key] = ped
-                    self.type_map[Pedestrian][key] = ped
-                    self.dynamic_objects[key] = obj
-                    break
 
         self.controlled_cars = {k: self.objects[k] for k in car_ids[:controlled_cars]}
         for k, car in iteritems(self.controlled_cars):
             car.color = (155, 20, 20)
         self.background_cars = {k: self.objects[k] for k in car_ids[controlled_cars:]}
 
+        fluids_print("Generating trajectory map")
         self.waypoints      = [lane.start_waypoint for k, lane in iteritems(self.type_map[Lane])]
         self.waypoints.extend([lane.end_waypoint   for k, lane in iteritems(self.type_map[Lane])])
 
@@ -164,9 +155,25 @@ class State(object):
 
         new_waypoints = []
         for waypoint in self.ped_waypoints:
-            new_waypoints.extend(waypoint.smoothen())
+            new_waypoints.extend(waypoint.smoothen(smooth_level=1500))
         self.ped_waypoints.extend(new_waypoints)
 
+        fluids_print("Generating peds")
+        for i in range(background_peds):
+            while True:
+                wp = random.choice(self.ped_waypoints)
+                ped = Pedestrian(state=self, x=wp.x, y=wp.y, angle=wp.angle, vis_level=vis_level)
+                while ped.intersects(wp):
+                    wp = random.choice(wp.nxt)
+                ped.waypoints = [wp]
+                if not self.is_in_collision(ped):
+                    key = get_id()
+                    self.objects[key] = ped
+                    self.type_map[Pedestrian][key] = ped
+                    self.dynamic_objects[key] = obj
+                    break
+
+        fluids_print("State creation complete")
         if vis_level:
             self.static_surface = pygame.Surface(self.dimensions)
             for k, obj in iteritems(self.static_objects):

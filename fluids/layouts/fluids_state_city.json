@@ -138,13 +138,13 @@
         { "type":"TrafficLight"    ,"x": 900,  "y": 1050, "init_color":"green", "angle_deg":-180 },
         { "type":"TrafficLight"    ,"x": 1050, "y": 1100, "init_color":"red"  , "angle_deg":-90 },
         { "type":"TrafficLight"    ,"x": 950,  "y": 900,  "init_color":"red"  , "angle_deg":90 },
-        { "type":"CrossWalkLight"  ,"x": 875,  "y": 890,  "init_color":"red"  , "angle_deg":-90 },
-        { "type":"CrossWalkLight"  ,"x": 890,  "y": 875,  "init_color":"white", "angle_deg":0 },
-        { "type":"CrossWalkLight"  ,"x": 1110, "y": 1125, "init_color":"white", "angle_deg":-180 },
-        { "type":"CrossWalkLight"  ,"x": 1125, "y": 1110, "init_color":"red"  , "angle_deg":90 },
-        { "type":"CrossWalkLight"  ,"x": 875,  "y": 1110, "init_color":"red"  , "angle_deg":90 },
-        { "type":"CrossWalkLight"  ,"x": 890,  "y": 1125, "init_color":"white", "angle_deg":0 },
-        { "type":"CrossWalkLight"  ,"x": 1125, "y": 890,  "init_color":"red"  , "angle_deg":-90 },
-        { "type":"CrossWalkLight"  ,"x": 1110, "y": 875,  "init_color":"white", "angle_deg":-180 }
+        { "type":"CrossWalkLight"  ,"x": 875,  "y": 900,  "init_color":"red"  , "angle_deg":-90 },
+        { "type":"CrossWalkLight"  ,"x": 900,  "y": 875,  "init_color":"green", "angle_deg":0 },
+        { "type":"CrossWalkLight"  ,"x": 1100, "y": 1125, "init_color":"green", "angle_deg":-180 },
+        { "type":"CrossWalkLight"  ,"x": 1125, "y": 1100, "init_color":"red"  , "angle_deg":90 },
+        { "type":"CrossWalkLight"  ,"x": 875,  "y": 1100, "init_color":"red"  , "angle_deg":90 },
+        { "type":"CrossWalkLight"  ,"x": 900,  "y": 1125, "init_color":"green", "angle_deg":0 },
+        { "type":"CrossWalkLight"  ,"x": 1125, "y": 900,  "init_color":"red"  , "angle_deg":-90 },
+        { "type":"CrossWalkLight"  ,"x": 1100, "y": 875,  "init_color":"green", "angle_deg":-180 }
     ]
 }

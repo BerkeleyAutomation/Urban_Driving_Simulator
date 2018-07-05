@@ -1,9 +1,9 @@
 import sys
 
 
-def print(s):
-    sys.stdout.write("[FLUIDS] " + str(s) + '\n')
+def fluids_print(s, **kwargs):
+    print("[FLUIDS] " + str(s), **kwargs)
 def fluids_assert(cond, em):
     if not cond:
-        print("Error: " + em)
+        fluids_print("Error: " + em)
         exit(1)

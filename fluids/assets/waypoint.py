@@ -5,7 +5,7 @@ import shapely.geometry
 import scipy.interpolate as si
 from fluids.assets.shape import Shape
 
-def plan(x0,y0,a0,x1,y1,a1):
+def plan(x0,y0,a0,x1,y1,a1,smooth_level=3000):
     def interpolate(p0,p1,p2,p3,t):
         return [p0[0]*1.0*((1-t)**3) + p1[0]*3.0*t*(1-t)**2 + p2[0]*3.0*(t**2)*(1-t) + p3[0]*1.0*(t**3),
                 p0[1]*1.0*((1-t)**3) + p1[1]*3.0*t*(1-t)**2 + p2[1]*3.0*(t**2)*(1-t) + p3[1]*1.0*(t**3)]
@@ -21,7 +21,7 @@ def plan(x0,y0,a0,x1,y1,a1):
     for t in np.arange(0,1,.001):
         new_point = interpolate(p0,p1,p2,p3,t)
         old_point = res_path[-1]
-        if (new_point[0] - old_point[0])**2 + (new_point[1] - old_point[1])**2 > 3000:
+        if (new_point[0] - old_point[0])**2 + (new_point[1] - old_point[1])**2 > smooth_level:
             res_path.append(new_point)
     res_path.append([x1, y1])
     return res_path
@@ -40,13 +40,13 @@ class Waypoint(Shape):
 
         super(Waypoint, self).__init__(angle=angle, points=points, color=(0, 255, 255), **kwargs)
 
-    def smoothen(self, max_dangle=np.pi/5):
+    def smoothen(self, smooth_level=3000):
         all_news = []
         new_nxt = []
         for n_p in self.nxt:
 
             path = plan(self.x, self.y, self.angle % (2 * np.pi),
-                        n_p.x, n_p.y, n_p.angle % (2 * np.pi))
+                        n_p.x, n_p.y, n_p.angle % (2 * np.pi), smooth_level=smooth_level)
             new_point = Waypoint(path[1][0], path[1][1])
             all_news.append(new_point)
             new_nxt.append(new_point)
