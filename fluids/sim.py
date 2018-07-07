@@ -2,7 +2,7 @@ import numpy as np
 import json
 import pygame
 from six import iteritems
-import constraint as csp
+from ortools.constraint_solver import pywrapcp
 from copy import deepcopy
 
 from shapely import speedups
@@ -108,9 +108,9 @@ class FluidSim(object):
         else:
             self.clock.tick(0)
             if not self.state.time % 60:
-                fluids_print("FPS: " + str(int(self.clock.get_fps())))    
+                fluids_print("FPS: " + str(int(self.clock.get_fps())))
 
-        
+
     def get_control_keys(self):
         """
         Returns
@@ -123,13 +123,13 @@ class FluidSim(object):
     def step(self, actions={}):
         """
         Simulates one frame
-        
+
         Parameters
         ----------
         actions : dict of (key -> action)
             Keys in dict should correspond to controlled cars.
             Action can be of type KeyboardAction, SteeringAction, or VelocityAction
-        
+
         Returns
         -------
         dict of (key -> FluidsObs)
@@ -145,8 +145,8 @@ class FluidSim(object):
                     steer = 1 if keys[pygame.K_LEFT] else -1 if keys[pygame.K_RIGHT] else 0
                     actions[k] = SteeringAction(steer, acc)
                 else:
-                    actions[k] = None    
-            
+                    actions[k] = None
+
 
         # Get background vehicle and pedestrian controls
         actions.update(self.get_background_actions())
@@ -175,66 +175,83 @@ class FluidSim(object):
         futures_lights = [(o, o.get_future_color()) for k, o in iteritems(self.state.type_map[TrafficLight])]
         futures_crosswalks = [(o, o.get_future_color()) for k, o in iteritems(self.state.type_map[CrossWalkLight])]
         futures_peds = {k:o.get_future_shape() for k, o in iteritems(self.state.type_map[Pedestrian])}
-
+        buffered_objs = {k: o.shapely_obj.buffer(10) for k, o in iteritems(self.state.type_map[Car])}
         keys = list(futures.keys())
         ped_keys = list(futures_peds.keys())
-        problem = csp.Problem()
+
+        solver = pywrapcp.Solver("FLUIDS Background CSP")
+
+        var_map = {}
 
         for k in futures:
-            problem.addVariable(k, [(0, self.state.objects[k].shapely_obj, k), (1, futures[k], k)])
+            var = solver.IntVar(-1, 1, str(k))
+            var_map[k] = var
+
         for k in futures_peds:
-            problem.addVariable(k, [(0, self.state.objects[k].shapely_obj, k), (1, futures_peds[k], k)])
+            var = solver.IntVar(0, 1, str(k))
+            var_map[k] = var
         fast_map = {}
         for k1x in range(len(keys)):
             k1 = keys[k1x]
+            k1v = var_map[k1]
             car1 = self.state.objects[k1]
             for k2x in range(k1x + 1, len(keys)):
                 k2 = keys[k2x]
+                k2v = var_map[k2]
                 car2 = self.state.objects[k2]
 
                 might_collide = futures[k1].intersects(futures[k2])
                 if might_collide:
-                    fast_map[(k1, k2, 0, 0)] = True
-                    fast_map[(k1, k2, 0, 1)] = not futures[k2].intersects(car1.shapely_obj)
-                    fast_map[(k1, k2, 1, 0)] = not futures[k1].intersects(car2.shapely_obj)
-                    fast_map[(k1, k2, 1, 1)] = False
-                    problem.addConstraint(lambda k1v, k2v :
-                                          fast_map[k1v[2], k2v[2], k1v[0], k2v[0]],
-                                          [k1, k2])
+                    f1 = not futures[k2].intersects(buffered_objs[k1])
+                    f2 = not futures[k1].intersects(buffered_objs[k2])
+                    solver.Add(k1v + k2v < 2)
+                    if not f1:
+                        solver.Add((k2v == 1) == False)
+                    if not f2:
+                        solver.Add((k1v == 1) == False)
             for k2x in range(len(ped_keys)):
                 k2 = ped_keys[k2x]
+                k2v = var_map[k2]
                 ped2 = self.state.objects[k2]
                 might_collide = futures[k1].intersects(futures_peds[k2])
                 if might_collide:
-                    fast_map[(k1, k2, 0, 0)] = True
-                    fast_map[(k1, k2, 0, 1)] = not futures_peds[k2].intersects(car1.shapely_obj)
-                    fast_map[(k1, k2, 1, 0)] = not futures[k1].intersects(ped2.shapely_obj)
-                    fast_map[(k1, k2, 1, 1)] = False
-                    problem.addConstraint(lambda k1v, k2v:
-                                          fast_map[k1v[2], k2v[2], k1v[0], k2v[0]],
-                                          [k1, k2])
+                    f1 = not futures_peds[k2].intersects(buffered_objs[k1])
+                    f2 = not futures[k1].intersects(ped2.shapely_obj)
+                    solver.Add(k1v + k2v < 2)
+                    if not f1:
+                        solver.Add((k2v == 1) == False)
+                    if not f2:
+                        solver.Add((k1v == 1) == False)
             for fl, flc in futures_lights:
                 if flc == "red" and futures[k1].intersects(fl.shapely_obj) and not car1.intersects(fl):
-                    problem.addConstraint(lambda k1v : not k1v[0], [k1])
+                    solver.Add(k1v == 0)
         for k1x in range(len(ped_keys)):
             k1 = ped_keys[k1x]
             ped1 = self.state.objects[k1]
             for fl, flc in futures_crosswalks:
                 if abs(ped1.angle - fl.angle) < np.pi / 2:
                     if flc == "red" and ped1.intersects(fl):
-                        problem.addConstraint(lambda k1v: not k1v[0], [k1])
+                        solver.Add(k1v == 0)
 
 
-        solution = problem.getSolution()
+        db = solver.Phase(sorted([v for k,v in iteritems(var_map)]), solver.CHOOSE_FIRST_UNBOUND, solver.ASSIGN_MAX_VALUE)
+        solver.NewSearch(db)
+
+        solver.NextSolution()
         actions = {}
-        for k, v in iteritems(solution):
+        for k, v in iteritems(var_map):
             if k in self.state.background_cars:
-                actions[k] = VelocityAction(v[0]*3)
+
+                    actions[k] = VelocityAction(v.Value()*3)
+
             elif k in self.state.type_map[Pedestrian]:
-                actions[k] = v[0]
-                
+
+                    actions[k] = v.Value()
+
+
+
         return actions
 
-        fluids_assert(False, "Not implemented")
+
     def run_time(self):
         return self.state.time

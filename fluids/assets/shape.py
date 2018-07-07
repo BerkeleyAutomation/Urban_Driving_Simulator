@@ -30,7 +30,8 @@ class Shape(object):
         xs, ys = zip(*self.points)
         self.minx, self.maxx = min(xs), max(xs)
         self.miny, self.maxy = min(ys), max(ys)
-        self.radius = max(np.linalg.norm([p -  np.array([self.x, self.y]) for p in self.points], axis=1))
+        centers = np.array([self.x, self.y])
+        self.radius = max(np.linalg.norm([p -  centers for p in self.points], axis=1))
 
         self.xdim          = xdim
         self.ydim          = ydim

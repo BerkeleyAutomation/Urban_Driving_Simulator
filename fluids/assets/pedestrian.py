@@ -6,7 +6,7 @@ from fluids.assets.shape import Shape
 
 class Pedestrian(Shape):
     def __init__(self, max_vel=2, vel=0, planning_depth=2, **kwargs):
-        Shape.__init__(self, color=(255, 150, 150), xdim=20, ydim=20, **kwargs)
+        Shape.__init__(self, color=(255, 250, 150), xdim=20, ydim=20, **kwargs)
         self.max_vel        = max_vel
         self.vel            = vel
         self.waypoints      = []

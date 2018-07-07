@@ -122,7 +122,7 @@ class State(object):
 
         new_waypoints = []
         for waypoint in self.waypoints:
-            new_waypoints.extend(waypoint.smoothen())
+            new_waypoints.extend(waypoint.smoothen(smooth_level=2000))
         self.waypoints.extend(new_waypoints)
         for k, car in iteritems(self.type_map[Car]):
             for waypoint in self.waypoints:

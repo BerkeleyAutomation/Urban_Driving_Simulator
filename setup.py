@@ -6,4 +6,4 @@ setup(name="fluids",
                         'numpy',
                         'scipy',
                         'shapely',
-                        'python-constraint'])
+                        'ortools'])
