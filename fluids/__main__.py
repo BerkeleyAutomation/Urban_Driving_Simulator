@@ -32,4 +32,5 @@ simulator = fluids.FluidSim(visualization_level=args.v,
                             background_control =fluids.BACKGROUND_CSP) 
 while True:
     actions = {k: fluids.KeyboardAction() for k in simulator.get_control_keys()}
-    obs, rew = simulator.step(actions)
+    rew = simulator.step(actions)
+    obs = simulator.get_observations(simulator.get_control_keys())

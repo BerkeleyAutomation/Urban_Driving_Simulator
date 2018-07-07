@@ -95,7 +95,10 @@ class FluidSim(object):
             self.clock.tick(self.fps)
             self.surface.blit(pygame.transform.scale(self.state.get_static_surface(),
                                                      self.screen_dim), (0, 0))
-
+            if self.vis_level > 2:
+                self.surface.blit(pygame.transform.scale(self.state.get_static_debug_surface(),
+                                                         self.screen_dim), (0, 0))
+            
             self.surface.blit(pygame.transform.scale(self.state.get_dynamic_surface(),
                                                      self.screen_dim), (0, 0))
 
@@ -105,6 +108,14 @@ class FluidSim(object):
             pygame.display.flip()
             pygame.event.pump()
             self.last_keys_pressed = pygame.key.get_pressed()
+            if self.last_keys_pressed[pygame.K_PERIOD]:
+                self.vis_level += 1
+                self.state.update_vis_level(self.vis_level)
+                fluids_print("New visualization level: " + str(self.vis_level))
+            elif self.last_keys_pressed[pygame.K_COMMA] and self.vis_level > 1:
+                self.vis_level -= 1
+                self.state.update_vis_level(self.vis_level)
+                fluids_print("New visualization level: " + str(self.vis_level))
         else:
             self.clock.tick(0)
             if not self.state.time % 60:
@@ -157,15 +168,15 @@ class FluidSim(object):
 
         self.state.time += 1
 
-
-
-        observations = {k:c.make_observation(self.obs_space, **self.obs_args)
-                        for k, c in iteritems(self.state.controlled_cars)}
         reward_step = self.reward_fn(self.state)
         #print(reward_step)
         if self.render_on:
             self.render()
-        return observations, reward_step
+        return reward_step
+    def get_observations(self, keys={}):
+        observations = {k:self.state.objects[k].make_observation(self.obs_space, **self.obs_args)
+                        for k in keys}
+        return observations
 
     def get_background_actions(self):
         if self.background_control == BACKGROUND_NULL or len(self.state.background_cars) == 0:

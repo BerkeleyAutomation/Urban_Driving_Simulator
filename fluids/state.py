@@ -175,25 +175,31 @@ class State(object):
 
         fluids_print("State creation complete")
         if vis_level:
-            self.static_surface = pygame.Surface(self.dimensions)
+            self.static_surface       = pygame.Surface(self.dimensions)
+            self.static_debug_surface = pygame.Surface(self.dimensions, pygame.SRCALPHA)
             for k, obj in iteritems(self.static_objects):
-                obj.render(self.static_surface)
-            if vis_level > 2:
-                for waypoint in self.waypoints:
-                    waypoint.render(self.static_surface)
-                for waypoint in self.ped_waypoints:
-                    waypoint.render(self.static_surface, color=(255, 255, 0))
+                if type(obj) != CrossWalk:
+                    obj.render(self.static_surface)
+                else:
+                    obj.render(self.static_debug_surface)
+            for waypoint in self.waypoints:
+                waypoint.render(self.static_debug_surface)
+            for waypoint in self.ped_waypoints:
+                waypoint.render(self.static_debug_surface, color=(255, 255, 0))
 
 
     def get_static_surface(self):
         return self.static_surface
+
+    def get_static_debug_surface(self):
+        return self.static_debug_surface
 
     def get_dynamic_surface(self):
         dynamic_surface = pygame.Surface(self.dimensions, pygame.SRCALPHA)
         for typ in [Pedestrian, TrafficLight, CrossWalkLight]:
             for k, obj in iteritems(self.type_map[typ]):
                 obj.render(dynamic_surface)
-        for k, car in iteritems(self.background_cars):
+        for k, car in iteritems(self.background_cars): 
             car.render(dynamic_surface)
         for k, car in iteritems(self.controlled_cars):
             car.render(dynamic_surface)
@@ -225,6 +231,12 @@ class State(object):
                 if d < mind:
                     mind = d
         return mind
+
+    def update_vis_level(self, new_vis_level):
+        self.vis_level = new_vis_level
+        for k, obj in iteritems(self.objects):
+            obj.vis_level = new_vis_level
+
 
     def get_controlled_collisions(self):
         return

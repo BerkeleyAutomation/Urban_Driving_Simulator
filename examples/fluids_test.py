@@ -22,4 +22,5 @@ while True:
 #    actions = {k:fluids.VelocityAction(1) for k in controlled_keys}
 #    actions = {k:fluids.SteeringAction(0, 1) for k in controlled_keys}
 #    actions = {k:fluids.KeyboardAction() for k in controlled_keys}
-    obs, rew = simulator.step(actions)
+    rew = simulator.step(actions)
+    obs = simulator.get_observations(controlled_keys)

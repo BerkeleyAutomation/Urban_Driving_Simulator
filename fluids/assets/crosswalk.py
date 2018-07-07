@@ -15,7 +15,3 @@ class CrossWalk(Shape):
         self.start_waypoints[0].nxt = [self.end_waypoints[0]]
         self.start_waypoints[1].nxt = [self.end_waypoints[1]]
 
-
-    def render(self, surface, **kwargs):
-        if self.vis_level > 3:
-            super(CrossWalk, self).render(surface, **kwargs)
