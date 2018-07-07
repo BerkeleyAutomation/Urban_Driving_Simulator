@@ -85,11 +85,8 @@ class Car(Shape):
         x, y, vel, angle = delta_ode_state[-1]
         
 
-        self.angle = angle
-        self.x = x
-        self.y = y
         self.vel = vel
-        self.update_points()
+        self.update_points(x, y, angle)
 
 
 

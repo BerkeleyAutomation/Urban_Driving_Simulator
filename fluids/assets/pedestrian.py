@@ -26,10 +26,10 @@ class Pedestrian(Shape):
             x0, y0 = self.x, self.y
             x1, y1 = self.waypoints[0].x, self.waypoints[0].y
             angle = np.arctan2([y0-y1], [x1-x0])[0]
-            self.x = self.x + 1 * np.cos(angle)
-            self.y = self.y - 1 * np.sin(angle)
-            self.angle = angle
-            self.update_points()
+            x = self.x + 1 * np.cos(angle)
+            y = self.y - 1 * np.sin(angle)
+            angle = angle
+            self.update_points(x, y, angle)
         while len(self.waypoints) < self.planning_depth and len(self.waypoints) and len(self.waypoints[-1].nxt):
             next_waypoint = random.choice(self.waypoints[-1].nxt)
             line = shapely.geometry.LineString([(self.waypoints[-1].x, self.waypoints[-1].y),
