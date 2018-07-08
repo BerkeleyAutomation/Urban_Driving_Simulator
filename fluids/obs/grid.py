@@ -3,95 +3,101 @@ import numpy as np
 import pygame
 
 from fluids.assets.shape import Shape
-
 from fluids.obs.obs import FluidsObs
 from fluids.utils import rotation_array
 
 class GridObservation(FluidsObs):
-    def __init__(self, car, grid_dim=500, grid_size=19):
+    def __init__(self, car, obs_dim=500):
+        from fluids.assets import ALL_OBJS, TrafficLight, Lane, Terrain, Sidewalk, \
+            PedCrossing, Street, Car, Waypoint, Pedestrian
         state = car.state
         self.car = car
-        self.grid_dim = grid_dim
-        self.grid_size = grid_size
-        self.grid_square = Shape(x=car.x+grid_dim/3*np.cos(car.angle),
-                                 y=car.y-grid_dim/3*np.sin(car.angle),
-                                 xdim=grid_dim, ydim=grid_dim, angle=car.angle,
+        self.grid_dim = obs_dim
+        self.grid_square = Shape(x=car.x+obs_dim/3*np.cos(car.angle),
+                                 y=car.y-obs_dim/3*np.sin(car.angle),
+                                 xdim=obs_dim, ydim=obs_dim, angle=car.angle,
                                  color=None)
         self.all_collideables = []
-
+        collideable_map = {typ:[] for typ in ALL_OBJS}
         for k, obj in iteritems(state.objects):
-            if car.can_collide(obj) and self.grid_square.intersects(obj):
+            if (car.can_collide(obj) or type(obj) in {TrafficLight, Lane, Street}) and self.grid_square.intersects(obj):
+                typ = type(obj)
+                if typ not in collideable_map:
+                    collideable_map[typ] = []
+                collideable_map[typ].append(obj)
                 self.all_collideables.append(obj)
+        for waypoint in car.waypoints:
+            collideable_map[Waypoint].append(waypoint)
+            self.all_collideables.append(waypoint)
 
-        self.small_square_size = self.grid_dim / self.grid_size
-        x = self.grid_square.x
-        y = self.grid_square.y
-        angle = self.grid_square.angle
-        points = []
-        r_array = rotation_array(angle)
-        self.colls = [[None for _ in range(self.grid_size)] for _ in range(self.grid_size)]
-        self.waypoints = [[None for _ in range(self.grid_size)] for _ in range(self.grid_size)]
-        self.raw_colls = {}
-        for i in range(-int(self.grid_size/2), int(self.grid_size/2)+1):
-            for j in range(-int(self.grid_size/2), int(self.grid_size/2)+1):
-                point = np.array([i*self.small_square_size, j*self.small_square_size])
-                p = point.dot(r_array)
-                sx = p[0] + x
-                sy = p[1] + y
-        
-                for obj in self.all_collideables:
-                    if obj.contains_point((sx, sy)):
-                        self.colls[i+int(self.grid_size/2)][j+int(self.grid_size/2)] = obj
-                        self.raw_colls[(sx, sy)] = obj, None
-                        break
-                else:
-                    self.raw_colls[(sx, sy)] = None, None
-        
+        terrain_window    = pygame.Surface((self.grid_dim, self.grid_dim))
+        drivable_window   = pygame.Surface((self.grid_dim, self.grid_dim))
+        undrivable_window = pygame.Surface((self.grid_dim, self.grid_dim))
+        car_window        = pygame.Surface((self.grid_dim, self.grid_dim))
+        ped_window        = pygame.Surface((self.grid_dim, self.grid_dim))
+        light_window      = pygame.Surface((self.grid_dim, self.grid_dim))
+
+        gd = self.grid_dim
+        a0 = self.car.angle + np.pi / 2
+        a1 = self.car.angle
+        rel = (self.car.x+gd/2*np.cos(a0)-gd/6*np.cos(a1),
+               self.car.y-gd/2*np.sin(a0)+gd/6*np.sin(a1),
+               self.car.angle)
+
+        for typ in [Terrain, Sidewalk, PedCrossing]:
+            for obj in collideable_map[typ]:
+                rel_obj = obj.get_relative(rel)
+                rel_obj.render(terrain_window, border=None)
+
+        for obj in collideable_map[Lane]:
+            rel_obj = obj.get_relative(rel)
+            if not car.can_collide(obj):
+                rel_obj.render(drivable_window, border=None)
+            else:
+                rel_obj.render(undrivable_window, border=None)
+        for obj in collideable_map[Street]:
+            rel_obj = obj.get_relative(rel)
+            rel_obj.render(drivable_window, border=None)
+
+        for obj in collideable_map[Car]:
+            rel_obj = obj.get_relative(rel)
+            rel_obj.render(car_window, border=None)
+
+        for obj in collideable_map[Pedestrian]:
+            rel_obj = obj.get_relative(rel)
+            rel_obj.render(ped_window, border=None)
+        for obj in collideable_map[TrafficLight]:
+            rel_obj = obj.get_relative(rel)
+            rel_obj.render(light_window, border=None)
+            
+
+
+        self.pygame_rep = [pygame.transform.rotate(window, 90) for window in [terrain_window,
+                                                                              drivable_window,
+                                                                              undrivable_window,
+                                                                              car_window,
+                                                                              ped_window,
+                                                                              light_window]]
+
 
     def render(self, surface):
-        from fluids.assets import Car, Lane, Sidewalk, Terrain
-        
         self.grid_square.render(surface)
         if self.car.vis_level > 3:
 
             if self.car.vis_level > 4:
                 for obj in self.all_collideables:
                     obj.render_debug(surface)
+            for y in range(4):
+                for x in range(2):
+                    i = y + x * 4
+                    if i < len(self.pygame_rep):
+                        surface.blit(self.pygame_rep[i], (surface.get_size()[0] - self.grid_dim * (x+1), self.grid_dim * y))
+                        pygame.draw.rect(surface, (0, 100, 0),
+                                         pygame.Rect((surface.get_size()[0] - self.grid_dim*(x+1)-5, 0-5+self.grid_dim*y),
+                                                     (self.grid_dim+10, self.grid_dim+10)), 10)
 
-            for c, (obj, wp) in iteritems(self.raw_colls):
-                color = obj.color if obj else (0, 255, 0)
-                pygame.draw.circle(surface,
-                                   color,
-                                   (int(c[0]), int(c[1])),
-                                   10)
-                pygame.draw.circle(surface,
-                                   (0, 0, 0),
-                                   (int(c[0]), int(c[1])),
-                                   10,
-                                   5)
-            debug_window = pygame.Surface((self.grid_dim, self.grid_dim))
-            gd = self.grid_dim
-            a0 = self.car.angle + np.pi/2
-            a1 = self.car.angle
-            for obj in self.all_collideables:
-                rel_obj = obj.get_relative((self.car.x+gd/2*np.cos(a0)-gd/6*np.cos(a1),
-                                            self.car.y-gd/2*np.sin(a0)+gd/6*np.sin(a1),
-                                            self.car.angle))
-                #rel_obj.render(debug_window)
-            for i in range(len(self.colls)):
-                for j in range(len(self.colls[0])):
-                    obj = self.colls[i][j]
-                    ic = (i) * self.small_square_size
-                    jc = (j) * self.small_square_size
-                    
-                    color = obj.color if obj else (0, 255, 0)
-                    pygame.draw.rect(debug_window, color,
-                                     pygame.Rect((ic, jc),
-                                                 (self.small_square_size, self.small_square_size)))
-
-
-            surface.blit(debug_window, (surface.get_size()[0] - self.grid_dim, 0))        
-            pygame.draw.rect(surface, (0, 0, 0),
-                             pygame.Rect((surface.get_size()[0] - self.grid_dim-5, 0-5),
-                                         (self.grid_dim+10, self.grid_dim+10)), 10)
-            
+    def get_array(self):
+        arr = np.zeros((self.grid_dim, self.grid_dim, len(self.pygame_rep)))
+        for i in range(len(self.pygame_rep)):
+            arr[:,:,i] = pygame.surfarray.array2d(self.pygame_rep[0]) > 0
+        return arr

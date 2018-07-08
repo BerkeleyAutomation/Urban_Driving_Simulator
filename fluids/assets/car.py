@@ -24,7 +24,7 @@ def integrator(state, t, steer, acc, lr, lf):
 
 class Car(Shape):
     def __init__(self, vel=0, mass=400, max_vel=5,
-                 planning_depth=6, **kwargs):
+                 planning_depth=12, **kwargs):
         from fluids.assets import Lane, Car, Pedestrian, TrafficLight, Terrain, Sidewalk, PedCrossing
         collideables = [Lane,
                         Car,
@@ -173,7 +173,7 @@ class Car(Shape):
         if len(self.waypoints) and len(self.trajectory):
             line = shapely.geometry.LineString([(self.waypoints[0].x, self.waypoints[0].y),
                                                 (self.x, self.y)]).buffer(self.ydim * 0.5, resolution=2)
-            buf = [t[2] for t in self.trajectory][:max(int(1+self.planning_depth*self.vel/self.max_vel), 0)]
+            buf = [t[2] for t in self.trajectory][:max(int(1+6*self.vel/self.max_vel), 0)]
             return shapely.geometry.MultiPolygon([line] + buf).buffer(self.ydim*0.2, resolution=2)
         else:
             return self.shapely_obj.buffer(self.ydim*0.3, resolution=2)
@@ -194,7 +194,7 @@ class Car(Shape):
                                  line[0],
                                  line[1],
                                  2)
-        if len(self.waypoints) and self.vis_level > 2:
+        if len(self.waypoints) and self.vis_level > 5:
             blob = self.get_future_shape()
 
             traj_ob = list(zip(*(blob).exterior.coords.xy))

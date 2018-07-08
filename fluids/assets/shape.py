@@ -78,9 +78,11 @@ class Shape(object):
     def dist_to(self, other):
         return self.shapely_obj.distance(other.shapely_obj)
 
-    def render(self, surface, border=4):
-        if self.color:
-            pygame.draw.polygon(surface, self.color, self.points)
+    def render(self, surface, border=4, color=None):
+        if not color:
+            color = self.color
+        if color:
+            pygame.draw.polygon(surface, color, self.points)
         if border:
             pygame.draw.polygon(surface, (0, 0, 0), self.points, border)
 

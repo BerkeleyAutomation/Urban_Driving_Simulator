@@ -116,6 +116,16 @@ class FluidSim(object):
                 self.vis_level -= 1
                 self.state.update_vis_level(self.vis_level)
                 fluids_print("New visualization level: " + str(self.vis_level))
+            if self.last_keys_pressed[pygame.K_o]:
+                if self.obs_space == OBS_NONE:
+                    self.obs_space = OBS_BIRDSEYE
+                    fluids_print("Switching to observation: birdseye")
+                elif self.obs_space == OBS_BIRDSEYE:
+                    self.obs_space = OBS_GRID
+                    fluids_print("Switching to observation: grid")
+                else:
+                    self.obs_space = OBS_NONE
+                    fluids_print("Switching to observation: none")
         else:
             self.clock.tick(0)
             if not self.state.time % 60:
