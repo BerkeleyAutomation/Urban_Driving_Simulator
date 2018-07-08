@@ -151,12 +151,10 @@ class FluidSim(object):
             Keys in dict should correspond to controlled cars.
             Action can be of type KeyboardAction, SteeringAction, or VelocityAction
 
+
         Returns
         -------
-        dict of (key -> FluidsObs)
-            Dictionary mapping keys of controlled cars to FluidsObs object
-        int
-            Summed reward collected by all agents in this step
+        
         """
         for k, v in iteritems(actions):
             if type(v) == KeyboardAction:
@@ -184,6 +182,18 @@ class FluidSim(object):
             self.render()
         return reward_step
     def get_observations(self, keys={}):
+        """
+        Get observatoins from controlled cars in the scene.
+
+        Parameters
+        ----------
+        keys: dict of keys
+            Keys should refer to cars in the scene
+        Returns
+        -------
+        dict of (key -> FluidsObs)
+            Dictionary mapping keys of controlled cars to FluidsObs object
+        """
         observations = {k:self.state.objects[k].make_observation(self.obs_space, **self.obs_args)
                         for k in keys}
         return observations

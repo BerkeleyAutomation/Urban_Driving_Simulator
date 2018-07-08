@@ -2,7 +2,16 @@ import fluids
 from fluids.utils import fluids_print
 import argparse
 
-parser = argparse.ArgumentParser(description='FLUIDS First Order Lightweight Urban Intersection Driving Simulator')
+key_help = """
+Keyboard commands for when visualizer is running:
+   .            Increases debug visualization
+   ,            Decreases debug visualization
+   o            Switches observation type
+"""
+
+parser = argparse.ArgumentParser(description='FLUIDS First Order Lightweight Urban Intersection Driving Simulator',
+                                 formatter_class=argparse.RawDescriptionHelpFormatter,
+                                 epilog=key_help)
 parser.add_argument('-b', metavar='N', type=int, default=10, 
                     help='Number of background cars')
 parser.add_argument('-c', metavar='N', type=int, default=1, 

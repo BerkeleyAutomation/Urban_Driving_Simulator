@@ -7,6 +7,12 @@ from fluids.obs.obs import FluidsObs
 from fluids.utils import rotation_array
 
 class GridObservation(FluidsObs):
+    """
+    Grid observation type. 
+    Observation is an occupancy grid over the detection region. 
+    Observation has 6 dimensions: terrain, drivable regions, illegal drivable regions, cars, pedestrians, and traffic lights.
+    Array representation is (grid_size, grid_size, 6)
+    """
     def __init__(self, car, obs_dim=500):
         from fluids.assets import ALL_OBJS, TrafficLight, Lane, Terrain, Sidewalk, \
             PedCrossing, Street, Car, Waypoint, Pedestrian

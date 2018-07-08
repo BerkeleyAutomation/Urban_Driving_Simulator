@@ -8,6 +8,11 @@ from fluids.obs.obs import FluidsObs
 from fluids.utils import rotation_array
 
 class BirdsEyeObservation(FluidsObs):
+    """
+    Bird's-eye 2D top-down image centered on the vehicle, similar to what is visualized.
+    Minor difference is that drivable regions are colorless to differentiate from illegal drivable regions.
+    Array representation is (obs_dim, obs_dim, 3).
+    """
     def __init__(self, car, obs_dim=500):
         from fluids.assets import Car, Lane, Sidewalk, Terrain, TrafficLight, Waypoint, PedCrossing, Pedestrian
         state = car.state
