@@ -3,6 +3,8 @@
 
 [**Documentation**](http://urban-driving-simulator.readthedocs.io/en/master)
 
+# FLUIDS v1 has been deprecated.
+
 # FLUIDS
 This repository contains a first order driving simulator for autonomous driving in urban environments. The package implements a OpenAI Gym environment describing a city scene with cars and pedestrians.
 
