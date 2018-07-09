@@ -1,19 +1,35 @@
 language: python
 python:
   - "3.6"
+
 # command to install dependencies
 install:
   - pip install -e . 
   - pip install sphinx==1.6.5 recommonmark sphinx_rtd_theme pyyaml coveralls
+
+env:
+  global:
+    - SDL_VIDEODRIVER=dummy
+    - SDL_AUDIODRIVER=disk
+
 # command to run tests
 script:
   - cd docs && make html
   - python -m fluids --time 100 -v 0 -o birdseye
   - python -m fluids --time 100 -v 0 -o grid
   - python -m fluids --time 100 -v 0 -o none
+
+  - xvfb-run --server-args="-screen 0 1920x1080x16" python -m fluids --time 100 -v 99 -o birdseye
+  - xvfb-run --server-args="-screen 0 1920x1080x16" python -m fluids --time 100 -v 99 -o grid
+  - xvfb-run --server-args="-screen 0 1920x1080x16" python -m fluids --time 100 -v 99 -o none
+
   - coverage run -a --source fluids -m fluids --time 100 -v 0 -o birdseye
   - coverage run -a --source fluids -m fluids --time 100 -v 0 -o grid
   - coverage run -a --source fluids -m fluids --time 100 -v 0 -o none
+
+  - xvfb-run --server-args="-screen 0 1920x1080x16" coverage run -a --source fluids -m fluids --time 100 -v 99 -o birdseye
+  - xvfb-run --server-args="-screen 0 1920x1080x16" coverage run -a --source fluids -m fluids --time 100 -v 99 -o grid
+  - xvfb-run --server-args="-screen 0 1920x1080x16" coverage run -a --source fluids -m fluids --time 100 -v 99 -o none
 
 after_success:
   - coveralls

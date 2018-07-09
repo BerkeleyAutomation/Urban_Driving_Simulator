@@ -18,6 +18,7 @@ def get_id():
     id_index = id_index + 1
     return r
 
+
 class State(object):
     def __init__(self,
                  layout          =STATE_CITY,
@@ -176,7 +177,11 @@ class State(object):
         fluids_print("State creation complete")
         if vis_level:
             self.static_surface       = pygame.Surface(self.dimensions)
-            self.static_debug_surface = pygame.Surface(self.dimensions, pygame.SRCALPHA)
+            try:
+                self.static_debug_surface = pygame.Surface(self.dimensions, pygame.SRCALPHA)
+            except ValueError:
+                fluids_print("WARNING: Alpha channel not available. Visualization may be slow")
+                self.static_debug_surface = self.static_surface.copy()
             for k, obj in iteritems(self.static_objects):
                 if type(obj) != CrossWalk:
                     obj.render(self.static_surface)
@@ -195,7 +200,10 @@ class State(object):
         return self.static_debug_surface
 
     def get_dynamic_surface(self):
-        dynamic_surface = pygame.Surface(self.dimensions, pygame.SRCALPHA)
+        try:
+            dynamic_surface = pygame.Surface(self.dimensions, pygame.SRCALPHA)
+        except ValueError:
+            dynamic_surface = self.static_debug_surface.copy()
         for typ in [Pedestrian, TrafficLight, CrossWalkLight]:
             for k, obj in iteritems(self.type_map[typ]):
                 obj.render(dynamic_surface)
