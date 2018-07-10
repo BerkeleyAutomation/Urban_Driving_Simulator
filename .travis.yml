@@ -4,7 +4,8 @@ python:
 
 # command to install dependencies
 install:
-  - pip install -e . 
+  - pip install -e .
+  - pip install -e gym_fluids
   - pip install sphinx==1.6.5 recommonmark sphinx_rtd_theme pyyaml coveralls
 
 env:
@@ -14,22 +15,26 @@ env:
 
 # command to run tests
 script:
-  - cd docs && make html
+  - make -C docs html
   - python -m fluids --time 100 -v 0 -o birdseye
   - python -m fluids --time 100 -v 0 -o grid
   - python -m fluids --time 100 -v 0 -o none
 
-  - xvfb-run --server-args="-screen 0 1920x1080x16" python -m fluids --time 100 -v 99 -o birdseye
-  - xvfb-run --server-args="-screen 0 1920x1080x16" python -m fluids --time 100 -v 99 -o grid
-  - xvfb-run --server-args="-screen 0 1920x1080x16" python -m fluids --time 100 -v 99 -o none
+  - xvfb-run -a --server-args="-screen 0 1920x1080x16" python -m fluids --time 100 -v 99 -o birdseye
+  - xvfb-run -a --server-args="-screen 0 1920x1080x16" python -m fluids --time 100 -v 99 -o grid
+  - xvfb-run -a --server-args="-screen 0 1920x1080x16" python -m fluids --time 100 -v 99 -o none
+
+  - xvfb-run -a --server-args="-screen 0 1920x1080x16" python tests/test_gym.py
 
   - coverage run -a --source fluids -m fluids --time 100 -v 0 -o birdseye
   - coverage run -a --source fluids -m fluids --time 100 -v 0 -o grid
   - coverage run -a --source fluids -m fluids --time 100 -v 0 -o none
 
-  - xvfb-run --server-args="-screen 0 1920x1080x16" coverage run -a --source fluids -m fluids --time 100 -v 99 -o birdseye
-  - xvfb-run --server-args="-screen 0 1920x1080x16" coverage run -a --source fluids -m fluids --time 100 -v 99 -o grid
-  - xvfb-run --server-args="-screen 0 1920x1080x16" coverage run -a --source fluids -m fluids --time 100 -v 99 -o none
+  - xvfb-run -a --server-args="-screen 0 1920x1080x16" coverage run -a --source fluids -m fluids --time 100 -v 99 -o birdseye
+  - xvfb-run -a --server-args="-screen 0 1920x1080x16" coverage run -a --source fluids -m fluids --time 100 -v 99 -o grid
+  - xvfb-run -a --server-args="-screen 0 1920x1080x16" coverage run -a --source fluids -m fluids --time 100 -v 99 -o none
+
+  - xvfb-run -a --server-args="-screen 0 1920x1080x16" coverage run -a --source fluids,gym_fluids tests/test_gym.py
 
 after_success:
   - coveralls

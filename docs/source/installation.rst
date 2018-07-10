@@ -20,5 +20,4 @@ The FLUIDS Gym Environment is compatible with agents designed for OpenAI's Gym b
 ::
    
    git submodule update --init --recursive
-   cd gym_fluids
-   pip3 install -e .
+   pip3 install -e gym_fluids

@@ -18,6 +18,5 @@ The FLUIDS Gym environments provide a familiar interface to the FLUIDS simulator
 To install from source,
 ```
 git submodule update --init --recursive
-cd gym_fluids
-pip3 install -e .
+pip3 install -e gym_fluids
 ```
