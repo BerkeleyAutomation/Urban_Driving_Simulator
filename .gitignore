@@ -16,4 +16,7 @@ temp/
 test_data/
 *.model
 *.pickle
+docs/build/*
+.coverage
 
+.coveralls.yml
