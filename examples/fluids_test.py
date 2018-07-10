@@ -24,3 +24,4 @@ while True:
 #    actions = {k:fluids.KeyboardAction() for k in controlled_keys}
     rew = simulator.step(actions)
     obs = simulator.get_observations(controlled_keys)
+    simulator.render()

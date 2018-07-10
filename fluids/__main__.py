@@ -56,5 +56,6 @@ while not args.time or t < args.time:
     actions = {k: fluids.KeyboardAction() for k in simulator.get_control_keys()}
     rew = simulator.step(actions)
     obs = simulator.get_observations(simulator.get_control_keys())
+    simulator.render()
     t = t + 1
 
