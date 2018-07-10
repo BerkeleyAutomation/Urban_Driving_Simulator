@@ -47,7 +47,6 @@ class FluidSim(object):
     def __init__(self,
                  state               =STATE_CITY,
                  visualization_level =1,
-                 render_on           =True,
                  controlled_cars     =1,
                  background_cars     =0,
                  background_peds     =0,
@@ -82,7 +81,6 @@ class FluidSim(object):
                                       REWARD_NONE    : lambda s : 0}[reward_fn]
         self.background_control    = background_control
         self.vis_level             = visualization_level
-        self.render_on             = render_on
         self.fps                   = fps
         self.last_keys_pressed     = None
         self.render()
@@ -178,8 +176,6 @@ class FluidSim(object):
 
         reward_step = self.reward_fn(self.state)
         #print(reward_step)
-        if self.render_on:
-            self.render()
         return reward_step
     def get_observations(self, keys={}):
         """
