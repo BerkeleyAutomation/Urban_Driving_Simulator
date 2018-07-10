@@ -20,6 +20,6 @@ The FLUIDS Gym Environment is compatible with agents designed for OpenAI's Gym b
 
 ::
    
-   git clone https://github.com/jerryz123/gym_fluids.git
+   git clone https://github.com/BerkeleyAutomation/gym_fluids.git
    cd gym_fluids
    pip3 install -e .
