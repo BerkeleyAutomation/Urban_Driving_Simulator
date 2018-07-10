@@ -10,7 +10,6 @@ The FLUIDS core simulator provides the core simulation environment. Currently on
 
    git clone https://github.com/BerkeleyAutomation/Urban_Driving_Simulator.git
    cd Urban_Driving_Simulator
-   git checkout v2
    pip3 install -e .
 
 Installing FLUIDS Gym Environments
@@ -20,6 +19,6 @@ The FLUIDS Gym Environment is compatible with agents designed for OpenAI's Gym b
 
 ::
    
-   git clone https://github.com/jerryz123/gym_fluids.git
+   git submodule update --init --recursive
    cd gym_fluids
    pip3 install -e .

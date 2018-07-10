@@ -2,11 +2,22 @@
 
 # FLUIDS 2.0
 
-The core FLUIDS simulator. For a simpler OpenAI Gym interface see [https://www.github.com/jerryz123/gym_fluids.git](https://www.github.com/jerryz123/gym_fluids.git)
+The core FLUIDS simulator.
 
+To install from source, 
 ```
 pip3 install -e .
 ```
 
 For examples see `examples/fluids_test.py`.
 
+## Gym Environment
+
+The FLUIDS Gym environments provide a familiar interface to the FLUIDS simulator.
+
+To install from source,
+```
+git submodule update --init --recursive
+cd gym_fluids
+pip3 install -e .
+```
