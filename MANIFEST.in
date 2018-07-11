@@ -1,3 +1,0 @@
-include gym_urbandriving/state/configs/*.json
-include gym_urbandriving/visualizer/sprites/*.png
-include gym_urbandriving/visualizer/sprites/*.jpg
