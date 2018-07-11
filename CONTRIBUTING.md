@@ -11,4 +11,4 @@ When reporting an issue, please try to provide steps to reproduce it. If you hav
 
 ## Pull Requests
 
-We welcoming all contributions to FLUIDs. Pull requests consisting of multpile commits should be squashed into one concise commit outlining all changes.
+We welcoming all contributions to FLUIDs. Pull requests consisting of multiple commits should be squashed into one concise commit outlining all changes.
