@@ -10,3 +10,10 @@ for i in range(10):
     assert(rew == 0)
     env.render()
     
+
+del(env)
+
+env = gym.make("fluids-vel-v2")
+env.reset()
+env.step([0])
+env.render()

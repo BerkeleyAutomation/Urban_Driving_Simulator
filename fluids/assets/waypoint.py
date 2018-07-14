@@ -28,10 +28,10 @@ def plan(x0,y0,a0,x1,y1,a1,smooth_level=3000):
 
 class Waypoint(Shape):
     def __init__(self, x, y, angle=0, nxt=None, **kwargs):
-
+        
         self.radius = 0
         self.nxt   = nxt if nxt else []
-        self.prv   = []
+
         points = [(x-1, y-1),
                   (x+1, y-1),
                   (x+1, y+1),

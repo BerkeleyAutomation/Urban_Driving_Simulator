@@ -5,7 +5,7 @@ import shapely.geometry
 from fluids.utils import rotation_array
 
 class Shape(object):
-    def __init__(self, x=0, y=0, xdim=0, ydim=0, points=[], mass=0, 
+    def __init__(self, x=0, y=0, xdim=0, ydim=0, points=[], mass=0, type=None,
                  angle=0, angle_deg=0, color=(255, 255, 255), vis_level=1,
                  state=None,
                  collideables=[]):

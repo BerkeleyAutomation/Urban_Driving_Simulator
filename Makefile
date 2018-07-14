@@ -3,7 +3,7 @@ PY   := python
 GUI  := xvfb-run -a --server-args="-screen 0 1920x1080x16"
 COV  := coverage run -a --source fluids
 
-test:
+test: clean
 	$(PY) -m fluids --time 100 -v 0 -o birdseye
 	$(PY) -m fluids --time 100 -v 0 -o grid
 	$(PY) -m fluids --time 100 -v 0 -o none
@@ -12,6 +12,8 @@ test:
 	$(GUI) $(PY) -m fluids --time 100 -v 99 -o none
 	$(GUI) $(PY) tests/test_gym.py
 
+
+coverage: clean
 	$(COV) -m fluids --time 100 -v 0 -o birdseye
 	$(COV) -m fluids --time 100 -v 0 -o grid
 	$(COV) -m fluids --time 100 -v 0 -o none
@@ -21,3 +23,5 @@ test:
 	$(GUI) $(COV) tests/test_gym.py
 
 
+clean:
+	rm -rf ~/.fluidscache

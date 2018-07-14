@@ -1,9 +1,5 @@
 STATE_CITY   = "fluids_state_city"
 
-
-
-CTRL_STEERING = "fluids_ctrl_steering"
-
 OBS_QLIDAR   = "fluids_obs_qlidar"
 OBS_GRID     = "fluids_obs_grid"
 OBS_BIRDSEYE = "fluids_obs_birdseye"

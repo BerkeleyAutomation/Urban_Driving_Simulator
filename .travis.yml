@@ -17,6 +17,10 @@ env:
 script:
   - make -C docs html
   - make test
+  - make coverage
+
+  # hack to check that we changed version numbers
+  - git diff HEAD v2 | grep __version__
 after_success:
   - coveralls
 
