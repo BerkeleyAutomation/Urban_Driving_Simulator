@@ -23,6 +23,20 @@ def get_id():
 
 
 class State(object):
+    """
+    This class represents the state of the world
+
+    Parameters
+    ----------
+    layout: str
+        Name of json layout file specifiying environment object positions. Default is "fluids_state_city"
+    controlled_cars: int
+        Number of cars to accept external control for
+    background_cars: int
+        Number of cars to control with the background planner
+    background_peds: int
+        Number of pedestrians to control with the background planner
+    """
     def __init__(self,
                  layout          =STATE_CITY,
                  controlled_cars =0,
@@ -48,7 +62,7 @@ class State(object):
                                                 TrafficLight, Car, CrossWalkLight, Pedestrian, PedCrossing]}
         self.static_objects   = {}
         self.dynamic_objects  = {}
-        self.dimensions       = (layout['dimension_x'], layout['dimension_y'])
+        self.dimensions       = (layout['dimension_x'] + 800, layout['dimension_y'])
         self.vis_level        = vis_level
 
 

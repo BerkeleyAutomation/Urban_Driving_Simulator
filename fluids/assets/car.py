@@ -203,7 +203,3 @@ class Car(Shape):
                                 (175, 175, 175),
                                 traj_ob,
                                 5)
-
-
-        if self.last_obs and self.vis_level > 2:
-            self.last_obs.render(surface)
