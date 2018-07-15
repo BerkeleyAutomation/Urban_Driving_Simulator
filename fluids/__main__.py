@@ -42,14 +42,18 @@ fluids_print("")
 obs = {"none"     :fluids.OBS_NONE,
        "birdseye" :fluids.OBS_BIRDSEYE,
        "grid"     :fluids.OBS_GRID}[args.o]
+
 simulator = fluids.FluidSim(visualization_level=args.v,
-                            state              =args.state,
-                            background_cars    =args.b,
-                            controlled_cars    =args.c,
-                            background_peds    =args.p,
                             fps                =0,
                             obs_space          =obs,
                             background_control =fluids.BACKGROUND_CSP)
+
+state = fluids.State(layout=args.state,
+                     background_cars    =args.b,
+                     controlled_cars    =args.c,
+                     background_peds    =args.p)
+
+simulator.set_state(state)
 
 t = 0
 while not args.time or t < args.time:

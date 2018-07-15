@@ -1,5 +1,5 @@
 {
-    "dimension_x": 3000,
+    "dimension_x": 2000,
     "dimension_y": 2000,
     "static_objects": [
         { "type":"Terrain"    , "x":1000, "y":125, "xdim":2000, "ydim":250 },

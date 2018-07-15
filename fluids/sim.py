@@ -45,11 +45,7 @@ class FluidSim(object):
         Height of the visualization screen. Default is 800
     """
     def __init__(self,
-                 state               =STATE_CITY,
                  visualization_level =1,
-                 controlled_cars     =1,
-                 background_cars     =0,
-                 background_peds     =0,
                  fps                 =30,
                  obs_space           =OBS_NONE,
                  obs_args            ={},
@@ -57,22 +53,14 @@ class FluidSim(object):
                  reward_fn           =REWARD_PATH,
                  screen_dim          =800):
 
-        if state in [STATE_CITY]:
-            self.state = State(layout          =state,
-                               controlled_cars =controlled_cars,
-                               background_cars =background_cars,
-                               background_peds =background_peds,
-                               vis_level       =visualization_level)
-        else:
-            self.state = State
-        self.screen_dim            = (int(screen_dim * self.state.dimensions[0] / self.state.dimensions[1]),
-                                      screen_dim)
+        self.state                 = None
+        self.screen_dim            = screen_dim
         if visualization_level:
             pygame.init()
             pygame.font.init()
             self.fps_font    = pygame.font.SysFont('Mono', 30)
             self.fps_surface = self.fps_font.render("0", False, (0, 0, 0))
-            self.surface     = pygame.display.set_mode(self.screen_dim)
+            #self.surface     = pygame.display.set_mode(self.screen_dim)
         self.clock   = pygame.time.Clock()
 
         self.obs_space             = obs_space
@@ -83,22 +71,46 @@ class FluidSim(object):
         self.vis_level             = visualization_level
         self.fps                   = fps
         self.last_keys_pressed     = None
-        self.render()
+        self.last_obs              = {}
+
 
     def __del__(self):
         pygame.quit()
 
+    def set_state(self, state):
+        """
+        Sets the state to simulate
+        
+        Parameters
+        ----------
+        state: fluids.State
+            State object to simulate
+        """
+        self.state = state
+        state.update_vis_level(self.vis_level)
+
     def render(self):
+        if not self.state:
+            fluids_print("WARNING. Render called without calling set_state first")
+            return
         if self.vis_level:
             self.clock.tick(self.fps)
+            screen_dim = (int(self.screen_dim * self.state.dimensions[0] / self.state.dimensions[1]),
+                          self.screen_dim)
+            self.surface = pygame.display.set_mode(screen_dim)
             self.surface.blit(pygame.transform.scale(self.state.get_static_surface(),
-                                                     self.screen_dim), (0, 0))
+                                                     screen_dim), (0, 0))
             if self.vis_level > 2:
                 self.surface.blit(pygame.transform.scale(self.state.get_static_debug_surface(),
-                                                         self.screen_dim), (0, 0))
-            
-            self.surface.blit(pygame.transform.scale(self.state.get_dynamic_surface(),
-                                                     self.screen_dim), (0, 0))
+                                                         screen_dim), (0, 0))
+
+            dynamic_surface = self.state.get_dynamic_surface()
+            if self.vis_level > 2:
+                for k, obs in iteritems(self.last_obs):
+                    if obs:
+                        obs.render(dynamic_surface)
+            self.surface.blit(pygame.transform.scale(dynamic_surface,
+                                                     screen_dim), (0, 0))
 
             if not self.state.time % 30:
                 self.fps_surface = self.fps_font.render(str(int(self.clock.get_fps())), False, (0, 0, 0))
@@ -137,6 +149,7 @@ class FluidSim(object):
         list of keys
             Keys for every controlled car in the scene
         """
+        fluids_assert(self.state, "get_control_keys called without setting the state")
         return self.state.controlled_cars.keys()
 
     def step(self, actions={}):
@@ -152,8 +165,9 @@ class FluidSim(object):
 
         Returns
         -------
-        
+
         """
+        fluids_assert(self.state, "step called without setting the state")
         for k, v in iteritems(actions):
             if type(v) == KeyboardAction:
                 if self.last_keys_pressed:
@@ -190,8 +204,10 @@ class FluidSim(object):
         dict of (key -> FluidsObs)
             Dictionary mapping keys of controlled cars to FluidsObs object
         """
+        fluids_assert(self.state, "get_observations called without setting the state")
         observations = {k:self.state.objects[k].make_observation(self.obs_space, **self.obs_args)
                         for k in keys}
+        self.last_obs = observations
         return observations
 
     def get_background_actions(self):
@@ -281,4 +297,5 @@ class FluidSim(object):
 
 
     def run_time(self):
+        fluids_assert(self.state, "run_time called without setting the state")
         return self.state.time

@@ -10,7 +10,6 @@ install:
 
 env:
   global:
-    - SDL_VIDEODRIVER=dummy
     - SDL_AUDIODRIVER=disk
 
 # command to run tests
