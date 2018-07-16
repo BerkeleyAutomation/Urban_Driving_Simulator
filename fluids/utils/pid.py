@@ -11,8 +11,9 @@ class PIDController:
         self.prev_input = 0
         self.integral_error = 0
 
-    def get_control(self, err):
-        self.integral_error += err
+    def get_control(self, err, update=True):
+        if update:
+            self.integral_error += err
         derivative_error = err - self.prev_error
         self.prev_error = err
 

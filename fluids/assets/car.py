@@ -103,7 +103,7 @@ class Car(Shape):
             self.raw_step(*action.get_action())
             self.last_action = action
         elif type(action) == VelocityAction:
-            steer, acc = self.PIDController(action.get_action())
+            steer, acc = self.PIDController(action).get_action()
             steer += np.random.randn() * 0.5 * steer
             acc += np.random.randn() * 0.5 * acc / 5
             self.raw_step(steer, acc)
@@ -132,7 +132,8 @@ class Car(Shape):
 
         return
 
-    def PIDController(self, target_vel):
+    def PIDController(self, target_vel, update=True):
+        target_vel = target_vel.get_action()
         if len(self.waypoints):
             target_x = self.waypoints[0].x
             target_y = self.waypoints[0].y
@@ -153,9 +154,9 @@ class Car(Shape):
 
         e_vel = target_vel - self.vel
 
-        steer = self.PID_steer.get_control(e_angle)
-        acc = self.PID_acc.get_control(e_vel)
-        return steer, acc
+        steer = self.PID_steer.get_control(e_angle, update=update)
+        acc = self.PID_acc.get_control(e_vel, update=update)
+        return SteeringAction(steer, acc)
     def can_collide(self, other):
         from fluids.assets import Lane, TrafficLight
         if type(other) is Lane:
