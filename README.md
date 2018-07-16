@@ -20,3 +20,10 @@ To install from source,
 git submodule update --init --recursive
 pip3 install -e gym_fluids
 ```
+
+## Testing FLUIDS
+
+```
+make test
+```
+Travis testing will sometimes fail due to a xvfb issue with pygame. If you see a pygame error related to the bitdepth and alpha channel try restarting the build.
