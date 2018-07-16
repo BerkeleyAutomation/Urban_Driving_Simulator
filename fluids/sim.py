@@ -72,6 +72,7 @@ class FluidSim(object):
         self.fps                   = fps
         self.last_keys_pressed     = None
         self.last_obs              = {}
+        self.next_actions          = {}
 
 
     def __del__(self):
@@ -168,32 +169,39 @@ class FluidSim(object):
 
         """
         fluids_assert(self.state, "step called without setting the state")
-        for k, v in iteritems(actions):
+
+        car_keys = self.state.controlled_cars.keys()
+        for k in list(self.next_actions):
+            if k in car_keys:
+                self.next_actions.pop(k)
+        self.next_actions.update(actions)
+        for k, v in iteritems(self.next_actions):
             if type(v) == KeyboardAction:
                 if self.last_keys_pressed:
                     keys = self.last_keys_pressed
                     acc = 1 if keys[pygame.K_UP] else -1 if keys[pygame.K_DOWN] else 0
                     steer = 1 if keys[pygame.K_LEFT] else -1 if keys[pygame.K_RIGHT] else 0
-                    actions[k] = SteeringAction(steer, acc)
+                    self.next_actions[k] = SteeringAction(steer, acc)
                 else:
-                    actions[k] = None
+                    self.next_actions[k] = None
 
-
-        # Get background vehicle and pedestrian controls
-        actions.update(self.get_background_actions())
 
         # Simulate the objects
         for k, v in iteritems(self.state.dynamic_objects):
-            self.state.objects[k].step(actions[k] if k in actions else None)
+            self.state.objects[k].step(self.next_actions[k] if k in self.next_actions else None)
 
         self.state.time += 1
 
         reward_step = self.reward_fn(self.state)
         #print(reward_step)
+
+        # Get background vehicle and pedestrian controls
+        self.multiagent_plan()
+
         return reward_step
     def get_observations(self, keys={}):
         """
-        Get observatoins from controlled cars in the scene.
+        Get observations from controlled cars in the scene.
 
         Parameters
         ----------
@@ -210,7 +218,30 @@ class FluidSim(object):
         self.last_obs = observations
         return observations
 
-    def get_background_actions(self):
+    def get_supervisor_actions(self, action_type=SteeringAction, keys={}):
+        """
+        Get the actions assigned to the selected car by the FLUIDS multiagent planer
+
+        Parameters
+        ----------
+        action_type: fluids.Action
+            Type of action to return. VelocityAction or SteeringAction are currently supported
+        keys: set
+            Set of keys for controlled cars or background cars to return actions for
+        Returns
+        -------
+        dict of (key -> fluids.Action)
+            Dictionary mapping car keys to actions
+        """
+        if action_type == VelocityAction:
+            return {k:self.next_actions[k] for k in keys}
+        elif action_type == SteeringAction:
+            return {k:self.state.dynamic_objects[k].PIDController(self.next_actions[k], update=False)
+                    for k in keys}
+        else:
+            fluids_assert(false, "Illegal action type")
+
+    def multiagent_plan(self):
         if self.background_control == BACKGROUND_NULL or len(self.state.background_cars) == 0:
             return {}
 
@@ -283,7 +314,7 @@ class FluidSim(object):
         solver.NextSolution()
         actions = {}
         for k, v in iteritems(var_map):
-            if k in self.state.background_cars:
+            if k in self.state.type_map[Car]:
 
                     actions[k] = VelocityAction(v.Value()*3)
 
@@ -292,8 +323,7 @@ class FluidSim(object):
                     actions[k] = v.Value()
 
 
-
-        return actions
+        self.next_actions = actions
 
 
     def run_time(self):

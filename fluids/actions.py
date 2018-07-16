@@ -1,7 +1,11 @@
+import numpy as np
+
 class Action(object):
     def get_action(self):
         raise NotImplementedError
 
+    def get_array(self):
+        raise NotImplementedError
 class KeyboardAction(Action):
     """
     This action passes control to keyboard input
@@ -23,6 +27,9 @@ class SteeringAction(Action):
         self.acc = acc
     def get_action(self):
         return self.steer, self.acc
+    def get_array(self):
+        return np.array([self.steer, self.acc])
+        
 
 class VelocityAction(Action):
     """
@@ -36,6 +43,8 @@ class VelocityAction(Action):
         self.vel = vel
     def get_action(self):
         return self.vel
+    def get_array(self):
+        return np.array([self.vel])
 
 class LastValidAction(Action):
     """
