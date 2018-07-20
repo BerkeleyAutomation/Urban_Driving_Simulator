@@ -88,6 +88,7 @@ class FluidSim(object):
             State object to simulate
         """
         self.state = state
+        self.multiagent_plan()
         state.update_vis_level(self.vis_level)
 
     def render(self):
