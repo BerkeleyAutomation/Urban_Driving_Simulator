@@ -42,6 +42,7 @@ class GridObservation(FluidsObs):
         car_window        = pygame.Surface((self.grid_dim, self.grid_dim))
         ped_window        = pygame.Surface((self.grid_dim, self.grid_dim))
         light_window      = pygame.Surface((self.grid_dim, self.grid_dim))
+        direction_window  = pygame.Surface((self.grid_dim, self.grid_dim))
 
         gd = self.grid_dim
         a0 = self.car.angle + np.pi / 2
@@ -75,7 +76,16 @@ class GridObservation(FluidsObs):
         for obj in collideable_map[TrafficLight]:
             rel_obj = obj.get_relative(rel)
             rel_obj.render(light_window, border=None)
-            
+
+        point = (int(gd/6), int(gd/2))
+        for p in self.car.waypoints:
+            relp = p.get_relative(rel)
+            new_point = int(relp.x), int(relp.y)
+
+            pygame.draw.line(direction_window, (255, 255, 255), point, new_point, 10)
+            point = new_point
+
+        
 
 
         self.pygame_rep = [pygame.transform.rotate(window, 90) for window in [terrain_window,
@@ -83,7 +93,8 @@ class GridObservation(FluidsObs):
                                                                               undrivable_window,
                                                                               car_window,
                                                                               ped_window,
-                                                                              light_window]]
+                                                                              light_window,
+                                                                              direction_window]]
 
 
     def render(self, surface):
