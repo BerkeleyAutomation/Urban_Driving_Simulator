@@ -10,12 +10,13 @@ simulator = fluids.FluidSim(visualization_level=1,        # How much debug visua
 state = fluids.State(
     layout=fluids.STATE_CITY,
     background_cars=10,           # How many background cars
+    background_peds=10,
     controlled_cars=1,            # How many cars to control. Set to 0 for background cars only
     )
 
 simulator.set_state(state)
 
-controlled_keys = simulator.get_control_keys()
+car_keys = simulator.get_control_keys()
 
 while True:
     actions = {}
@@ -25,9 +26,14 @@ while True:
     # SteeringAction is steer, acc control
     # KeyboardAction is use keyboard input
 
-#    actions = {k:fluids.VelocityAction(1) for k in controlled_keys}
-#    actions = {k:fluids.SteeringAction(0, 1) for k in controlled_keys}
-#    actions = {k:fluids.KeyboardAction() for k in controlled_keys}
+#    actions = simulator.get_supervisor_actions(fluids.SteeringAction, keys=car_keys)
+#    actions = simulator.get_supervisor_actions(fluids.VelocityAction, keys=car_keys)
+
+#    actions = {k:fluids.VelocityAction(1) for k in car_keys}
+#    actions = {k:fluids.SteeringAction(0, 1) for k in car_keys}
+#    actions = {k:fluids.KeyboardAction() for k in car_keys}
+
+
     rew = simulator.step(actions)
-    obs = simulator.get_observations(controlled_keys)
+    obs = simulator.get_observations(car_keys)
     simulator.render()
