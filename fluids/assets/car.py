@@ -24,7 +24,7 @@ def integrator(state, t, steer, acc, lr, lf):
 
 class Car(Shape):
     def __init__(self, vel=0, mass=400, max_vel=5,
-                 planning_depth=12, **kwargs):
+                 planning_depth=20, **kwargs):
         from fluids.assets import Lane, Car, Pedestrian, TrafficLight, Terrain, Sidewalk, PedCrossing
         collideables = [Lane,
                         Car,
@@ -54,6 +54,11 @@ class Car(Shape):
         self.last_distance  = 0
         self.last_to_goal   = 0
         self.stopped_time   = 0
+        self.running_time   = 0
+
+        self.last_blob_time = -1
+        self.cached_blob    = self.get_future_shape()
+
 
     def make_observation(self, obs_space=OBS_NONE, **kwargs):
         if obs_space == OBS_NONE:
@@ -83,10 +88,11 @@ class Car(Shape):
         t = np.arange(0.0, 1.5, 0.5)
         delta_ode_state = odeint(integrator, ode_state, t, args=aux_state)
         x, y, vel, angle = delta_ode_state[-1]
-        
+
 
         self.vel = vel
         self.update_points(x, y, angle)
+        self.running_time += 1
 
 
 
@@ -110,7 +116,8 @@ class Car(Shape):
             self.last_action = action
         elif type(action) == LastValidAction:
             self.step(self.last_action)
-
+        else:
+            fluids_assert(False, "Car received an illegal action")
         while len(self.waypoints) < self.planning_depth and len(self.waypoints) and len(self.waypoints[-1].nxt):
             next_waypoint = random.choice(self.waypoints[-1].nxt)
             line = shapely.geometry.LineString([(self.waypoints[-1].x, self.waypoints[-1].y),
@@ -171,13 +178,17 @@ class Car(Shape):
         return super(Car, self).can_collide(other)
 
     def get_future_shape(self):
-        if len(self.waypoints) and len(self.trajectory):
-            line = shapely.geometry.LineString([(self.waypoints[0].x, self.waypoints[0].y),
-                                                (self.x, self.y)]).buffer(self.ydim * 0.5, resolution=2)
-            buf = [t[2] for t in self.trajectory][:max(int(1+6*self.vel/self.max_vel), 0)]
-            return shapely.geometry.MultiPolygon([line] + buf).buffer(self.ydim*0.2, resolution=2)
-        else:
-            return self.shapely_obj.buffer(self.ydim*0.3, resolution=2)
+        if self.last_blob_time != self.running_time:
+            if len(self.waypoints) and len(self.trajectory):
+                line = shapely.geometry.LineString([(self.waypoints[0].x, self.waypoints[0].y),
+                                                    (self.x, self.y)]).buffer(self.ydim * 0.5, resolution=2)
+                buf = [t[2] for t in self.trajectory][:max(int(1+6*self.vel/self.max_vel), 0)]
+                self.cached_blob = shapely.geometry.MultiPolygon([line] + buf).buffer(self.ydim*0.2, resolution=2)
+            else:
+                self.cached_blob = self.shapely_obj.buffer(self.ydim*0.3, resolution=2)
+
+        self.last_blob_time = self.running_time
+        return self.cached_blob
 
     def render(self, surface, **kwargs):
         super(Car, self).render(surface, **kwargs)
