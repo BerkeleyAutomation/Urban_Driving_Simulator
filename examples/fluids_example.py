@@ -26,8 +26,10 @@ while True:
     # SteeringAction is steer, acc control
     # KeyboardAction is use keyboard input
 
+
 #    actions = simulator.get_supervisor_actions(fluids.SteeringAction, keys=car_keys)
 #    actions = simulator.get_supervisor_actions(fluids.VelocityAction, keys=car_keys)
+#    actions = simulator.get_supervisor_actions(fluids.SteeringAccAction, keys=car_keys)
 
 #    actions = {k:fluids.VelocityAction(1) for k in car_keys}
 #    actions = {k:fluids.SteeringAction(0, 1) for k in car_keys}

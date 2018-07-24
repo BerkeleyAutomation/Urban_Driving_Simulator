@@ -12,7 +12,7 @@ class KeyboardAction(Action):
     """
     pass
     
-class SteeringAction(Action):
+class SteeringAccAction(Action):
     """
     This action provides both steering and acceleration control
 
@@ -29,7 +29,24 @@ class SteeringAction(Action):
         return self.steer, self.acc
     def get_array(self):
         return np.array([self.steer, self.acc])
-        
+
+    def asSteeringAction(self):
+        return SteeringAction(self.steer)
+
+class SteeringAction(Action):
+    """
+    This action provides a steering control. The supervisor will control the acceleration
+    
+    Parameters
+    ----------
+    steer: float
+    """
+    def __init__(self, steer):
+        self.steer = steer
+    def get_action(self):
+        return self.steer
+    def get_array(self):
+        return np.array([self.steer])
 
 class VelocityAction(Action):
     """
@@ -45,6 +62,8 @@ class VelocityAction(Action):
         return self.vel
     def get_array(self):
         return np.array([self.vel])
+
+    
 
 class LastValidAction(Action):
     """
