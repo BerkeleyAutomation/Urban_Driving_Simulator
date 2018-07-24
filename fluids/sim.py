@@ -99,21 +99,19 @@ class FluidSim(object):
             self.clock.tick(self.fps)
             screen_dim = (int(self.screen_dim * self.state.dimensions[0] / self.state.dimensions[1]),
                           self.screen_dim)
+            full_surface = pygame.Surface(self.state.dimensions)
             self.surface = pygame.display.set_mode(screen_dim)
-            self.surface.blit(pygame.transform.scale(self.state.get_static_surface(),
-                                                     screen_dim), (0, 0))
+            full_surface.blit(self.state.get_static_surface(), (0, 0))
             if self.vis_level > 2:
-                self.surface.blit(pygame.transform.scale(self.state.get_static_debug_surface(),
-                                                         screen_dim), (0, 0))
+                full_surface.blit(self.state.get_static_debug_surface(), (0, 0))
 
             dynamic_surface = self.state.get_dynamic_surface()
             if self.vis_level > 2:
                 for k, obs in iteritems(self.last_obs):
                     if obs:
                         obs.render(dynamic_surface)
-            self.surface.blit(pygame.transform.scale(dynamic_surface,
-                                                     screen_dim), (0, 0))
-
+            full_surface.blit(dynamic_surface, (0, 0))
+            self.surface.blit(pygame.transform.scale(full_surface, screen_dim), (0, 0))
             if not self.state.time % 30:
                 self.fps_surface = self.fps_font.render(str(int(self.clock.get_fps())), False, (0, 0, 0))
             self.surface.blit(self.fps_surface, (0, 0))
@@ -162,7 +160,7 @@ class FluidSim(object):
         ----------
         actions : dict of (key -> action)
             Keys in dict should correspond to controlled cars.
-            Action can be of type KeyboardAction, SteeringAction, or VelocityAction
+            Action can be of type KeyboardAction, SteeringAction, SteeringAccAction, or VelocityAction
 
 
         Returns
@@ -174,6 +172,8 @@ class FluidSim(object):
         car_keys = self.state.controlled_cars.keys()
         for k in list(self.next_actions):
             if k in car_keys:
+                if type(actions[k]) == SteeringAction:
+                    actions[k] = SteeringAccAction(actions[k].steer, self.state.dynamic_objects[k].PIDController(self.next_actions[k], update=False).acc)
                 self.next_actions.pop(k)
         self.next_actions.update(actions)
         for k, v in iteritems(self.next_actions):
@@ -182,9 +182,11 @@ class FluidSim(object):
                     keys = self.last_keys_pressed
                     acc = 1 if keys[pygame.K_UP] else -1 if keys[pygame.K_DOWN] else 0
                     steer = 1 if keys[pygame.K_LEFT] else -1 if keys[pygame.K_RIGHT] else 0
-                    self.next_actions[k] = SteeringAction(steer, acc)
+                    self.next_actions[k] = SteeringAccAction(steer, acc)
                 else:
                     self.next_actions[k] = None
+            elif type(v) == SteeringAction:
+                action = self.next_actions
 
 
         # Simulate the objects
@@ -219,14 +221,14 @@ class FluidSim(object):
         self.last_obs = observations
         return observations
 
-    def get_supervisor_actions(self, action_type=SteeringAction, keys={}):
+    def get_supervisor_actions(self, action_type=SteeringAccAction, keys={}):
         """
         Get the actions assigned to the selected car by the FLUIDS multiagent planer
 
         Parameters
         ----------
         action_type: fluids.Action
-            Type of action to return. VelocityAction or SteeringAction are currently supported
+            Type of action to return. VelocityAction, SteeringAccAction, and SteeringAction are currently supported
         keys: set
             Set of keys for controlled cars or background cars to return actions for
         Returns
@@ -236,8 +238,11 @@ class FluidSim(object):
         """
         if action_type == VelocityAction:
             return {k:self.next_actions[k] for k in keys}
-        elif action_type == SteeringAction:
+        elif action_type == SteeringAccAction:
             return {k:self.state.dynamic_objects[k].PIDController(self.next_actions[k], update=False)
+                    for k in keys}
+        elif action_type == SteeringAction:
+            return {k:self.state.dynamic_objects[k].PIDController(self.next_actions[k], update=False).asSteeringAction()
                     for k in keys}
         else:
             fluids_assert(false, "Illegal action type")

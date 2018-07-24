@@ -17,6 +17,7 @@ FLUIDS supports four action types. All action types are acceptable for ``FluidSi
 
 .. autoclass:: fluids.actions.KeyboardAction
 .. autoclass:: fluids.actions.SteeringAction
+.. autoclass:: fluids.actions.SteeringAccAction
 .. autoclass:: fluids.actions.VelocityAction
 .. autoclass:: fluids.actions.LastValidAction
 

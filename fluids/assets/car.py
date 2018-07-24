@@ -7,7 +7,7 @@ import shapely.ops
 
 from fluids.assets.shape import Shape
 from fluids.actions import *
-from fluids.utils import PIDController
+from fluids.utils import PIDController, fluids_assert
 from fluids.obs import *
 from fluids.consts import *
 
@@ -49,7 +49,7 @@ class Car(Shape):
         self.planning_depth = planning_depth
         self.PID_acc        = PIDController(1.0, 0, 0)
         self.PID_steer      = PIDController(2.0, 0, 0)
-        self.last_action    = SteeringAction(0, 0)
+        self.last_action    = SteeringAccAction(0, 0)
         self.last_obs       = None
         self.last_distance  = 0
         self.last_to_goal   = 0
@@ -105,9 +105,11 @@ class Car(Shape):
         if action == None:
             self.raw_step(0, 0)
             self.last_action = action
-        elif type(action) == SteeringAction:
+        elif type(action) == SteeringAccAction:
             self.raw_step(*action.get_action())
             self.last_action = action
+        elif type(action) == SteeringAction:
+            fluids_assert(False, "Cars cannot receive a raw steering action")
         elif type(action) == VelocityAction:
             steer, acc = self.PIDController(action).get_action()
             steer += np.random.randn() * 0.5 * steer
@@ -163,7 +165,7 @@ class Car(Shape):
 
         steer = self.PID_steer.get_control(e_angle, update=update)
         acc = self.PID_acc.get_control(e_vel, update=update)
-        return SteeringAction(steer, acc)
+        return SteeringAccAction(steer, acc)
     def can_collide(self, other):
         from fluids.assets import Lane, TrafficLight
         if type(other) is Lane:
