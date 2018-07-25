@@ -43,6 +43,10 @@ class GridObservation(FluidsObs):
         ped_window        = pygame.Surface((self.grid_dim, self.grid_dim))
         light_window      = pygame.Surface((self.grid_dim, self.grid_dim))
         direction_window  = pygame.Surface((self.grid_dim, self.grid_dim))
+        direction_pixel_window \
+                          = pygame.Surface((self.grid_dim, self.grid_dim))
+        direction_edge_window \
+                          = pygame.Surface((self.grid_dim, self.grid_dim))
 
         gd = self.grid_dim
         a0 = self.car.angle + np.pi / 2
@@ -78,14 +82,32 @@ class GridObservation(FluidsObs):
             rel_obj.render(light_window, border=None)
 
         point = (int(gd/6), int(gd/2))
+        edge_point = None
+
+        def is_on_screen(point, gd):
+            return 0 <= point[0] < gd and 0 <= point[1] < gd
+
         for p in self.car.waypoints:
             relp = p.get_relative(rel)
             new_point = int(relp.x), int(relp.y)
+            if not edge_point and is_on_screen(point, gd) and not is_on_screen(new_point, gd):
+                edge_point = new_point
 
             pygame.draw.line(direction_window, (255, 255, 255), point, new_point, 10)
             point = new_point
 
-        
+        edge_point = (min(gd - 1, max(0, edge_point[0])), min(gd - 1, max(0, edge_point[1])))
+
+        pygame.draw.circle(direction_pixel_window, (255, 255, 255), edge_point, 10)
+
+        if edge_point[0] == 0:
+            pygame.draw.line(direction_edge_window, (255, 255, 255), (0, 0), (0, gd - 1), 10)
+        if edge_point[0] == gd - 1:
+            pygame.draw.line(direction_edge_window, (255, 255, 255), (gd - 1, 0), (gd - 1, gd - 1), 10)
+        if edge_point[1] == 0:
+            pygame.draw.line(direction_edge_window, (255, 255, 255), (0, 0), (gd - 1, 0), 10)
+        if edge_point[1] == gd - 1:
+            pygame.draw.line(direction_edge_window, (255, 255, 255), (0, gd - 1), (gd - 1, gd - 1), 10)
 
 
         self.pygame_rep = [pygame.transform.rotate(window, 90) for window in [terrain_window,
@@ -94,8 +116,10 @@ class GridObservation(FluidsObs):
                                                                               car_window,
                                                                               ped_window,
                                                                               light_window,
-                                                                              direction_window]]
-
+                                                                              direction_window,
+                                                                              direction_pixel_window,
+                                                                              direction_edge_window
+                                                                              ]]
 
     def render(self, surface):
         self.grid_square.render(surface)
