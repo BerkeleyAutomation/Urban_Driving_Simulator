@@ -115,7 +115,7 @@ class GridObservation(FluidsObs):
                                                                               undrivable_window,
                                                                               car_window,
                                                                               ped_window,
-                                                                              # light_window,
+                                                                              light_window,
                                                                               direction_window,
                                                                               direction_pixel_window,
                                                                               direction_edge_window
