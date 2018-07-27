@@ -6,7 +6,7 @@ from fluids.utils import rotation_array
 
 class Shape(object):
     def __init__(self, x=0, y=0, xdim=0, ydim=0, points=[], mass=0, type=None,
-                 angle=0, angle_deg=0, color=(255, 255, 255), vis_level=1,
+                 angle=0, angle_deg=0, color=(255, 255, 255), border_color=(0,0,0), vis_level=1,
                  state=None,
                  collideables=[]):
         if angle_deg:
@@ -42,6 +42,7 @@ class Shape(object):
         self.collideables  = collideables
         self.shapely_obj   = shapely.geometry.Polygon(self.points)
         self.color         = color
+        self.border_color  = border_color
         self.state         = state
 
     def intersects(self, other):
@@ -84,7 +85,7 @@ class Shape(object):
         if color:
             pygame.draw.polygon(surface, color, self.points)
         if border:
-            pygame.draw.polygon(surface, (0, 0, 0), self.points, border)
+            pygame.draw.polygon(surface, self.border_color, self.points, border)
 
     def render_debug(self, surface, color=(255, 0, 0), width=10):
         pygame.draw.polygon(surface, color, self.points, width)
