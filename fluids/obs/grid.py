@@ -22,7 +22,7 @@ class GridObservation(FluidsObs):
         self.grid_square = Shape(x=car.x+obs_dim/3*np.cos(car.angle),
                                  y=car.y-obs_dim/3*np.sin(car.angle),
                                  xdim=obs_dim, ydim=obs_dim, angle=car.angle,
-                                 color=None)
+                                 color=None, border_color=(200,0,0))
         self.all_collideables = []
         collideable_map = {typ:[] for typ in ALL_OBJS}
         for k, obj in iteritems(state.objects):
@@ -122,7 +122,7 @@ class GridObservation(FluidsObs):
                                                                               ]]
 
     def render(self, surface):
-        self.grid_square.render(surface)
+        self.grid_square.render(surface, border=10)
         if self.car.vis_level > 3:
 
             if self.car.vis_level > 4:
@@ -133,7 +133,7 @@ class GridObservation(FluidsObs):
                     i = y + x * 4
                     if i < len(self.pygame_rep):
                         surface.blit(self.pygame_rep[i], (surface.get_size()[0] - self.grid_dim * (x+1), self.grid_dim * y))
-                        pygame.draw.rect(surface, (0, 100, 0),
+                        pygame.draw.rect(surface, (200, 0, 0),
                                          pygame.Rect((surface.get_size()[0] - self.grid_dim*(x+1)-5, 0-5+self.grid_dim*y),
                                                      (self.grid_dim+10, self.grid_dim+10)), 10)
 

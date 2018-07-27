@@ -167,7 +167,7 @@ class State(object):
 
         self.controlled_cars = {k: self.objects[k] for k in car_ids[:controlled_cars]}
         for k, car in iteritems(self.controlled_cars):
-            car.color = (155, 20, 20)
+            car.color = (5, 250, 0)
         self.background_cars = {k: self.objects[k] for k in car_ids[controlled_cars:]}
 
 

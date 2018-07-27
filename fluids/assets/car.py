@@ -35,7 +35,7 @@ class Car(Shape):
                         PedCrossing]
         Shape.__init__(self,
                        collideables=collideables,
-                       color=(20, 150, 250),
+                       color=(20, 50, 250),
                        xdim=70,
                        ydim=35,
                        **kwargs)
