@@ -85,28 +85,29 @@ class GridObservation(FluidsObs):
 
         def is_on_screen(point, gd):
             return 0 <= point[0] < gd and 0 <= point[1] < gd
-
+        
+        line_width = 20
         for p in self.car.waypoints:
             relp = p.get_relative(rel)
             new_point = int(relp.x), int(relp.y)
             if not edge_point and is_on_screen(point, gd) and not is_on_screen(new_point, gd):
                 edge_point = new_point
 
-            pygame.draw.line(direction_window, (255, 255, 255), point, new_point, 10)
+            pygame.draw.line(direction_window, (255, 255, 255), point, new_point, line_width)
             point = new_point
 
         edge_point = (min(gd - 1, max(0, edge_point[0])), min(gd - 1, max(0, edge_point[1])))
 
-        pygame.draw.circle(direction_pixel_window, (255, 255, 255), edge_point, 10)
+        pygame.draw.circle(direction_pixel_window, (255, 255, 255), edge_point, line_width)
 
         if edge_point[0] == 0:
-            pygame.draw.line(direction_edge_window, (255, 255, 255), (0, 0), (0, gd - 1), 10)
+            pygame.draw.line(direction_edge_window, (255, 255, 255), (0, 0), (0, gd - 1), line_width)
         if edge_point[0] == gd - 1:
-            pygame.draw.line(direction_edge_window, (255, 255, 255), (gd - 1, 0), (gd - 1, gd - 1), 10)
+            pygame.draw.line(direction_edge_window, (255, 255, 255), (gd - 1, 0), (gd - 1, gd - 1), line_width)
         if edge_point[1] == 0:
-            pygame.draw.line(direction_edge_window, (255, 255, 255), (0, 0), (gd - 1, 0), 10)
+            pygame.draw.line(direction_edge_window, (255, 255, 255), (0, 0), (gd - 1, 0), line_width)
         if edge_point[1] == gd - 1:
-            pygame.draw.line(direction_edge_window, (255, 255, 255), (0, gd - 1), (gd - 1, gd - 1), 10)
+            pygame.draw.line(direction_edge_window, (255, 255, 255), (0, gd - 1), (gd - 1, gd - 1), line_width)
 
 
         self.pygame_rep = [pygame.transform.rotate(window, 90) for window in [terrain_window,
