@@ -140,5 +140,5 @@ class GridObservation(FluidsObs):
     def get_array(self):
         arr = np.zeros((self.grid_dim, self.grid_dim, len(self.pygame_rep)))
         for i in range(len(self.pygame_rep)):
-            arr[:,:,i] = pygame.surfarray.array2d(self.pygame_rep[0]) > 0
+            arr[:,:,i] = pygame.surfarray.array2d(self.pygame_rep[i]) > 0
         return arr
