@@ -81,7 +81,7 @@ class GridObservation(FluidsObs):
             rel_obj.render(light_window, border=None)
 
         point = (int(gd/6), int(gd/2))
-        edge_point = (int(gd/6), int(gd/2))
+        edge_point = None
 
         def is_on_screen(point, gd):
             return 0 <= point[0] < gd and 0 <= point[1] < gd
@@ -95,19 +95,20 @@ class GridObservation(FluidsObs):
 
             pygame.draw.line(direction_window, (255, 255, 255), point, new_point, line_width)
             point = new_point
-
-        edge_point = (min(gd - 1, max(0, edge_point[0])), min(gd - 1, max(0, edge_point[1])))
-
-        pygame.draw.circle(direction_pixel_window, (255, 255, 255), edge_point, line_width)
-
-        if edge_point[0] == 0:
-            pygame.draw.line(direction_edge_window, (255, 255, 255), (0, 0), (0, gd - 1), line_width)
-        if edge_point[0] == gd - 1:
-            pygame.draw.line(direction_edge_window, (255, 255, 255), (gd - 1, 0), (gd - 1, gd - 1), line_width)
-        if edge_point[1] == 0:
-            pygame.draw.line(direction_edge_window, (255, 255, 255), (0, 0), (gd - 1, 0), line_width)
-        if edge_point[1] == gd - 1:
-            pygame.draw.line(direction_edge_window, (255, 255, 255), (0, gd - 1), (gd - 1, gd - 1), line_width)
+        
+        if edge_point:
+            edge_point = (min(gd - 1, max(0, edge_point[0])), min(gd - 1, max(0, edge_point[1])))
+            pygame.draw.circle(direction_pixel_window, (255, 255, 255), edge_point, line_width)
+        
+        if edge_point:
+            if edge_point[0] == 0:
+                pygame.draw.line(direction_edge_window, (255, 255, 255), (0, 0), (0, gd - 1), line_width)
+            if edge_point[0] == gd - 1:
+                pygame.draw.line(direction_edge_window, (255, 255, 255), (gd - 1, 0), (gd - 1, gd - 1), line_width)
+            if edge_point[1] == 0:
+                pygame.draw.line(direction_edge_window, (255, 255, 255), (0, 0), (gd - 1, 0), line_width)
+            if edge_point[1] == gd - 1:
+                pygame.draw.line(direction_edge_window, (255, 255, 255), (0, gd - 1), (gd - 1, gd - 1), line_width)
 
 
         self.pygame_rep = [pygame.transform.rotate(window, 90) for window in [terrain_window,
