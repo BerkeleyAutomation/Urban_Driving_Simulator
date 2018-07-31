@@ -4,7 +4,7 @@ import pygame
 from fluids.assets.shape import Shape
 from fluids.obs.obs import FluidsObs
 from fluids.utils import rotation_array
-
+from scipy.misc import imresize
 class GridObservation(FluidsObs):
     """
     Grid observation type. 
@@ -81,7 +81,7 @@ class GridObservation(FluidsObs):
             rel_obj.render(light_window, border=None)
 
         point = (int(gd/6), int(gd/2))
-        edge_point = None
+        edge_point = (int(gd/6), int(gd/2))
 
         def is_on_screen(point, gd):
             return 0 <= point[0] < gd and 0 <= point[1] < gd
@@ -143,9 +143,12 @@ class GridObservation(FluidsObs):
             arr[:,:,i] = pygame.surfarray.array2d(self.pygame_rep[i]) > 0
             
         if downsample:
-            arr = self.to_low_res_truth(arr, shape)
+            arr = self.sp_imresize(arr, shape)
         return arr
-        
+    
+    def sp_imresize(self, arr, shape):
+        return np.array([imresize(arr[:,:,i],shape) for i in range(arr.shape[2])]).T
+            
     def label_distribution_from_block(self, arr, start, end):
         """Returns the distribution of labels in a block from arr.
 
