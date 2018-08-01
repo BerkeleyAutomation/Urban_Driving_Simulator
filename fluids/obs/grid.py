@@ -9,15 +9,18 @@ class GridObservation(FluidsObs):
     """
     Grid observation type. 
     Observation is an occupancy grid over the detection region. 
-    Observation has 6 dimensions: terrain, drivable regions, illegal drivable regions, cars, pedestrians, and traffic lights.
+    Observation has 9 dimensions: terrain, drivable regions, illegal drivable 
+    regions, cars, pedestrians, traffic lights, way points, point trajectory and edge trajectory.
     Array representation is (grid_size, grid_size, 9)
     """
-    def __init__(self, car, obs_dim=500):
+    def __init__(self, car, obs_dim=500, shape=(80,80)):
         from fluids.assets import ALL_OBJS, TrafficLight, Lane, Terrain, Sidewalk, \
             PedCrossing, Street, Car, Waypoint, Pedestrian
         state = car.state
         self.car = car
+        self.shape = shape
         self.grid_dim = obs_dim
+        self.downsample = self.shape != (obs_dim, obs_dim)
         self.grid_square = Shape(x=car.x+obs_dim/3*np.cos(car.angle),
                                  y=car.y-obs_dim/3*np.sin(car.angle),
                                  xdim=obs_dim, ydim=obs_dim, angle=car.angle,
@@ -138,13 +141,13 @@ class GridObservation(FluidsObs):
                                          pygame.Rect((surface.get_size()[0] - self.grid_dim*(x+1)-5, 0-5+self.grid_dim*y),
                                                      (self.grid_dim+10, self.grid_dim+10)), 10)
 
-    def get_array(self, downsample=False, shape=(80,80)):
+    def get_array(self):
         arr = np.zeros((self.grid_dim, self.grid_dim, len(self.pygame_rep)))
         for i in range(len(self.pygame_rep)):
             arr[:,:,i] = pygame.surfarray.array2d(self.pygame_rep[i]) > 0
             
-        if downsample:
-            arr = self.sp_imresize(arr, shape)
+        if self.downsample:
+            arr = self.sp_imresize(arr, self.shape)
         return arr
     
     def sp_imresize(self, arr, shape):
