@@ -3,8 +3,10 @@ import numpy as np
 import shapely
 import pygame
 from fluids.assets.shape import Shape
-
+from fluids.assets.car import Car
+from fluids.assets.crosswalk_light import CrossWalkLight
 class Pedestrian(Shape):
+    collideables = [Car, CrossWalkLight]
     def __init__(self, max_vel=2, vel=0, planning_depth=2, **kwargs):
         Shape.__init__(self, color=(255, 250, 150), xdim=20, ydim=20, **kwargs)
         self.max_vel        = max_vel
