@@ -6,4 +6,5 @@ setup(name="fluids",
                         'numpy',
                         'scipy',
                         'shapely',
-                        'ortools'])
+                        'ortools',
+                        'pillow'])
