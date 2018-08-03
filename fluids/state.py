@@ -45,8 +45,8 @@ class State(object):
                  vis_level       =1):
 
         fluids_print("Loading layout: " + layout)
-        cfilename = layout + __version__ + ".json"
         layout = open(os.path.join(basedir, "layouts", layout + ".json"))
+        cfilename = hashlib.md5(str(layout).encode()).hexdigest()[:10] + __version__ + ".json"
         cached_layout = lookup_cache(cfilename)
         cache_found = cached_layout is not False
         if cached_layout:
@@ -76,7 +76,6 @@ class State(object):
                    "CrossWalk"  : CrossWalk,
                    "PedCrossing": PedCrossing,
                    "Sidewalk"   : Sidewalk}[obj_info['type']]
-
             obj = typ(state=self, vis_level=vis_level, **obj_info)
 
             if typ == Lane:
@@ -94,6 +93,8 @@ class State(object):
                    "TrafficLight"  : TrafficLight,
                    "CrossWalkLight": CrossWalkLight,
                    "Pedestrian"    : Pedestrian}[obj_info['type']]
+            if (obj_info['type'] == "CrossWalkLight"):
+                continue
 
             obj = typ(state=self, vis_level=vis_level, **obj_info)
 
@@ -167,7 +168,7 @@ class State(object):
 
         self.controlled_cars = {k: self.objects[k] for k in car_ids[:controlled_cars]}
         for k, car in iteritems(self.controlled_cars):
-            car.color = (5, 250, 0)
+            car.color = (0x0b,0x04,0xf4)#(0x5B,0x5C,0xF7)
         self.background_cars = {k: self.objects[k] for k in car_ids[controlled_cars:]}
 
 

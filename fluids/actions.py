@@ -14,12 +14,12 @@ class KeyboardAction(Action):
     
 class SteeringAccAction(Action):
     """
-    This action provides both steering and acceleration control
+    This action provides both steering and acceleration control.
 
     Parameters
     ----------
-    steer: float
-    acc: float
+    steer: float in range (-1, 1)
+    acc: float in range (-1, 1)
     """
 
     def __init__(self, steer, acc):
@@ -39,7 +39,7 @@ class SteeringAction(Action):
     
     Parameters
     ----------
-    steer: float
+    steer: float in range (-1, 1)
     """
     def __init__(self, steer):
         self.steer = steer
@@ -54,7 +54,7 @@ class VelocityAction(Action):
 
     Parameters
     ----------
-    vel: float
+    vel: float in range (0, 1)
     """
     def __init__(self, vel):
         self.vel = vel

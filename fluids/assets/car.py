@@ -35,7 +35,7 @@ class Car(Shape):
                         PedCrossing]
         Shape.__init__(self,
                        collideables=collideables,
-                       color=(20, 50, 250),
+                       color=(0x1d,0xb1,0xc1),#769BB0
                        xdim=70,
                        ydim=35,
                        **kwargs)
@@ -208,7 +208,7 @@ class Car(Shape):
                                  line[0],
                                  line[1],
                                  2)
-        if len(self.waypoints) and self.vis_level > 5:
+        if len(self.waypoints) and self.vis_level > 4:
             blob = self.get_future_shape()
 
             traj_ob = list(zip(*(blob).exterior.coords.xy))

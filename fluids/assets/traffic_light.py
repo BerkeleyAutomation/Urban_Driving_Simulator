@@ -1,8 +1,8 @@
 from fluids.assets.shape import Shape
 
-RED = (200, 0, 0)
-YELLOW = (200, 200, 0),
-GREEN = (0, 200, 0)
+RED = (0xf6, 0x11, 0x46)
+YELLOW = (0xfc, 0xef, 0x5e),
+GREEN = (0, 0xc6, 0x44)
 
 
 
@@ -15,7 +15,7 @@ class TrafficLight(Shape):
                       "green":200,
                       "yellow":350}[init_color]
 
-        Shape.__init__(self, xdim=10, ydim=50, color=color, **kwargs)
+        Shape.__init__(self, xdim=20, ydim=60, color=color, **kwargs)
 
 
     def step(self, action):

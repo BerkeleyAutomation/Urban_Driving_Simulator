@@ -4,7 +4,7 @@ from fluids.assets.waypoint import Waypoint
 
 class CrossWalk(Shape):
     def __init__(self, **kwargs):
-        Shape.__init__(self, color=(120, 150, 20), **kwargs)
+        Shape.__init__(self, color=(0xf1, 0xf4, 0xf5), **kwargs)
         point0 = (self.points[2] + self.points[3]) / 2
         point1 = (self.points[0] + self.points[1]) / 2
 

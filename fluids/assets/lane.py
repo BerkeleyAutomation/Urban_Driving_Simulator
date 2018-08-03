@@ -6,7 +6,8 @@ from fluids.assets.waypoint import Waypoint
 
 class Lane(Shape):
     def __init__(self, **kwargs):
-        Shape.__init__(self, color=(50, 50, 50), **kwargs)
+        #FCF59B
+        Shape.__init__(self, color=(0xff, 0xff, 0xff), **kwargs)
 
         self.start_waypoint = (self.points[2] + self.points[3]) / 2
         self.end_waypoint   = (self.points[0] + self.points[1]) / 2
