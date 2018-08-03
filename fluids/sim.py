@@ -307,6 +307,7 @@ class FluidSim(object):
                     solver.Add(k1v == 0)
         for k1x in range(len(ped_keys)):
             k1 = ped_keys[k1x]
+            k1v = var_map[k1]
             ped1 = self.state.objects[k1]
             for fl, flc in futures_crosswalks:
                 if abs(ped1.angle - fl.angle) < np.pi / 2:
