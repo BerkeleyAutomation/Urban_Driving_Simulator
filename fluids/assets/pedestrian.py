@@ -8,7 +8,7 @@ from fluids.assets.crosswalk_light import CrossWalkLight
 class Pedestrian(Shape):
     collideables = [Car, CrossWalkLight]
     def __init__(self, max_vel=2, vel=0, planning_depth=2, **kwargs):
-        Shape.__init__(self, color=(255, 250, 150), xdim=20, ydim=20, **kwargs)
+        Shape.__init__(self, color=(0xF4,0x80,0x04), xdim=25, ydim=25, **kwargs)
         self.max_vel        = max_vel
         self.vel            = vel
         self.waypoints      = []

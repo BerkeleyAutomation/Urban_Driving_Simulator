@@ -4,7 +4,7 @@ from fluids.assets.waypoint import Waypoint
 
 class Sidewalk(Shape):
     def __init__(self, **kwargs):
-        Shape.__init__(self, color=(150, 150, 150), **kwargs)
+        Shape.__init__(self, color=(0xf7, 0xf7, 0xf7), **kwargs)
         point0 = (self.points[2] + self.points[3]) / 2
         point1 = (self.points[0] + self.points[1]) / 2
 
