@@ -171,7 +171,7 @@ class FluidSim(object):
 
         car_keys = self.state.controlled_cars.keys()
         for k in list(self.next_actions):
-            if k in car_keys:
+            if k in car_keys and k in actions:
                 if type(actions[k]) == SteeringAction:
                     actions[k] = SteeringAccAction(actions[k].steer, self.state.dynamic_objects[k].PIDController(self.next_actions[k], update=False).acc)
                 self.next_actions.pop(k)
