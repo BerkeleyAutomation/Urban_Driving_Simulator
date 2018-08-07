@@ -38,17 +38,17 @@ class GridObservation(FluidsObs):
             collideable_map[Waypoint].append(waypoint)
             self.all_collideables.append(waypoint)
 
-        terrain_window    = pygame.Surface((self.grid_dim, self.grid_dim))
-        drivable_window   = pygame.Surface((self.grid_dim, self.grid_dim))
-        undrivable_window = pygame.Surface((self.grid_dim, self.grid_dim))
-        car_window        = pygame.Surface((self.grid_dim, self.grid_dim))
-        ped_window        = pygame.Surface((self.grid_dim, self.grid_dim))
-        light_window      = pygame.Surface((self.grid_dim, self.grid_dim))
-        direction_window  = pygame.Surface((self.grid_dim, self.grid_dim))
+        terrain_window    = pygame.Surface((self.grid_dim, self.grid_dim), pygame.SRCALPHA)
+        drivable_window   = pygame.Surface((self.grid_dim, self.grid_dim), pygame.SRCALPHA)
+        undrivable_window = pygame.Surface((self.grid_dim, self.grid_dim), pygame.SRCALPHA)
+        car_window        = pygame.Surface((self.grid_dim, self.grid_dim), pygame.SRCALPHA)
+        ped_window        = pygame.Surface((self.grid_dim, self.grid_dim), pygame.SRCALPHA)
+        light_window      = pygame.Surface((self.grid_dim, self.grid_dim), pygame.SRCALPHA)
+        direction_window  = pygame.Surface((self.grid_dim, self.grid_dim), pygame.SRCALPHA)
         direction_pixel_window \
-                          = pygame.Surface((self.grid_dim, self.grid_dim))
+                          = pygame.Surface((self.grid_dim, self.grid_dim), pygame.SRCALPHA)
         direction_edge_window \
-                          = pygame.Surface((self.grid_dim, self.grid_dim))
+                          = pygame.Surface((self.grid_dim, self.grid_dim), pygame.SRCALPHA)
 
         gd = self.grid_dim
         a0 = self.car.angle + np.pi / 2
@@ -144,7 +144,8 @@ class GridObservation(FluidsObs):
     def get_array(self):
         arr = np.zeros((self.grid_dim, self.grid_dim, len(self.pygame_rep)))
         for i in range(len(self.pygame_rep)):
-            arr[:,:,i] = pygame.surfarray.array2d(self.pygame_rep[i]) > 0
+            arr[:,:,i] = pygame.surfarray.array2d(self.pygame_rep[i]) != 0
+            # print(pygame.surfarray.array2d(self.pygame_rep[i]) != 0)
             
         if self.downsample:
             arr = self.sp_imresize(arr, self.shape)
