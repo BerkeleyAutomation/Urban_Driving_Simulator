@@ -93,8 +93,6 @@ class State(object):
                    "TrafficLight"  : TrafficLight,
                    "CrossWalkLight": CrossWalkLight,
                    "Pedestrian"    : Pedestrian}[obj_info['type']]
-            if (obj_info['type'] == "CrossWalkLight"):
-                continue
 
             obj = typ(state=self, vis_level=vis_level, **obj_info)
 
