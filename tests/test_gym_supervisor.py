@@ -13,7 +13,7 @@ for i in range(100):
     env.render()
     action = gym_fluids.agents.fluids_supervisor(obs, info)
 
-assert(reward > 0)
+assert(reward >= 0)
 
 
 del(env)
@@ -28,4 +28,4 @@ for i in range(100):
     env.render()
     action = gym_fluids.agents.fluids_supervisor(obs, info)
 
-assert(reward > 0)
+assert(reward >= 0)
