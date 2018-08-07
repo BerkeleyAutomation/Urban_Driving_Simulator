@@ -12,7 +12,7 @@ test: clean
 	$(GUI) $(PY) -m fluids --time 100 -v 99 -o none
 	$(GUI) $(PY) tests/test_gym.py
 	$(GUI) $(PY) tests/test_gym_supervisor.py
-
+	$(GUI) $(PY) tests/test_grid_obs.py
 coverage: clean
 	$(COV) -m fluids --time 100 -v 0 -o birdseye
 	$(COV) -m fluids --time 100 -v 0 -o grid
@@ -22,6 +22,7 @@ coverage: clean
 	$(GUI) $(COV) -m fluids --time 100 -v 99 -o none
 	$(GUI) $(COV) tests/test_gym.py
 	$(GUI) $(COV) tests/test_gym_supervisor.py
+	$(GUI) $(COV) tests/test_grid_obs.py
 
 
 clean:

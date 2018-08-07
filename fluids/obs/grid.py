@@ -13,7 +13,7 @@ class GridObservation(FluidsObs):
     regions, cars, pedestrians, traffic lights, way points, point trajectory and edge trajectory.
     Array representation is (grid_size, grid_size, 9)
     """
-    def __init__(self, car, obs_dim=500, shape=(80,80)):
+    def __init__(self, car, obs_dim=500, shape=(500,500)):
         from fluids.assets import ALL_OBJS, TrafficLight, Lane, Terrain, Sidewalk, \
             PedCrossing, Street, Car, Waypoint, Pedestrian
         state = car.state
@@ -154,89 +154,89 @@ class GridObservation(FluidsObs):
     def sp_imresize(self, arr, shape):
         return np.array([imresize(arr[:,:,i],shape) for i in range(arr.shape[2])]).T
             
-    def label_distribution_from_block(self, arr, start, end):
-        """Returns the distribution of labels in a block from arr.
+    # def label_distribution_from_block(self, arr, start, end):
+    #     """Returns the distribution of labels in a block from arr.
 
-        If start or end are floats, the distribution includes weighted elements
-        on the edge of the block.
+    #     If start or end are floats, the distribution includes weighted elements
+    #     on the edge of the block.
 
-        Args:
-            arr (np.ndarray): 3D array from which to obtain the block where the
-                3rd dimension is a one-hot encoded vector of labels.
-            start (tuple of floats): top left corner of the block.
-            end (tuple of floats): bottom right corner of block.
+    #     Args:
+    #         arr (np.ndarray): 3D array from which to obtain the block where the
+    #             3rd dimension is a one-hot encoded vector of labels.
+    #         start (tuple of floats): top left corner of the block.
+    #         end (tuple of floats): bottom right corner of block.
 
-        Returns:
-            Array containing the distribution of labels.
-        """
-        assert len(start) == len(end) == 2
-        assert len(arr.shape) == 3
-        start = np.array(start)
-        end = np.array(end)
+    #     Returns:
+    #         Array containing the distribution of labels.
+    #     """
+    #     assert len(start) == len(end) == 2
+    #     assert len(arr.shape) == 3
+    #     start = np.array(start)
+    #     end = np.array(end)
 
-        start_idx = np.ceil(start).astype(np.int)
-        end_idx = np.floor(end).astype(np.int)
+    #     start_idx = np.ceil(start).astype(np.int)
+    #     end_idx = np.floor(end).astype(np.int)
 
-        counts = np.sum(arr[start_idx[0]:end_idx[0], start_idx[1]:end_idx[1]],
-                        axis=(0, 1))
+    #     counts = np.sum(arr[start_idx[0]:end_idx[0], start_idx[1]:end_idx[1]],
+    #                     axis=(0, 1))
 
-        NUM_DECIMALS = 7    # Prevents floating point errors
-        top_weight, left_weight = np.round(-start % 1, NUM_DECIMALS)
-        bottom_weight, right_weight = np.round(end, NUM_DECIMALS) % 1
+    #     NUM_DECIMALS = 7    # Prevents floating point errors
+    #     top_weight, left_weight = np.round(-start % 1, NUM_DECIMALS)
+    #     bottom_weight, right_weight = np.round(end, NUM_DECIMALS) % 1
 
-        counts = counts.astype(np.float)
+    #     counts = counts.astype(np.float)
 
-        # Edges not including corners
-        if top_weight > 1e-4:   # Tolerate floating point errors with small numbers
-            counts += top_weight * \
-                    np.sum(arr[start_idx[0] - 1, start_idx[1]:end_idx[1]], axis=0)
-        if bottom_weight > 1e-4:
-            counts += bottom_weight * \
-                    np.sum(arr[end_idx[0], start_idx[1]:end_idx[1]], axis=0)
-        if left_weight > 1e-4:
-            counts += left_weight * \
-                    np.sum(arr[start_idx[0]:end_idx[0], start_idx[1] - 1],
-                           axis=0)
-        if right_weight > 1e-4:
-            counts += right_weight * \
-                    np.sum(arr[start_idx[0]:end_idx[0], end_idx[1]],
-                           axis=0)
-        # Corners
-        if top_weight and left_weight:
-            counts += top_weight * left_weight * arr[start_idx[0], start_idx[1]]
-        if top_weight and right_weight:
-            counts += top_weight * right_weight * arr[start_idx[0], end_idx[1]]
-        if bottom_weight and left_weight:
-            counts += bottom_weight * left_weight * arr[end_idx[0], start_idx[1]]
-        if bottom_weight and right_weight:
-            counts += bottom_weight * right_weight * arr[end_idx[0], end_idx[1]]
+    #     # Edges not including corners
+    #     if top_weight > 1e-4:   # Tolerate floating point errors with small numbers
+    #         counts += top_weight * \
+    #                 np.sum(arr[start_idx[0] - 1, start_idx[1]:end_idx[1]], axis=0)
+    #     if bottom_weight > 1e-4:
+    #         counts += bottom_weight * \
+    #                 np.sum(arr[end_idx[0], start_idx[1]:end_idx[1]], axis=0)
+    #     if left_weight > 1e-4:
+    #         counts += left_weight * \
+    #                 np.sum(arr[start_idx[0]:end_idx[0], start_idx[1] - 1],
+    #                        axis=0)
+    #     if right_weight > 1e-4:
+    #         counts += right_weight * \
+    #                 np.sum(arr[start_idx[0]:end_idx[0], end_idx[1]],
+    #                        axis=0)
+    #     # Corners
+    #     if top_weight and left_weight:
+    #         counts += top_weight * left_weight * arr[start_idx[0], start_idx[1]]
+    #     if top_weight and right_weight:
+    #         counts += top_weight * right_weight * arr[start_idx[0], end_idx[1]]
+    #     if bottom_weight and left_weight:
+    #         counts += bottom_weight * left_weight * arr[end_idx[0], start_idx[1]]
+    #     if bottom_weight and right_weight:
+    #         counts += bottom_weight * right_weight * arr[end_idx[0], end_idx[1]]
 
-        return counts / np.sum(counts)
+    #     return counts / np.sum(counts)
 
-    def to_low_res_truth(self, labeled_img, shape, nsamples=None):
-        """Calculates the distrubution of each region.
+    # def to_low_res_truth(self, labeled_img, shape, nsamples=None):
+    #     """Calculates the distrubution of each region.
 
-        Uses the area of intersection between each pixel and the larger low-res
-        region to weight each label in order to construct the distribution.
+    #     Uses the area of intersection between each pixel and the larger low-res
+    #     region to weight each label in order to construct the distribution.
 
-        Args:
-            labeled_img (np.ndarray): 3D array from which to obtain the block
-                where the 3rd dimension is a one-hot encoded vector of labels.
-            shape (tuple of length 2): output resolution.
-            nsamples: dummy argument to mantain API consistency.
+    #     Args:
+    #         labeled_img (np.ndarray): 3D array from which to obtain the block
+    #             where the 3rd dimension is a one-hot encoded vector of labels.
+    #         shape (tuple of length 2): output resolution.
+    #         nsamples: dummy argument to mantain API consistency.
 
-        Returns:
-            Low resolution array where the 3rd dimension contains the distribution
-            of labels present within the high resolution elements corresponding
-            to the location in the low resolution array.
-        """
-        assert len(labeled_img.shape) == 3
+    #     Returns:
+    #         Low resolution array where the 3rd dimension contains the distribution
+    #         of labels present within the high resolution elements corresponding
+    #         to the location in the low resolution array.
+    #     """
+    #     assert len(labeled_img.shape) == 3
 
-        row_step, col_step = np.divide(labeled_img.shape[0:2], shape)
+    #     row_step, col_step = np.divide(labeled_img.shape[0:2], shape)
 
-        low_res = np.array([[self.label_distribution_from_block(
-                                labeled_img, (i, j), (i + row_step, j + col_step))
-                             for j in np.arange(0, labeled_img.shape[1], col_step)]
-                            for i in np.arange(0, labeled_img.shape[0], row_step)])
+    #     low_res = np.array([[self.label_distribution_from_block(
+    #                             labeled_img, (i, j), (i + row_step, j + col_step))
+    #                          for j in np.arange(0, labeled_img.shape[1], col_step)]
+    #                         for i in np.arange(0, labeled_img.shape[0], row_step)])
 
-        return low_res
+    #     return low_res
