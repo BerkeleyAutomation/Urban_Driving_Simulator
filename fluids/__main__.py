@@ -23,6 +23,10 @@ parser.add_argument('-v', metavar='N', type=int, default=1,
 parser.add_argument('-o', metavar='str', type=str, default="birdseye",
                     choices=["none", "birdseye", "grid"],
                     help='Observation type')
+parser.add_argument('--no-trafficlights', dest='trafficlights', action='store_false', default=True,
+                    help='Disables vehicle crossing lights')
+parser.add_argument('--no-pedlights', dest='pedlights', action='store_false', default=True,
+                    help='Disables pedestrian crossing lights')
 parser.add_argument('--time', metavar='N', type=int, default=0,
                     help="Max time to run simulation")
 parser.add_argument('--state', metavar='file', type=str, default=fluids.STATE_CITY,
@@ -51,7 +55,9 @@ simulator = fluids.FluidSim(visualization_level=args.v,
 state = fluids.State(layout=args.state,
                      background_cars    =args.b,
                      controlled_cars    =args.c,
-                     background_peds    =args.p)
+                     background_peds    =args.p,
+                     use_traffic_lights =args.trafficlights,
+                     use_ped_lights     =args.pedlights)
 
 simulator.set_state(state)
 
