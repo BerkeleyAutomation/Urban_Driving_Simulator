@@ -23,6 +23,8 @@ parser.add_argument('-v', metavar='N', type=int, default=1,
 parser.add_argument('-o', metavar='str', type=str, default="birdseye",
                     choices=["none", "birdseye", "grid"],
                     help='Observation type')
+parser.add_argument('--screen-height', metavar='N', dest='screen_dim', type=int, default=800,
+                    help='Sets screen height')
 parser.add_argument('--no-trafficlights', dest='trafficlights', action='store_false', default=True,
                     help='Disables vehicle crossing lights')
 parser.add_argument('--no-pedlights', dest='pedlights', action='store_false', default=True,
@@ -50,6 +52,7 @@ obs = {"none"     :fluids.OBS_NONE,
 simulator = fluids.FluidSim(visualization_level=args.v,
                             fps                =0,
                             obs_space          =obs,
+                            screen_dim         =args.screen_dim,
                             background_control =fluids.BACKGROUND_CSP)
 
 state = fluids.State(layout=args.state,
