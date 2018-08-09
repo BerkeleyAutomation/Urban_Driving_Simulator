@@ -286,11 +286,8 @@ class State(object):
     def get_static_debug_surface(self):
         return self.static_debug_surface
 
-    def get_dynamic_surface(self):
-        try:
-            dynamic_surface = pygame.Surface(self.dimensions, pygame.SRCALPHA)
-        except ValueError:
-            dynamic_surface = self.static_debug_surface.copy()
+    def get_dynamic_surface(self, background):
+        dynamic_surface = background.copy()
         for typ in [Pedestrian, TrafficLight, CrossWalkLight]:
             for k, obj in iteritems(self.type_map[typ]):
                 obj.render(dynamic_surface)
