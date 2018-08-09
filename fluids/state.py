@@ -36,13 +36,19 @@ class State(object):
         Number of cars to control with the background planner
     background_peds: int
         Number of pedestrians to control with the background planner
+    use_traffic_lights: bool
+        Sets whether traffic lights are generated
+    use_ped_lights: bool
+        Sets whether pedestrian lights are generated
     """
     def __init__(self,
-                 layout          =STATE_CITY,
-                 controlled_cars =0,
-                 background_cars =0,
-                 background_peds =0,
-                 vis_level       =1):
+                 layout             =STATE_CITY,
+                 controlled_cars    =0,
+                 background_cars    =0,
+                 background_peds    =0,
+                 use_traffic_lights =True,
+                 use_ped_lights     =True,
+                 vis_level          =1):
 
         fluids_print("Loading layout: " + layout)
         layout = open(os.path.join(basedir, "layouts", layout + ".json"))
@@ -95,7 +101,10 @@ class State(object):
                    "Pedestrian"    : Pedestrian}[obj_info['type']]
 
             obj = typ(state=self, vis_level=vis_level, **obj_info)
-
+            if not use_traffic_lights and type(obj) == TrafficLight:
+                continue
+            if not use_ped_lights and type(obj) == CrossWalkLight:
+                continue
             key = get_id()
             if type == Car:
                 car_ids.append(key)
