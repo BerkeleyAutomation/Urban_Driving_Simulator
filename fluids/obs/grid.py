@@ -38,17 +38,17 @@ class GridObservation(FluidsObs):
             collideable_map[Waypoint].append(waypoint)
             self.all_collideables.append(waypoint)
 
-        terrain_window    = pygame.Surface((self.grid_dim, self.grid_dim), pygame.SRCALPHA)
-        drivable_window   = pygame.Surface((self.grid_dim, self.grid_dim), pygame.SRCALPHA)
-        undrivable_window = pygame.Surface((self.grid_dim, self.grid_dim), pygame.SRCALPHA)
-        car_window        = pygame.Surface((self.grid_dim, self.grid_dim), pygame.SRCALPHA)
-        ped_window        = pygame.Surface((self.grid_dim, self.grid_dim), pygame.SRCALPHA)
-        light_window      = pygame.Surface((self.grid_dim, self.grid_dim), pygame.SRCALPHA)
-        direction_window  = pygame.Surface((self.grid_dim, self.grid_dim), pygame.SRCALPHA)
+        terrain_window    = pygame.Surface((self.grid_dim, self.grid_dim))
+        drivable_window   = pygame.Surface((self.grid_dim, self.grid_dim))
+        undrivable_window = pygame.Surface((self.grid_dim, self.grid_dim))
+        car_window        = pygame.Surface((self.grid_dim, self.grid_dim))
+        ped_window        = pygame.Surface((self.grid_dim, self.grid_dim))
+        light_window      = pygame.Surface((self.grid_dim, self.grid_dim))
+        direction_window  = pygame.Surface((self.grid_dim, self.grid_dim))
         direction_pixel_window \
-                          = pygame.Surface((self.grid_dim, self.grid_dim), pygame.SRCALPHA)
+                          = pygame.Surface((self.grid_dim, self.grid_dim))
         direction_edge_window \
-                          = pygame.Surface((self.grid_dim, self.grid_dim), pygame.SRCALPHA)
+                          = pygame.Surface((self.grid_dim, self.grid_dim))
 
         gd = self.grid_dim
         a0 = self.car.angle + np.pi / 2

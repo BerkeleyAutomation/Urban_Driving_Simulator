@@ -1,6 +1,7 @@
 import numpy as np
 import json
 import pygame
+from pygame.locals import DOUBLEBUF
 from six import iteritems
 from ortools.constraint_solver import pywrapcp
 from copy import deepcopy
@@ -101,11 +102,13 @@ class FluidSim(object):
                           self.screen_dim)
             full_surface = pygame.Surface(self.state.dimensions)
             self.surface = pygame.display.set_mode(screen_dim)
+            self.surface.set_alpha(None)
+            
             full_surface.blit(self.state.get_static_surface(), (0, 0))
             if self.vis_level > 2:
                 full_surface.blit(self.state.get_static_debug_surface(), (0, 0))
 
-            dynamic_surface = self.state.get_dynamic_surface()
+            dynamic_surface = self.state.get_dynamic_surface(full_surface)
             if self.vis_level > 2:
                 for k, obs in iteritems(self.last_obs):
                     if obs:
