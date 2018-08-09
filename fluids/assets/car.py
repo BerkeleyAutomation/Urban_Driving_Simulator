@@ -35,7 +35,7 @@ class Car(Shape):
                         PedCrossing]
         Shape.__init__(self,
                        collideables=collideables,
-                       color=(0x1d,0xb1,0xc1),#769BB0
+                       color=(0x1d,0xb1,0xb0),#769BB0
                        xdim=70,
                        ydim=35,
                        **kwargs)
@@ -121,9 +121,11 @@ class Car(Shape):
         else:
             fluids_assert(False, "Car received an illegal action")
         while len(self.waypoints) < self.planning_depth and len(self.waypoints) and len(self.waypoints[-1].nxt):
-            next_waypoint = random.choice(self.waypoints[-1].nxt)
-            line = shapely.geometry.LineString([(self.waypoints[-1].x, self.waypoints[-1].y),
-                                                (next_waypoint.x, next_waypoint.y)]).buffer(self.ydim*0.5)
+            next_edge = random.choice(self.waypoints[-1].nxt)
+            next_waypoint = next_edge.out_p
+            line = next_edge.shapely_obj
+            # line = shapely.geometry.LineString([(self.waypoints[-1].x, self.waypoints[-1].y),
+            #                                     (next_waypoint.x, next_waypoint.y)]).buffer(self.ydim*0.5)
             self.trajectory.append(((self.waypoints[-1].x, self.waypoints[-1].y),
                                     (next_waypoint.x, next_waypoint.y), line))
             self.waypoints.append(next_waypoint)
@@ -182,12 +184,13 @@ class Car(Shape):
     def get_future_shape(self):
         if self.last_blob_time != self.running_time:
             if len(self.waypoints) and len(self.trajectory):
+
                 line = shapely.geometry.LineString([(self.waypoints[0].x, self.waypoints[0].y),
-                                                    (self.x, self.y)]).buffer(self.ydim * 0.5, resolution=2)
+                                                    (self.x, self.y)]).buffer(20, resolution=2)
                 buf = [t[2] for t in self.trajectory][:max(int(1+6*self.vel/self.max_vel), 0)]
-                self.cached_blob = shapely.geometry.MultiPolygon([line] + buf).buffer(self.ydim*0.2, resolution=2)
+                self.cached_blob = shapely.ops.cascaded_union([line] + buf)
             else:
-                self.cached_blob = self.shapely_obj.buffer(self.ydim*0.3, resolution=2)
+                self.cached_blob = self.shapely_obj
 
         self.last_blob_time = self.running_time
         return self.cached_blob

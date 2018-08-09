@@ -33,7 +33,7 @@ class Pedestrian(Shape):
             angle = angle
             self.update_points(x, y, angle)
         while len(self.waypoints) < self.planning_depth and len(self.waypoints) and len(self.waypoints[-1].nxt):
-            next_waypoint = random.choice(self.waypoints[-1].nxt)
+            next_waypoint = random.choice(self.waypoints[-1].nxt).out_p
             line = shapely.geometry.LineString([(self.waypoints[-1].x, self.waypoints[-1].y),
                                                 (next_waypoint.x, next_waypoint.y)]).buffer(self.ydim*0.5)
             self.trajectory.append(((self.waypoints[-1].x, self.waypoints[-1].y),
