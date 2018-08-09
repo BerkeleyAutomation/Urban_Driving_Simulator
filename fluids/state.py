@@ -149,6 +149,12 @@ class State(object):
                           "nxt":[w.index for w in wp.nxt]}
                 layout['ped_waypoints'].append(wpdict)
 
+        for waypoint in self.waypoints:
+            waypoint.create_edges(buff=20)
+        for waypoint in self.ped_waypoints:
+            waypoint.create_edges(buff=5)
+        
+
         fluids_print("Generating cars")
         for i in range(controlled_cars + background_cars):
             while True:
@@ -163,8 +169,8 @@ class State(object):
                     for waypoint in self.waypoints:
                         if car.intersects(waypoint):
                             while car.intersects(waypoint):
-                                waypoint = random.choice(waypoint.nxt)
-                            waypoint = random.choice(waypoint.nxt)
+                                waypoint = random.choice(waypoint.nxt).out_p
+                            waypoint = random.choice(waypoint.nxt).out_p
                             car.waypoints = [waypoint]
                             break
                     self.type_map[Car][key] = car
@@ -185,7 +191,7 @@ class State(object):
                 wp = random.choice(self.ped_waypoints)
                 ped = Pedestrian(state=self, x=wp.x, y=wp.y, angle=wp.angle, vis_level=vis_level)
                 while ped.intersects(wp):
-                    wp = random.choice(wp.nxt)
+                    wp = random.choice(wp.nxt).out_p
                 ped.waypoints = [wp]
                 if not self.is_in_collision(ped):
                     key = get_id()

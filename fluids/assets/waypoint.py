@@ -4,7 +4,7 @@ import shapely.geometry
 
 import scipy.interpolate as si
 from fluids.assets.shape import Shape
-
+from fluids.assets.waypoint_edge import WaypointEdge
 def plan(x0,y0,a0,x1,y1,a1,smooth_level=3000):
     def interpolate(p0,p1,p2,p3,t):
         return [p0[0]*1.0*((1-t)**3) + p1[0]*3.0*t*(1-t)**2 + p2[0]*3.0*(t**2)*(1-t) + p3[0]*1.0*(t**3),
@@ -59,6 +59,12 @@ class Waypoint(Shape):
         self.nxt = new_nxt
         return all_news
 
+    def create_edges(self, **kwargs):
+        new_nxt = []
+        for n_p in self.nxt:
+            new_nxt.append(WaypointEdge(self, n_p, **kwargs))
+        self.nxt = new_nxt
+
     def render(self, surface, **kwargs):
         if 'color' in kwargs:
             color = kwargs['color']
@@ -73,5 +79,5 @@ class Waypoint(Shape):
                 pygame.draw.line(surface,
                                  color,
                                  (int(self.x), int(self.y)),
-                                 (int(next_point.x), int(next_point.y)),
+                                 (int(next_point.out_p.x), int(next_point.out_p.y)),
                                  1)
