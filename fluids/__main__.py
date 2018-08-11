@@ -31,6 +31,8 @@ parser.add_argument('--no-pedlights', dest='pedlights', action='store_false', de
                     help='Disables pedestrian crossing lights')
 parser.add_argument('--time', metavar='N', type=int, default=0,
                     help="Max time to run simulation")
+parser.add_argument('--fps', metavar='N', dest='fps', type=int, default=0,
+                    help='Sets max FPS, default is unlimited FPS')
 parser.add_argument('--state', metavar='file', type=str, default=fluids.STATE_CITY,
                     help='Layout file for state generation')
 
@@ -42,6 +44,10 @@ fluids_print("            Visualization level : {}".format(args.v))
 fluids_print("            Observation type    : {}".format(args.o))
 fluids_print("            Scene layout        : {}".format(args.state))
 fluids_print("            Simulation time     : {}".format("unlimited" if not args.time else args.time))
+fluids_print("            Pedestrian lights   : {}".format("enabled" if args.pedlights else "disabled"))
+fluids_print("            Traffic lights      : {}".format("enabled" if args.trafficlights else "disabled"))
+fluids_print("            Max FPS             : {}".format("unbound" if not args.fps else args.fps))
+
 fluids_print("")
 
 
@@ -50,7 +56,7 @@ obs = {"none"     :fluids.OBS_NONE,
        "grid"     :fluids.OBS_GRID}[args.o]
 
 simulator = fluids.FluidSim(visualization_level=args.v,
-                            fps                =0,
+                            fps                =args.fps,
                             obs_space          =obs,
                             screen_dim         =args.screen_dim,
                             background_control =fluids.BACKGROUND_CSP)
