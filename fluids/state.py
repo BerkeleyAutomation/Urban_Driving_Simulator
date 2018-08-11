@@ -51,15 +51,16 @@ class State(object):
                  vis_level          =1):
 
         fluids_print("Loading layout: " + layout)
-        layout = open(os.path.join(basedir, "layouts", layout + ".json"))
-        cfilename = hashlib.md5(str(layout).encode()).hexdigest()[:10] + __version__ + ".json"
+        layout = open(os.path.join(basedir, "layouts", layout + ".json")).read()
+
+        cfilename = hashlib.sha256(layout.encode()).hexdigest()[:10] + __version__ + ".json"
         cached_layout = lookup_cache(cfilename)
         cache_found = cached_layout is not False
         if cached_layout:
             fluids_print("Cached layout found")
-            layout = cached_layout
-
-        layout = json.load(layout)
+            layout = cached_layout.read()
+            
+        layout = json.loads(layout)
 
         
         self.time             = 0

@@ -1,0 +1,86 @@
+{
+    "dimension_x": 2000,
+    "dimension_y": 2000,
+    "static_objects": [
+        { "type":"Terrain"    , "x":1000, "y":125, "xdim":2000, "ydim":250 },
+        { "type":"Terrain"    , "x":1000, "y":1875, "xdim":2000, "ydim":250 },
+        { "type":"Terrain"    , "x":125, "y":1000, "xdim":250, "ydim":1500 },
+        { "type":"Terrain"    , "x":1875, "y":1000, "xdim":250, "ydim":1500 },
+        
+        { "type":"Lane"       , "x":950, "y":700, "xdim":400, "ydim":100, "angle_deg":-90 },
+        { "type":"Lane"       , "x":1050, "y":700, "xdim":400, "ydim":100, "angle_deg":90 },
+
+
+        { "type":"Sidewalk"   , "x":575,  "y":275, "xdim":550, "ydim":50},
+        { "type":"Sidewalk"   , "x":575,  "y":1725, "xdim":550, "ydim":50},
+        { "type":"Sidewalk"   , "x":1425,  "y":275, "xdim":550, "ydim":50},
+        { "type":"Sidewalk"   , "x":1425,  "y":1725, "xdim":550, "ydim":50},
+        { "type":"Sidewalk"   , "x":275,  "y":575, "xdim":550, "ydim":50, "angle_deg":90},
+        { "type":"Sidewalk"   , "x":275,  "y":1425, "xdim":550, "ydim":50, "angle_deg":90},
+        { "type":"Sidewalk"   , "x":1725,  "y":575, "xdim":550, "ydim":50, "angle_deg":90},
+        { "type":"Sidewalk"   , "x":1725,  "y":1425, "xdim":550, "ydim":50, "angle_deg":90},
+
+        { "type":"Sidewalk"   , "x":1000,   "y":275, "xdim":200, "ydim":50},
+        { "type":"Sidewalk"   , "x":1000,   "y":1725, "xdim":200, "ydim":50},
+        { "type":"Sidewalk"   , "x":275,   "y":1000, "xdim":200, "ydim":50, "angle_deg":90},
+        { "type":"Sidewalk"   , "x":1725,   "y":1000, "xdim":200, "ydim":50, "angle_deg":90},
+
+        { "type":"PedCrossing", "x":275,   "y":275, "xdim":50, "ydim":50},
+        { "type":"PedCrossing", "x":1725,   "y":275, "xdim":50, "ydim":50},
+        { "type":"PedCrossing", "x":275,   "y":1725, "xdim":50, "ydim":50},
+        { "type":"PedCrossing", "x":1725,   "y":1725, "xdim":50, "ydim":50},
+
+        { "type":"PedCrossing", "x":275,   "y":875, "xdim":50, "ydim":50},
+        { "type":"PedCrossing", "x":275,   "y":1125, "xdim":50, "ydim":50},
+        { "type":"PedCrossing", "x":1725,   "y":875, "xdim":50, "ydim":50},
+        { "type":"PedCrossing", "x":1725,   "y":1125, "xdim":50, "ydim":50},
+
+        { "type":"PedCrossing", "x":875,   "y":275, "xdim":50, "ydim":50},
+        { "type":"PedCrossing", "x":875,   "y":1725, "xdim":50, "ydim":50},
+        { "type":"PedCrossing", "x":1125,   "y":275, "xdim":50, "ydim":50},
+        { "type":"PedCrossing", "x":1125,   "y":1725, "xdim":50, "ydim":50},
+        
+        { "type":"Street"     , "x":400, "y":400, "xdim":200, "ydim":200 },
+        { "type":"Street"     , "x":1600, "y":400, "xdim":200, "ydim":200 },
+        { "type":"Street"     , "x":400, "y":1600, "xdim":200, "ydim":200 },
+        { "type":"Street"     , "x":1600, "y":1600, "xdim":200, "ydim":200 },
+        { "type":"Street"     , "x":1000,  "y":400, "xdim":200, "ydim":200 },
+        { "type":"Street"     , "x":1000, "y":1600, "xdim":200, "ydim":200 },
+        { "type":"Street"     , "x":1600, "y":1600, "xdim":200, "ydim":200 },
+        { "type":"Street"     , "x":1600, "y":1600, "xdim":200, "ydim":200 },
+        { "type":"Street"     , "x":400, "y":1000, "xdim":200, "ydim":200 },
+        { "type":"Street"     , "x":1600, "y":1000, "xdim":200, "ydim":200 },
+        { "type":"Lane"       , "x":700, "y":450, "xdim":400, "ydim":100, "angle_deg":0 },
+        { "type":"Lane"       , "x":700, "y":1650, "xdim":400, "ydim":100, "angle_deg":0 },
+        { "type":"Lane"       , "x":1300, "y":450, "xdim":400, "ydim":100, "angle_deg":0 },
+        { "type":"Lane"       , "x":1300, "y":1650, "xdim":400, "ydim":100, "angle_deg":0 },
+        { "type":"Lane"       , "x":700, "y":350, "xdim":400, "ydim":100, "angle_deg":-180 },
+        { "type":"Lane"       , "x":700, "y":1550, "xdim":400, "ydim":100, "angle_deg":-180 },
+        { "type":"Lane"       , "x":1300, "y":350, "xdim":400, "ydim":100, "angle_deg":-180 },
+        { "type":"Lane"       , "x":1300, "y":1550, "xdim":400, "ydim":100, "angle_deg":-180 },
+        { "type":"Lane"       , "x":350, "y":700, "xdim":400, "ydim":100, "angle_deg":-90 },
+        { "type":"Lane"       , "x":350, "y":1300, "xdim":400, "ydim":100, "angle_deg":-90 },
+        { "type":"Lane"       , "x":1550, "y":700, "xdim":400, "ydim":100, "angle_deg":-90 },
+        { "type":"Lane"       , "x":1550, "y":1300, "xdim":400, "ydim":100, "angle_deg":-90 },
+        { "type":"Lane"       , "x":450, "y":700, "xdim":400, "ydim":100, "angle_deg":90 },
+        { "type":"Lane"       , "x":450, "y":1300, "xdim":400, "ydim":100, "angle_deg":90 },
+        { "type":"Lane"       , "x":1650, "y":700, "xdim":400, "ydim":100, "angle_deg":90 },
+        { "type":"Lane"       , "x":1650, "y":1300, "xdim":400, "ydim":100, "angle_deg":90 },
+
+
+
+        { "type":"CrossWalk"  , "x":400,  "y": 875, "xdim":200, "ydim":50},
+        { "type":"CrossWalk"  , "x":1600,  "y": 875, "xdim":200, "ydim":50},
+        { "type":"CrossWalk"  , "x":400,  "y": 1125, "xdim":200, "ydim":50},
+        { "type":"CrossWalk"  , "x":1600,  "y": 1125, "xdim":200, "ydim":50},
+
+        
+        { "type":"CrossWalk"  , "y":400,  "x": 875, "xdim":200, "ydim":50, "angle_deg":90},
+        { "type":"CrossWalk"  , "y":1600,  "x": 875, "xdim":200, "ydim":50, "angle_deg":90},
+        { "type":"CrossWalk"  , "y":400,  "x": 1125, "xdim":200, "ydim":50, "angle_deg":90},
+        { "type":"CrossWalk"  , "y":1600,  "x": 1125, "xdim":200, "ydim":50, "angle_deg":90}
+
+    ],
+    "dynamic_objects": [
+    ]
+}
