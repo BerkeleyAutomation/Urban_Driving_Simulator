@@ -33,7 +33,6 @@ class GridObservation(FluidsObs):
             if (car.can_collide(obj) or type(obj) in {TrafficLight, Lane, Street}) and self.grid_square.intersects(obj):
                 typ = type(obj)
                 if typ == TrafficLight:
-                    print("TRAFFIC LIGHT")
                     if obj.color == RED:
                         typ = "TrafficLight-Red"
                     elif obj.color == GREEN:
