@@ -10,3 +10,7 @@ BACKGROUND_NULL = "fluids_background_null"
 
 REWARD_PATH = "fluids_reward_path"
 REWARD_NONE = "fluids_reward_none"
+
+RED = (0xf6, 0x11, 0x46)
+YELLOW = (0xfc, 0xef, 0x5e),
+GREEN = (0, 0xc6, 0x44)

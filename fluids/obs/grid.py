@@ -5,6 +5,8 @@ from fluids.assets.shape import Shape
 from fluids.obs.obs import FluidsObs
 from fluids.utils import rotation_array
 from scipy.misc import imresize
+from fluids.consts import *
+
 class GridObservation(FluidsObs):
     """
     Grid observation type. 
@@ -30,6 +32,14 @@ class GridObservation(FluidsObs):
         for k, obj in iteritems(state.objects):
             if (car.can_collide(obj) or type(obj) in {TrafficLight, Lane, Street}) and self.grid_square.intersects(obj):
                 typ = type(obj)
+                if typ == TrafficLight:
+                    print("TRAFFIC LIGHT")
+                    if obj.color == RED:
+                        typ = "TrafficLight-Red"
+                    elif obj.color == GREEN:
+                        typ = "TrafficLight-Green"
+                    elif obj.color == YELLOW:
+                        typ = "TrafficLight-Yellow"
                 if typ not in collideable_map:
                     collideable_map[typ] = []
                 collideable_map[typ].append(obj)
