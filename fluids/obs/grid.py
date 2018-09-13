@@ -52,7 +52,9 @@ class GridObservation(FluidsObs):
         undrivable_window = pygame.Surface((self.grid_dim, self.grid_dim))
         car_window        = pygame.Surface((self.grid_dim, self.grid_dim))
         ped_window        = pygame.Surface((self.grid_dim, self.grid_dim))
-        light_window      = pygame.Surface((self.grid_dim, self.grid_dim))
+        light_window_red  = pygame.Surface((self.grid_dim, self.grid_dim))
+        light_window_green= pygame.Surface((self.grid_dim, self.grid_dim))
+        light_window_yellow=pygame.Surface((self.grid_dim, self.grid_dim))
         direction_window  = pygame.Surface((self.grid_dim, self.grid_dim))
         direction_pixel_window \
                           = pygame.Surface((self.grid_dim, self.grid_dim))
@@ -88,9 +90,18 @@ class GridObservation(FluidsObs):
         for obj in collideable_map[Pedestrian]:
             rel_obj = obj.get_relative(rel)
             rel_obj.render(ped_window, border=None)
-        for obj in collideable_map[TrafficLight]:
+
+        for obj in collideable_map["TrafficLight-Red"]:
             rel_obj = obj.get_relative(rel)
-            rel_obj.render(light_window, border=None)
+            rel_obj.render(light_window_red, border=None)
+
+        for obj in collideable_map["TrafficLight-Green"]:
+            rel_obj = obj.get_relative(rel)
+            rel_obj.render(light_window_green, border=None)
+        
+        for obj in collideable_map["TrafficLight-Yellow"]:
+            rel_obj = obj.get_relative(rel)
+            rel_obj.render(light_window_green, border=None)
 
         point = (int(gd/6), int(gd/2))
         edge_point = None
@@ -128,7 +139,9 @@ class GridObservation(FluidsObs):
                                                                               undrivable_window,
                                                                               car_window,
                                                                               ped_window,
-                                                                              light_window,
+                                                                              light_window_red,
+                                                                              light_window_green,
+                                                                              light_window_yellow,
                                                                               direction_window,
                                                                               direction_pixel_window,
                                                                               direction_edge_window
