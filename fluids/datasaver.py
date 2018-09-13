@@ -2,6 +2,7 @@ from fluids.actions import SteeringAccAction
 from fluids.consts import OBS_NONE
 from fluids.utils import *
 import pickle
+import os
 
 class DataSaver():
     """
@@ -10,7 +11,7 @@ class DataSaver():
     dict[time]["act"][ACT_NAME][key]
     """
 
-    def __init__(self, fluid_sim, file, keys=None, obs=[OBS_NONE], act=[SteeringAccAction], batch_size=500):
+    def __init__(self, fluid_sim, file, keys=None, obs=[OBS_NONE], act=[SteeringAccAction], batch_size=500, make_dir=True):
         """
             Save data from FLUIDS simulation.
 
@@ -22,6 +23,7 @@ class DataSaver():
             obs: List of observations to record. Default is [OBS_NONE]
             act: List of actions to record. Default is [SteeringAccAction]
             batch_size: Number of iterations to run before dumping data. Default is 500.
+            make_dir: Boolean. Flags if directory specified should be created or not.
         """
         self.fluid_sim = fluid_sim
         self.file = file
@@ -31,6 +33,9 @@ class DataSaver():
         self.keys = keys
         if self.keys == None:
             self.keys = self.fluid_sim.state.background_cars.keys()
+        if make_dir:
+            dir = os.path.dirname(self.file)
+            os.makedirs(dir, exist_ok=True)
 
         self.curr_batch = 0
         self.file_num = 0
