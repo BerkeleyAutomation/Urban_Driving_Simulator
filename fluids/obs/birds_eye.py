@@ -50,8 +50,6 @@ class BirdsEyeObservation(FluidsObs):
 
 
     def render(self, surface):
-
-
         self.grid_square.render(surface)
         if self.car.vis_level > 3:
 

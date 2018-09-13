@@ -18,6 +18,7 @@ from fluids.utils import *
 from fluids.actions import *
 from fluids.consts import *
 from fluids.obs import GridObservation
+from fluids.datasaver import DataSaver
 
 
 
@@ -52,7 +53,8 @@ class FluidSim(object):
                  obs_args            ={},
                  background_control  =BACKGROUND_NULL,
                  reward_fn           =REWARD_PATH,
-                 screen_dim          =800):
+                 screen_dim          =800,
+                 ):
 
         self.state                 = None
         self.screen_dim            = screen_dim
@@ -74,6 +76,7 @@ class FluidSim(object):
         self.last_keys_pressed     = None
         self.last_obs              = {}
         self.next_actions          = {}
+        self.data_saver = None
 
 
     def __del__(self):
@@ -91,6 +94,15 @@ class FluidSim(object):
         self.state = state
         self.multiagent_plan()
         state.update_vis_level(self.vis_level)
+
+    def set_data_saver(self, data_saver):
+        self.data_saver = data_saver
+
+    def save_data(self):
+        if self.data_saver == None: return
+        fluids_assert(type(self.data_saver) == DataSaver, "data_saver object must be of type DataSaver")
+        self.data_saver.accumulate()
+
 
     def render(self):
         if not self.state:
@@ -203,6 +215,7 @@ class FluidSim(object):
 
         # Get background vehicle and pedestrian controls
         self.multiagent_plan()
+        self.save_data()
 
         return reward_step
     def get_observations(self, keys={}):
