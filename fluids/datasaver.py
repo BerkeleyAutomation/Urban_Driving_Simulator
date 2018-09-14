@@ -65,7 +65,7 @@ class DataSaver():
     def dump(self):
         file_name = "{}{}{}{}{}{}".format(self.file, "_", "[KEY]", "_", self.file_num, ".npz")
         fluids_print("Dumping batch in files with format {}".format(file_name))
-        file_name = "{}_{}.npy".format(self.file, self.file_num)
+        file_name = "{}_{}.npz".format(self.file, self.file_num)
         dumped_data = np.array(self.curr_data, dtype=self.dtype)
         np.savez_compressed(file_name, dumped_data)
 
