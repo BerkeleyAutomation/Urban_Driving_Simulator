@@ -6,9 +6,8 @@ import os
 
 class DataSaver():
     """
-    Saves data in pickle file. After loading from pickle, data is in following format
-    dict[time]["obs"][OBS_NAME][key]
-    dict[time]["act"][ACT_NAME][key]
+    Saves data in numpy files organized by key. After loading from [filename]_[key]_[batchnum].npy, data is in numpy array with the following data type
+    np.dtype([('time', np.int32), ('obs_name', [OBS_DATA_TYPE], [OBS_SHAPE]), ..., ('act_name', np.uint8, [OBS_SHAPE])])
     """
 
     def __init__(self, fluid_sim, file, keys=None, obs=[OBS_NONE], act=[SteeringAccAction], batch_size=500, make_dir=True):
@@ -39,38 +38,55 @@ class DataSaver():
 
         self.curr_batch = 0
         self.file_num = 0
-        self.curr_data = {}
-        self.separator = "_"
+        self.curr_data = []
+        self.dtype = None
+
+    def generate_dtype(self):
+        dtype = [('time', np.int32), ('key', np.int32)]
+        k = list(self.keys)[0]
+        obs, acts = self.get_obs_and_act(k)
+        for obs_space, observation in obs:
+            dtype.append((obs_space, observation.dtype, observation.shape))
+        for act_space, action in acts:
+            dtype.append((act_space, action.dtype, action.shape))
+        self.dtype = np.dtype(dtype)
+
+    def get_obs_and_act(self, key):
+        observations = [] #(obs_name, observation)
+        actions = [] #(act_name, action)
+        for obs_space in self.obs:
+            curr_observation = self.fluid_sim.state.objects[key].make_observation(obs_space).get_array() 
+            observations.append((obs_space, curr_observation))
+        for act_space in self.act:
+            curr_act = self.fluid_sim.get_supervisor_actions(act_space, [key])[key].get_array()
+            actions.append((act_space.__name__, curr_act))
+        return observations, actions
 
     def dump(self):
-        file_name = "{}{}{}{}".format(self.file, self.separator, self.file_num, ".pickle")
-        fluids_print("Dumping batch in {}".format(file_name))
+        file_name = "{}{}{}{}{}{}".format(self.file, "_", "[KEY]", "_", self.file_num, ".npz")
+        fluids_print("Dumping batch in files with format {}".format(file_name))
+        file_name = "{}_{}.npy".format(self.file, self.file_num)
+        dumped_data = np.array(self.curr_data, dtype=self.dtype)
+        np.savez_compressed(file_name, dumped_data)
 
-
-        with open(file_name, 'wb') as handle:
-            pickle.dump(self.curr_data, handle, protocol=pickle.HIGHEST_PROTOCOL)
-        self.curr_data = {}
         self.file_num += 1
+        self.curr_data = []
 
     def accumulate(self):
+        if self.dtype == None: self.generate_dtype() # Call here to prevent state access errors if DataSaver is created before state is set.
         self.curr_batch += 1
 
         time = self.fluid_sim.run_time()
-        observations = {}
-        for obs_space in self.obs:
-            curr_observation = {k:self.fluid_sim.state.objects[k].make_observation(obs_space).get_array() for k in self.keys} # TODO: add **obs_args
-            observations[obs_space] = curr_observation
-
-        actions = {}
-        for act_space in self.act:
-            curr_act = self.fluid_sim.get_supervisor_actions(act_space, self.keys)
-            actions[act_space.__name__] = curr_act
-        
-        curr_data = {
-                "obs": observations,
-                "act": actions
-                }
-        self.curr_data[time] = curr_data
+        for k in self.keys:
+            obs, acts = self.get_obs_and_act(k)
+            curr_data = np.zeros(1, dtype=self.dtype)
+            curr_data['time'] = time
+            curr_data['key'] = k
+            for obs_space, observation in obs:
+                curr_data[obs_space]= observation
+            for act_space, action in acts:
+                curr_data[act_space] = action
+            self.curr_data.append(curr_data)
         #print("data accumulated", self.curr_batch, self.batch_size)
         if self.curr_batch % self.batch_size == 0:
             self.dump()
