@@ -3,11 +3,14 @@ from fluids.consts import OBS_NONE
 from fluids.utils import *
 import pickle
 import os
+import time
+import gzip
 
 class DataSaver():
     """
-    Saves data in numpy files organized by key. After loading from [filename]_[key]_[batchnum].npy, data is in numpy array with the following data type
+    Saves data in numpy files organized by key. After loading from [filename]_[filenum].npy, data is in numpy array with the following data type
     np.dtype([('time', np.int32), ('obs_name', [OBS_DATA_TYPE], [OBS_SHAPE]), ..., ('act_name', np.uint8, [OBS_SHAPE])])
+    Once loading the np.array, data can be accessed (for example) with data[data['key']==128] to get all data for 'key'==128
     """
 
     def __init__(self, fluid_sim, file, keys=None, obs=[OBS_NONE], act=[SteeringAccAction], batch_size=500, make_dir=True):
@@ -63,11 +66,12 @@ class DataSaver():
         return observations, actions
 
     def dump(self):
-        file_name = "{}{}{}{}{}{}".format(self.file, "_", "[KEY]", "_", self.file_num, ".npz")
-        fluids_print("Dumping batch in files with format {}".format(file_name))
         file_name = "{}_{}.npz".format(self.file, self.file_num)
+        fluids_print("Dumping batch in files with format {}".format(file_name))
         dumped_data = np.array(self.curr_data, dtype=self.dtype)
+        start =  time.time()
         np.savez_compressed(file_name, dumped_data)
+        fluids_print("Saved compressed file in {}s".format(round(time.time() - start)))
 
         self.file_num += 1
         self.curr_data = []
