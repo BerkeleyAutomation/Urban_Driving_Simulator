@@ -61,6 +61,7 @@ simulator = fluids.FluidSim(visualization_level=args.v,
                             screen_dim         =args.screen_dim,
                             background_control =fluids.BACKGROUND_CSP)
 
+
 state = fluids.State(layout=args.state,
                      background_cars    =args.b,
                      controlled_cars    =args.c,
@@ -69,6 +70,9 @@ state = fluids.State(layout=args.state,
                      use_ped_lights     =args.pedlights)
 
 simulator.set_state(state)
+
+data_saver = fluids.DataSaver(fluid_sim=simulator, file="./data/fluids_test", obs=[fluids.OBS_BIRDSEYE], batch_size=100)
+simulator.set_data_saver(data_saver)
 
 t = 0
 while not args.time or t < args.time:
