@@ -175,7 +175,7 @@ class FluidSim(object):
         ----------
         actions : dict of (key -> action)
             Keys in dict should correspond to controlled cars.
-            Action can be of type KeyboardAction, SteeringAction, SteeringAccAction, or VelocityAction
+            Action can be of type KeyboardAction, SteeringAction, SteeringAccAction, VelocityAction, or SteeringVelAction
 
 
         Returns
@@ -188,7 +188,8 @@ class FluidSim(object):
         for k in list(self.next_actions):
             if k in car_keys and k in actions:
                 if type(actions[k]) == SteeringAction:
-                    actions[k] = SteeringAccAction(actions[k].steer, self.state.dynamic_objects[k].PIDController(self.next_actions[k], update=False).acc)
+                    actions[k] = SteeringAccAction(actions[k].steer,
+                                                   self.state.dynamic_objects[k].PIDController(self.next_actions[k], update=False).acc)
                 self.next_actions.pop(k)
         self.next_actions.update(actions)
         for k, v in iteritems(self.next_actions):
@@ -244,7 +245,7 @@ class FluidSim(object):
         Parameters
         ----------
         action_type: fluids.Action
-            Type of action to return. VelocityAction, SteeringAccAction, and SteeringAction are currently supported
+            Type of action to return. VelocityAction, SteeringAccAction, SteeringAction, and SteeringVelAction are currently supported
         keys: set
             Set of keys for controlled cars or background cars to return actions for
         Returns
@@ -259,6 +260,10 @@ class FluidSim(object):
                     for k in keys}
         elif action_type == SteeringAction:
             return {k:self.state.dynamic_objects[k].PIDController(self.next_actions[k], update=False).asSteeringAction()
+                    for k in keys}
+        elif action_type == SteeringVelAction:
+            return {k:SteeringVelAction(self.state.dynamic_objects[k].PIDController(self.next_actions[k], update=False).get_action()[0],
+                                        self.next_actions[k].get_action())
                     for k in keys}
         else:
             fluids_assert(false, "Illegal action type")

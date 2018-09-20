@@ -112,12 +112,18 @@ class Car(Shape):
             fluids_assert(False, "Cars cannot receive a raw steering action")
         elif type(action) == VelocityAction:
             steer, acc = self.PIDController(action).get_action()
-            steer += np.random.randn() * 0.5 * steer
-            acc += np.random.randn() * 0.5 * acc / 5
+            #steer += np.random.randn() * 0.5 * steer
+            #acc += np.random.randn() * 0.5 * acc / 5
+            self.raw_step(steer, acc)
+            self.last_action = action
+        elif type(action) == SteeringVelAction:
+            steer, vel = action.get_action()
+            _, acc = self.PIDController(VelocityAction(vel)).get_action()
             self.raw_step(steer, acc)
             self.last_action = action
         elif type(action) == LastValidAction:
             self.step(self.last_action)
+            return
         else:
             fluids_assert(False, "Car received an illegal action")
         while len(self.waypoints) < self.planning_depth and len(self.waypoints) and len(self.waypoints[-1].nxt):
@@ -144,7 +150,9 @@ class Car(Shape):
         return
 
     def PIDController(self, target_vel, update=True):
+
         target_vel = target_vel.get_action()
+
         if len(self.waypoints):
             target_x = self.waypoints[0].x
             target_y = self.waypoints[0].y
