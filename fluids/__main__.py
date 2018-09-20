@@ -1,6 +1,7 @@
 import fluids
 from fluids.utils import fluids_print
 import argparse
+import time
 
 key_help = """
 Keyboard commands for when visualizer is running:
@@ -75,10 +76,16 @@ data_saver = fluids.DataSaver(fluid_sim=simulator, file="./data/fluids_test", ob
 simulator.set_data_saver(data_saver)
 
 t = 0
+curr = time.time()
 while not args.time or t < args.time:
-    actions = {k: fluids.KeyboardAction() for k in simulator.get_control_keys()}
+    actions = simulator.get_supervisor_actions(fluids.VelocityAction, keys=simulator.get_control_keys())
     rew = simulator.step(actions)
     obs = simulator.get_observations(simulator.get_control_keys())
     simulator.render()
+    if t == 100:
+        now = time.time()
+        elapsed = now - curr
+        fluids_print("Time elapsed: {}".format(elapsed))
+        curr = time.time()
     t = t + 1
 
