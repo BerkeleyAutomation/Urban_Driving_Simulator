@@ -144,6 +144,9 @@ class Car(Shape):
         return
 
     def get_direction(self):
+        """
+        Returns predicted direction of the car based on waypoints
+        """
         if self.waypoints == []: return 
         future_index = min(len(self.waypoints) - 1, 1)
         start = np.array([self.x , self.y])
