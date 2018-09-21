@@ -344,7 +344,7 @@ class FluidSim(object):
         for k, v in iteritems(var_map):
             if k in self.state.type_map[Car]:
 
-                    actions[k] = VelocityAction(v.Value()*3)
+                    actions[k] = VelocityAction(v.Value()*0.7)
 
             elif k in self.state.type_map[Pedestrian]:
 

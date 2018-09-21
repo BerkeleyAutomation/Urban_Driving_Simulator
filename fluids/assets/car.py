@@ -55,7 +55,7 @@ class Car(Shape):
         self.last_to_goal   = 0
         self.stopped_time   = 0
         self.running_time   = 0
-
+        
         self.last_blob_time = -1
         self.cached_blob    = self.get_future_shape()
 
@@ -150,9 +150,7 @@ class Car(Shape):
         return
 
     def PIDController(self, target_vel, update=True):
-
-        target_vel = target_vel.get_action()
-
+        target_vel = target_vel.get_action() * self.max_vel
         if len(self.waypoints):
             target_x = self.waypoints[0].x
             target_y = self.waypoints[0].y
