@@ -33,7 +33,7 @@ parser.add_argument('--time', metavar='N', type=int, default=0,
                     help="Max time to run simulation")
 parser.add_argument('--state', metavar='file', type=str, default=fluids.STATE_CITY,
                     help='Layout file for state generation')
-parser.add_argument('--datasaver_path', metavar='datasaver', type=str, default="",
+parser.add_argument('--datasaver', metavar='datasaver', type=str, default="",
                     help='Path for datasaver. Empty string disables datasaver.')
 
 parser.add_argument('--fps', metavar='N', dest='fps', type=int, default=0,
