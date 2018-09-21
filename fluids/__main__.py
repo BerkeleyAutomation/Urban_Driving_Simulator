@@ -31,11 +31,13 @@ parser.add_argument('--no-pedlights', dest='pedlights', action='store_false', de
                     help='Disables pedestrian crossing lights')
 parser.add_argument('--time', metavar='N', type=int, default=0,
                     help="Max time to run simulation")
-parser.add_argument('--fps', metavar='N', dest='fps', type=int, default=0,
-                    help='Sets max FPS, default is unlimited FPS')
 parser.add_argument('--state', metavar='file', type=str, default=fluids.STATE_CITY,
                     help='Layout file for state generation')
+parser.add_argument('--datasaver_path', metavar='datasaver', type=str, default="",
+                    help='Path for datasaver. Empty string disables datasaver.')
 
+parser.add_argument('--fps', metavar='N', dest='fps', type=int, default=0,
+                    help='Sets max FPS, default is unlimited FPS')
 args = parser.parse_args()
 fluids_print("Parameters: Num background cars : {}".format(args.b))
 fluids_print("            Num controlled cars : {}".format(args.c))
@@ -43,6 +45,7 @@ fluids_print("            Num controlled peds : {}".format(args.p))
 fluids_print("            Visualization level : {}".format(args.v))
 fluids_print("            Observation type    : {}".format(args.o))
 fluids_print("            Scene layout        : {}".format(args.state))
+fluids_print("            Datasaver           : {}".format("disabled" if not args.datasaver else "Storing file at " + args.datasaver))
 fluids_print("            Simulation time     : {}".format("unlimited" if not args.time else args.time))
 fluids_print("            Pedestrian lights   : {}".format("enabled" if args.pedlights else "disabled"))
 fluids_print("            Traffic lights      : {}".format("enabled" if args.trafficlights else "disabled"))
@@ -71,8 +74,9 @@ state = fluids.State(layout=args.state,
 
 simulator.set_state(state)
 
-data_saver = fluids.DataSaver(fluid_sim=simulator, file="./data/fluids_test", obs=[fluids.OBS_BIRDSEYE], batch_size=100)
-simulator.set_data_saver(data_saver)
+if args.datasaver != "":
+    data_saver = fluids.DataSaver(fluid_sim=simulator, file=args.datasaver, obs=[fluids.OBS_BIRDSEYE], batch_size=4)
+    simulator.set_data_saver(data_saver)
 
 t = 0
 while not args.time or t < args.time:
