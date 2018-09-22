@@ -357,3 +357,13 @@ class FluidSim(object):
     def run_time(self):
         fluids_assert(self.state, "run_time called without setting the state")
         return self.state.time
+
+
+    def in_deadlock(self):
+        """
+        Returns true if multiagent planner has deadlocked
+        """
+        for car in self.state.type_map[Car]:
+            if car.stopped_time < 10:
+                return False
+        return True
