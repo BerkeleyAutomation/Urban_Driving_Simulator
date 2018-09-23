@@ -11,7 +11,25 @@ class KeyboardAction(Action):
     This action passes control to keyboard input
     """
     pass
-    
+
+class SteeringVelAction(Action):
+    """
+    This action provides steering and velocity control
+
+    Parameters
+    ----------
+    steer: float in range (-1, 1)
+    vel: float in range (0, 1)
+    """
+    def __init__(self, steer, vel):
+        self.steer = steer
+        self.vel = vel
+    def get_action(self):
+        return self.steer, self.vel
+    def get_array(self):
+        return np.array([self.steer, self.vel])
+
+
 class SteeringAccAction(Action):
     """
     This action provides both steering and acceleration control.

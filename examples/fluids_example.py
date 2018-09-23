@@ -25,15 +25,18 @@ while True:
     # VelocityAction is vel for car to move along trajectory
     # SteeringAction is steer, acc control
     # KeyboardAction is use keyboard input
+    # SteeringVelAction is steer, vel control
 
 
-#    actions = simulator.get_supervisor_actions(fluids.SteeringAction, keys=car_keys)
-#    actions = simulator.get_supervisor_actions(fluids.VelocityAction, keys=car_keys)
-#    actions = simulator.get_supervisor_actions(fluids.SteeringAccAction, keys=car_keys)
+    # actions = simulator.get_supervisor_actions(fluids.SteeringAction, keys=car_keys)
+    # actions = simulator.get_supervisor_actions(fluids.VelocityAction, keys=car_keys)
+    # actions = simulator.get_supervisor_actions(fluids.SteeringAccAction, keys=car_keys)
+    actions = simulator.get_supervisor_actions(fluids.SteeringVelAction, keys=car_keys)
 
-#    actions = {k:fluids.VelocityAction(1) for k in car_keys}
-#    actions = {k:fluids.SteeringAction(0, 1) for k in car_keys}
-#    actions = {k:fluids.KeyboardAction() for k in car_keys}
+    #    actions = {k:fluids.VelocityAction(1) for k in car_keys}
+    #    actions = {k:fluids.SteeringAction(0, 1) for k in car_keys}
+    #    actions = {k:fluids.KeyboardAction() for k in car_keys}
+    #    actions = {k:fluids.SteeringVelAction(0, 1) for k in car_keys}
 
 
     rew = simulator.step(actions)
