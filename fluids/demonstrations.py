@@ -72,7 +72,8 @@ state = fluids.State(layout=args.state,
 
 simulator.set_state(state)
 
-data_saver = fluids.DataSaver(fluid_sim=simulator, file="./data/fluids_test", obs=[fluids.OBS_GRID], batch_size=100)
+data_location = "/nfs/diskstation/projects/fluids_dataset"
+data_saver = fluids.DataSaver(fluid_sim=simulator, file=data_location, obs=[fluids.OBS_GRID], batch_size=100)
 simulator.set_data_saver(data_saver)
 
 t = 0
