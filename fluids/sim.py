@@ -85,7 +85,7 @@ class FluidSim(object):
     def set_state(self, state):
         """
         Sets the state to simulate
-        
+
         Parameters
         ----------
         state: fluids.State
@@ -115,7 +115,7 @@ class FluidSim(object):
             full_surface = pygame.Surface(self.state.dimensions)
             self.surface = pygame.display.set_mode(screen_dim)
             self.surface.set_alpha(None)
-            
+
             full_surface.blit(self.state.get_static_surface(), (0, 0))
             if self.vis_level > 2:
                 full_surface.blit(self.state.get_static_debug_surface(), (0, 0))
@@ -175,7 +175,7 @@ class FluidSim(object):
         ----------
         actions : dict of (key -> action)
             Keys in dict should correspond to controlled cars.
-            Action can be of type KeyboardAction, SteeringAction, SteeringAccAction, or VelocityAction
+            Action can be of type KeyboardAction, SteeringAction, SteeringAccAction, VelocityAction, or SteeringVelAction
 
 
         Returns
@@ -188,7 +188,8 @@ class FluidSim(object):
         for k in list(self.next_actions):
             if k in car_keys and k in actions:
                 if type(actions[k]) == SteeringAction:
-                    actions[k] = SteeringAccAction(actions[k].steer, self.state.dynamic_objects[k].PIDController(self.next_actions[k], update=False).acc)
+                    actions[k] = SteeringAccAction(actions[k].steer,
+                                                   self.state.dynamic_objects[k].PIDController(self.next_actions[k], update=False).acc)
                 self.next_actions.pop(k)
         self.next_actions.update(actions)
         for k, v in iteritems(self.next_actions):
@@ -244,7 +245,7 @@ class FluidSim(object):
         Parameters
         ----------
         action_type: fluids.Action
-            Type of action to return. VelocityAction, SteeringAccAction, and SteeringAction are currently supported
+            Type of action to return. VelocityAction, SteeringAccAction, SteeringAction, and SteeringVelAction are currently supported
         keys: set
             Set of keys for controlled cars or background cars to return actions for
         Returns
@@ -260,6 +261,10 @@ class FluidSim(object):
         elif action_type == SteeringAction:
             return {k:self.state.dynamic_objects[k].PIDController(self.next_actions[k], update=False).asSteeringAction()
                     for k in keys}
+        elif action_type == SteeringVelAction:
+            return {k:SteeringVelAction(self.state.dynamic_objects[k].PIDController(self.next_actions[k], update=False).get_action()[0],
+                                        self.next_actions[k].get_action())
+                    for k in keys}
         else:
             fluids_assert(false, "Illegal action type")
 
@@ -267,26 +272,46 @@ class FluidSim(object):
         if self.background_control == BACKGROUND_NULL or len(self.state.background_cars) == 0:
             return {}
 
-        futures = { k:o.get_future_shape() for k, o in iteritems(self.state.type_map[Car])}
-        futures_lights = [(o, o.get_future_color()) for k, o in iteritems(self.state.type_map[TrafficLight])]
-        futures_crosswalks = [(o, o.get_future_color()) for k, o in iteritems(self.state.type_map[CrossWalkLight])]
-        futures_peds = {k:o.get_future_shape() for k, o in iteritems(self.state.type_map[Pedestrian])}
-        buffered_objs = {k: o.shapely_obj.buffer(10) for k, o in iteritems(self.state.type_map[Car])}
+        # "Futures" represents the future zones where the car will occupy if the car
+        #     chooses to move
+        # "Buffered_objs" represents a buffered region around the car, which is
+        #     approximately where the car will occupy if it chooses to stop
+        futures            = { k:o.get_future_shape() \
+                               for k, o in iteritems(self.state.type_map[Car])}
+        futures_lights     = [(o, o.get_future_color()) \
+                              for k, o in iteritems(self.state.type_map[TrafficLight])]
+        futures_crosswalks = [(o, o.get_future_color()) \
+                              for k, o in iteritems(self.state.type_map[CrossWalkLight])]
+        futures_peds       = { k:o.get_future_shape() \
+                               for k, o in iteritems(self.state.type_map[Pedestrian])}
+        buffered_objs      = { k: o.shapely_obj.buffer(10) \
+                               for k, o in iteritems(self.state.type_map[Car])}
+
+
         keys = list(futures.keys())
         ped_keys = list(futures_peds.keys())
 
+        # Create the CSP solver for this instance of the problem
         solver = pywrapcp.Solver("FLUIDS Background CSP")
 
+        # Maps fluids object keys to CSP solver "variable" objects
         var_map = {}
 
         for k in futures:
+            # For all cars, possible vel values are (-1, 0, 1)
+            # Technically only 0 and 1 are allowed, but restricting
+            #   values to 0/1 will result in unsolvable problems occasionaly
+            # To avoid fatal crashes when this happens, let "-1" be adummy value
             var = solver.IntVar(-1, 1, str(k))
             var_map[k] = var
 
         for k in futures_peds:
+            # Pedestrian velocities are 0 or 1
             var = solver.IntVar(0, 1, str(k))
             var_map[k] = var
+
         fast_map = {}
+        # For every car1-car2 pair,
         for k1x in range(len(keys)):
             k1 = keys[k1x]
             k1v = var_map[k1]
@@ -296,20 +321,36 @@ class FluidSim(object):
                 k2v = var_map[k2]
                 car2 = self.state.objects[k2]
 
+                # If there is no possibility of these car's colliding,
+                #  we don't generate a constraint
                 might_collide = futures[k1].intersects(futures[k2])
                 if might_collide:
+
+                    # f1 is True if there is no collision when car2 moves and car1 stops
+                    # f2 is True if there is no collision when car1 moves and car2 stops
                     f1 = not futures[k2].intersects(buffered_objs[k1])
                     f2 = not futures[k1].intersects(buffered_objs[k2])
+
+                    # We know at this point that if both cars move, there is collision,
+                    #  so add a constraint for that here
                     solver.Add(k1v + k2v < 2)
+
+                    # If car2 will collide when it moves, prevent it from moving
                     if not f1:
                         solver.Add((k2v == 1) == False)
+
+                    # If car1 will collide when it moves, prevent it from moving
                     if not f2:
                         solver.Add((k1v == 1) == False)
+
+            # For every car-ped pair
             for k2x in range(len(ped_keys)):
                 k2 = ped_keys[k2x]
                 k2v = var_map[k2]
                 ped2 = self.state.objects[k2]
                 might_collide = futures[k1].intersects(futures_peds[k2])
+
+                # Same logic as for car-car interactions
                 if might_collide:
                     f1 = not futures_peds[k2].intersects(buffered_objs[k1])
                     f2 = not futures[k1].intersects(ped2.shapely_obj)
@@ -318,9 +359,15 @@ class FluidSim(object):
                         solver.Add((k2v == 1) == False)
                     if not f2:
                         solver.Add((k1v == 1) == False)
+
+            # For every car-light pair
             for fl, flc in futures_lights:
+                # If the light will be rec, and the car will collide with it when it moves,
+                #  limit the movement of the car
                 if flc == "red" and futures[k1].intersects(fl.shapely_obj) and not car1.intersects(fl):
                     solver.Add(k1v == 0)
+
+        # For every ped-light pair
         for k1x in range(len(ped_keys)):
             k1 = ped_keys[k1x]
             k1v = var_map[k1]
@@ -330,16 +377,19 @@ class FluidSim(object):
                     if flc == "red" and ped1.intersects(fl):
                         solver.Add(k1v == 0)
 
-
+        # Solve the CSP, try to assign max allowable velocity to every car/pedestrian
+        #  (everything stop is a trivial solution)
         db = solver.Phase(sorted([v for k,v in iteritems(var_map)]), solver.CHOOSE_FIRST_UNBOUND, solver.ASSIGN_MAX_VALUE)
         solver.NewSearch(db)
 
         solver.NextSolution()
         actions = {}
+
+        # Interpret the solver solution
         for k, v in iteritems(var_map):
             if k in self.state.type_map[Car]:
 
-                    actions[k] = VelocityAction(v.Value()*3)
+                    actions[k] = VelocityAction(v.Value()*0.7)
 
             elif k in self.state.type_map[Pedestrian]:
 
@@ -352,3 +402,13 @@ class FluidSim(object):
     def run_time(self):
         fluids_assert(self.state, "run_time called without setting the state")
         return self.state.time
+
+
+    def in_deadlock(self):
+        """
+        Returns true if multiagent planner has deadlocked
+        """
+        for car in self.state.type_map[Car]:
+            if car.stopped_time < 10:
+                return False
+        return True
