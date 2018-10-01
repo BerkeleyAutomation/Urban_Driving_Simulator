@@ -93,6 +93,7 @@ class FluidSim(object):
         """
         self.state = state
         self.multiagent_plan()
+
         state.update_vis_level(self.vis_level)
 
     def set_data_saver(self, data_saver):
@@ -270,6 +271,7 @@ class FluidSim(object):
 
     def multiagent_plan(self):
         if self.background_control == BACKGROUND_NULL or len(self.state.background_cars) == 0:
+
             return {}
 
         # "Futures" represents the future zones where the car will occupy if the car
@@ -408,7 +410,7 @@ class FluidSim(object):
         """
         Returns true if multiagent planner has deadlocked
         """
-        for car in self.state.type_map[Car]:
+        for _, car in iteritems(self.state.type_map[Car]):
             if car.stopped_time < 10:
                 return False
         return True
