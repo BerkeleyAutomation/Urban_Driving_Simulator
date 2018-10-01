@@ -32,9 +32,6 @@ class DataSaver():
         self.obs = obs
         self.act = act
         self.batch_size = batch_size
-        self.keys = keys
-        if self.keys == None:
-            self.keys = self.fluid_sim.state.background_cars.keys()
         if make_dir:
             dir = os.path.dirname(self.file)
             os.makedirs(dir, exist_ok=True)
@@ -46,7 +43,8 @@ class DataSaver():
 
     def generate_dtype(self):
         dtype = [('time', np.int32), ('key', np.int32)]
-        k = list(self.keys)[0]
+        k = list(self.fluid_sim.state.background_cars.keys())[0]
+
         obs, acts = self.get_obs_and_act(k)
         for obs_space, observation in obs:
             dtype.append((obs_space, observation.dtype, observation.shape))
@@ -81,7 +79,7 @@ class DataSaver():
         self.curr_batch += 1
 
         time = self.fluid_sim.run_time()
-        for k in self.keys:
+        for k in self.fluid_sim.state.background_cars.keys():
             obs, acts = self.get_obs_and_act(k)
             curr_data = np.zeros(1, dtype=self.dtype)
             curr_data['time'] = time
