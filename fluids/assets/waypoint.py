@@ -27,10 +27,11 @@ def plan(x0,y0,a0,x1,y1,a1,smooth_level=3000):
     return res_path
 
 class Waypoint(Shape):
-    def __init__(self, x, y, angle=0, nxt=None, **kwargs):
+    def __init__(self, x, y, angle=0, nxt=None, intersection=-1, **kwargs):
         
         self.radius = 0
         self.nxt   = nxt if nxt else []
+        self.intersection = intersection
 
         points = [(x-1, y-1),
                   (x+1, y-1),

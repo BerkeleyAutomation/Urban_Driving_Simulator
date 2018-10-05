@@ -142,11 +142,11 @@ class State(object):
             layout['ped_waypoints'] = []
             for wp in self.waypoints:
                 wpdict = {"index":wp.index, "x":wp.x, "y": wp.y, "angle":wp.angle,
-                          "nxt":[w.index for w in wp.nxt]}
+                        "nxt":[w.index for w in wp.nxt], "intersection": wp.intersection}
                 layout['waypoints'].append(wpdict)
             for wp in self.ped_waypoints:
                 wpdict = {"index":wp.index, "x":wp.x, "y": wp.y, "angle":wp.angle,
-                          "nxt":[w.index for w in wp.nxt]}
+                        "nxt":[w.index for w in wp.nxt], "intersection": wp.intersection}
                 layout['ped_waypoints'].append(wpdict)
 
         for waypoint in self.waypoints:
@@ -227,6 +227,8 @@ class State(object):
         self.waypoints      = [lane.start_waypoint for k, lane in iteritems(self.type_map[Lane])]
         self.waypoints.extend([lane.end_waypoint   for k, lane in iteritems(self.type_map[Lane])])
 
+        already_seen = []
+        new_waypoints = []
         for k, street in iteritems(self.type_map[Street]):
             for waypoint in self.waypoints:
                 if street.intersects(waypoint):
@@ -241,10 +243,16 @@ class State(object):
                     dangle = (in_p.angle - out_p.angle) % (2 * np.pi)
                     if dangle < 0.75*np.pi or dangle > 1.25*np.pi:
                         in_p.nxt.append(out_p)
+                already_seen.append(in_p)
+                intersection_waypoints = in_p.smoothen(smooth_level=2000)
+                street.intersection_waypoints.extend(intersection_waypoints)
+                new_waypoints.extend(intersection_waypoints)
+            for intersection_waypoint in street.intersection_waypoints:
+                intersection_waypoint.intersection = k
 
-        new_waypoints = []
         for waypoint in self.waypoints:
-            new_waypoints.extend(waypoint.smoothen(smooth_level=2000))
+            if waypoint not in already_seen:
+                new_waypoints.extend(waypoint.smoothen(smooth_level=2000))
         self.waypoints.extend(new_waypoints)
 
         self.ped_waypoints = []

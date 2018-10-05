@@ -92,8 +92,6 @@
         { "type":"Street"     , "x":1600, "y":1600, "xdim":200, "ydim":200 },
         { "type":"Street"     , "x":1000,  "y":400, "xdim":200, "ydim":200 },
         { "type":"Street"     , "x":1000, "y":1600, "xdim":200, "ydim":200 },
-        { "type":"Street"     , "x":1600, "y":1600, "xdim":200, "ydim":200 },
-        { "type":"Street"     , "x":1600, "y":1600, "xdim":200, "ydim":200 },
         { "type":"Street"     , "x":400, "y":1000, "xdim":200, "ydim":200 },
         { "type":"Street"     , "x":1600, "y":1000, "xdim":200, "ydim":200 },
         { "type":"Lane"       , "x":700, "y":450, "xdim":400, "ydim":100, "angle_deg":0 },

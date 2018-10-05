@@ -52,11 +52,11 @@ class DataSaver():
             dtype.append((act_space, action.dtype, action.shape))
         self.dtype = np.dtype(dtype)
 
-    def get_obs_and_act(self, key):
+    def get_obs_and_act(self, key, obs_kwargs={}):
         observations = [] #(obs_name, observation)
         actions = [] #(act_name, action)
         for obs_space in self.obs:
-            curr_observation = self.fluid_sim.state.objects[key].make_observation(obs_space).get_array() 
+            curr_observation = self.fluid_sim.state.objects[key].make_observation(obs_space, **obs_kwargs).get_array() 
             observations.append((obs_space, curr_observation))
         for act_space in self.act:
             curr_act = self.fluid_sim.get_supervisor_actions(act_space, [key])[key].get_array()
