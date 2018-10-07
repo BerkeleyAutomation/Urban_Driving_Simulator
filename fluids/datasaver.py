@@ -13,7 +13,7 @@ class DataSaver():
     Once loading the np.array, data can be accessed (for example) with data[data['key']==128] to get all data for 'key'==128
     """
 
-    def __init__(self, fluid_sim, file, keys=None, obs=[OBS_NONE], act=[SteeringAccAction], batch_size=500, make_dir=True):
+    def __init__(self, fluid_sim, file, keys=None, obs=[OBS_NONE], act=[SteeringAccAction], batch_size=500, make_dir=True, obs_kwargs={}):
         """
             Save data from FLUIDS simulation.
 
@@ -32,6 +32,7 @@ class DataSaver():
         self.obs = obs
         self.act = act
         self.batch_size = batch_size
+        self.obs_kwargs = obs_kwargs
         if make_dir:
             dir = os.path.dirname(self.file)
             os.makedirs(dir, exist_ok=True)
@@ -52,11 +53,11 @@ class DataSaver():
             dtype.append((act_space, action.dtype, action.shape))
         self.dtype = np.dtype(dtype)
 
-    def get_obs_and_act(self, key, obs_kwargs={}):
+    def get_obs_and_act(self, key):
         observations = [] #(obs_name, observation)
         actions = [] #(act_name, action)
         for obs_space in self.obs:
-            curr_observation = self.fluid_sim.state.objects[key].make_observation(obs_space, **obs_kwargs).get_array() 
+            curr_observation = self.fluid_sim.state.objects[key].make_observation(obs_space, **self.obs_kwargs).get_array() 
             observations.append((obs_space, curr_observation))
         for act_space in self.act:
             curr_act = self.fluid_sim.get_supervisor_actions(act_space, [key])[key].get_array()
