@@ -29,7 +29,8 @@ class State(object):
     Parameters
     ----------
     layout: str
-        Name of json layout file specifiying environment object positions. Default is "fluids_state_city"
+        Name of json layout file specifiying environment object positions.
+        Default is "fluids_state_city"
     controlled_cars: int
         Number of cars to accept external control for
     background_cars: int
@@ -52,7 +53,9 @@ class State(object):
 
         fluids_print("Loading layout: " + layout)
         layout = open(os.path.join(basedir, "layouts", layout + ".json"))
-        cfilename = hashlib.md5(str(layout).encode()).hexdigest()[:10] + __version__ + ".json"
+        cfilename = "{}{}.json".format(
+            hashlib.md5(str(layout).encode()).hexdigest()[:10],
+            __version__)
         cached_layout = lookup_cache(cfilename)
         cache_found = cached_layout is not False
         if cached_layout:
@@ -61,14 +64,19 @@ class State(object):
 
         layout = json.load(layout)
 
-        
+
         self.time             = 0
         self.objects          = {}
-        self.type_map         = {k:{} for k in [Terrain, Lane, Street, CrossWalk, Sidewalk,
-                                                TrafficLight, Car, CrossWalkLight, Pedestrian, PedCrossing]}
+        self.type_map         = {k:{} for k in [Terrain, Lane,
+                                                Street, CrossWalk,
+                                                Sidewalk,
+                                                TrafficLight, Car,
+                                                CrossWalkLight, Pedestrian,
+                                                PedCrossing]}
         self.static_objects   = {}
         self.dynamic_objects  = {}
-        self.dimensions       = (layout['dimension_x'] + 800, layout['dimension_y'])
+        self.dimensions       = (layout['dimension_x'] + 800,
+                                 layout['dimension_y'])
         self.vis_level        = vis_level
 
 
@@ -92,7 +100,7 @@ class State(object):
             self.type_map[typ][key] = obj
             self.objects[key] = obj
             self.static_objects[key] = obj
-
+            obj_info['fluids_obj'] = obj
         car_ids = []
         for obj_info in layout['dynamic_objects']:
             typ = {"Car"           : Car,
@@ -121,39 +129,66 @@ class State(object):
 
             for wp_info in layout['waypoints']:
                 index = wp_info.pop('index')
-                wp = Waypoint(**wp_info)
+                wp = Waypoint(owner=None, **wp_info)
                 wp_map[index] = wp
                 self.waypoints.append(wp)
             for wp in self.waypoints:
                 wp.nxt = [wp_map[index] for index in wp.nxt]
 
-            wp_map = {}
+
             for wp_info in layout['ped_waypoints']:
                 index = wp_info.pop('index')
-                wp = Waypoint(**wp_info)
+                wp = Waypoint(owner=None, **wp_info)
                 wp_map[index] = wp
                 self.ped_waypoints.append(wp)
             for wp in self.ped_waypoints:
                 wp.nxt = [wp_map[index] for index in wp.nxt]
+
+
+            for k, obj in iteritems(self.objects):
+                obj.waypoints       = [wp_map[i] for i in obj.waypoints]
+                for wp in obj.waypoints:
+                    wp.owner = obj
+            for k, obj in iteritems(self.type_map[Lane]):
+                obj.start_waypoint  = wp_map[obj.start_waypoint]
+                obj.end_waypoint    = wp_map[obj.end_waypoint]
+            for k, obj in iteritems(self.type_map[Sidewalk]):
+                obj.start_waypoints = [wp_map[i] for i in obj.start_waypoints]
+                obj.end_waypoints   = [wp_map[i] for i in obj.end_waypoints]
+            for k, obj in iteritems(self.type_map[CrossWalk]):
+                obj.start_waypoints = [wp_map[i] for i in obj.start_waypoints]
+                obj.end_waypoints   = [wp_map[i] for i in obj.end_waypoints]
+
         else:
             self.generate_waypoints_init()
-        
+
             layout['waypoints'] = []
             layout['ped_waypoints'] = []
             for wp in self.waypoints:
                 wpdict = {"index":wp.index, "x":wp.x, "y": wp.y, "angle":wp.angle,
-                        "nxt":[w.index for w in wp.nxt], "intersection": wp.intersection}
+                          "nxt":[w.index for w in wp.nxt]}
                 layout['waypoints'].append(wpdict)
             for wp in self.ped_waypoints:
                 wpdict = {"index":wp.index, "x":wp.x, "y": wp.y, "angle":wp.angle,
-                        "nxt":[w.index for w in wp.nxt], "intersection": wp.intersection}
+                          "nxt":[w.index for w in wp.nxt]}
                 layout['ped_waypoints'].append(wpdict)
+
+            for obj_info in layout['static_objects']:
+                obj = obj_info.pop('fluids_obj')
+                if obj_info['type'] == 'Lane':
+                    obj_info['start_wp']  = obj.start_waypoint.index
+                    obj_info['end_wp']    = obj.end_waypoint.index
+                elif obj_info['type'] in ['Sidewalk', 'CrossWalk']:
+                    obj_info['start_wps'] = [wp.index for wp in obj.start_waypoints]
+                    obj_info['end_wps']   = [wp.index for wp in obj.end_waypoints]
+                obj_info['waypoints']     = [wp.index for wp in obj.waypoints]
+
 
         for waypoint in self.waypoints:
             waypoint.create_edges(buff=20)
         for waypoint in self.ped_waypoints:
             waypoint.create_edges(buff=5)
-        
+
 
         fluids_print("Generating cars")
         for i in range(controlled_cars + background_cars):
@@ -163,7 +198,8 @@ class State(object):
                 y = np.random.uniform(start.miny + 50, start.maxy - 50)
                 angle = start.angle + np.random.uniform(-0.1, 0.1)
                 car = Car(state=self, x=x, y=y, angle=angle, vis_level=vis_level)
-                min_d = min([car.dist_to(other) for k, other in iteritems(self.type_map[Car])] + [np.inf])
+                min_d = min([car.dist_to(other) for k, other \
+                             in iteritems(self.type_map[Car])] + [np.inf])
                 if min_d > 10 and not self.is_in_collision(car):
                     key = get_id()
                     for waypoint in self.waypoints:
@@ -189,7 +225,8 @@ class State(object):
         for i in range(background_peds):
             while True:
                 wp = random.choice(self.ped_waypoints)
-                ped = Pedestrian(state=self, x=wp.x, y=wp.y, angle=wp.angle, vis_level=vis_level)
+                ped = Pedestrian(state=self, x=wp.x, y=wp.y,
+                                 angle=wp.angle, vis_level=vis_level)
                 while ped.intersects(wp):
                     wp = random.choice(wp.nxt).out_p
                 ped.waypoints = [wp]
@@ -209,7 +246,8 @@ class State(object):
         if vis_level:
             self.static_surface       = pygame.Surface(self.dimensions)
             try:
-                self.static_debug_surface = pygame.Surface(self.dimensions, pygame.SRCALPHA)
+                self.static_debug_surface = pygame.Surface(self.dimensions,
+                                                           pygame.SRCALPHA)
             except ValueError:
                 fluids_print("WARNING: Alpha channel not available. Visualization may be slow")
                 self.static_debug_surface = self.static_surface.copy()
@@ -224,10 +262,11 @@ class State(object):
                 waypoint.render(self.static_debug_surface, color=(255, 255, 0))
 
     def generate_waypoints_init(self):
-        self.waypoints      = [lane.start_waypoint for k, lane in iteritems(self.type_map[Lane])]
-        self.waypoints.extend([lane.end_waypoint   for k, lane in iteritems(self.type_map[Lane])])
+        self.waypoints      = [lane.start_waypoint for k, lane in \
+                               iteritems(self.type_map[Lane])]
+        self.waypoints.extend([lane.end_waypoint   for k, lane in \
+                               iteritems(self.type_map[Lane])])
 
-        already_seen = []
         new_waypoints = []
         for k, street in iteritems(self.type_map[Street]):
             for waypoint in self.waypoints:
@@ -236,6 +275,8 @@ class State(object):
                                   waypoint.y - np.sin(waypoint.angle))
                     if street.contains_point(test_point):
                         street.in_waypoints.append(waypoint)
+                        assert(waypoint == waypoint.owner.end_waypoint)
+                        waypoint.owner = street
                     else:
                         street.out_waypoints.append(waypoint)
             for in_p in street.in_waypoints:
@@ -243,16 +284,12 @@ class State(object):
                     dangle = (in_p.angle - out_p.angle) % (2 * np.pi)
                     if dangle < 0.75*np.pi or dangle > 1.25*np.pi:
                         in_p.nxt.append(out_p)
-                already_seen.append(in_p)
-                intersection_waypoints = in_p.smoothen(smooth_level=2000)
-                street.intersection_waypoints.extend(intersection_waypoints)
-                new_waypoints.extend(intersection_waypoints)
-            for intersection_waypoint in street.intersection_waypoints:
-                intersection_waypoint.intersection = k
 
         for waypoint in self.waypoints:
-            if waypoint not in already_seen:
-                new_waypoints.extend(waypoint.smoothen(smooth_level=2000))
+            new_points = waypoint.smoothen(smooth_level=2000)
+            new_waypoints.extend(new_points)
+            for wp in new_points:
+                wp.owner = waypoint.owner
         self.waypoints.extend(new_waypoints)
 
         self.ped_waypoints = []
@@ -277,16 +314,21 @@ class State(object):
 
         new_waypoints = []
         for waypoint in self.ped_waypoints:
-            new_waypoints.extend(waypoint.smoothen(smooth_level=1500))
+            new_points = waypoint.smoothen(smooth_level=1500)
+            new_waypoints.extend(new_points)
+            for wp in new_points:
+                wp.owner = waypoint.owner
         self.ped_waypoints.extend(new_waypoints)
 
         i = 0
         for wp in self.waypoints:
             wp.index = i
             i += 1
+            wp.owner.waypoints.append(wp)
         for wp in self.ped_waypoints:
             wp.index = i
             i += 1
+            wp.owner.waypoints.append(wp)
 
     def get_static_surface(self):
         return self.static_surface
@@ -299,7 +341,7 @@ class State(object):
         for typ in [Pedestrian, TrafficLight, CrossWalkLight]:
             for k, obj in iteritems(self.type_map[typ]):
                 obj.render(dynamic_surface)
-        for k, car in iteritems(self.background_cars): 
+        for k, car in iteritems(self.background_cars):
             car.render(dynamic_surface)
         for k, car in iteritems(self.controlled_cars):
             car.render(dynamic_surface)
