@@ -67,6 +67,8 @@ class Car(Shape):
             self.last_obs = GridObservation(self, **kwargs)
         elif obs_space == OBS_BIRDSEYE:
             self.last_obs = BirdsEyeObservation(self, **kwargs)
+        elif obs_space == OBS_QLIDAR:
+            self.last_obs = QLidarObservation(self, **kwargs)
         elif obs_space:
             fluids_assert(False, "Observation space not legal")
         return self.last_obs

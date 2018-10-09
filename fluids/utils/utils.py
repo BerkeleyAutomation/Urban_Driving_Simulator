@@ -23,3 +23,6 @@ def get_cache_filename(fname):
         os.mkdir(cache_folder)
     fname = os.path.join(cache_folder, fname)
     return fname
+
+def distance(p0, p1):
+    return np.linalg.norm([p0[0] - p1[0], p0[1] - p1[1]])

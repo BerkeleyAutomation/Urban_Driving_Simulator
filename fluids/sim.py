@@ -158,6 +158,9 @@ class FluidSim(object):
                 elif self.obs_space == OBS_BIRDSEYE:
                     self.obs_space = OBS_GRID
                     fluids_print("Switching to observation: grid")
+                elif self.obs_space == OBS_GRID:
+                    self.obs_space = OBS_QLIDAR
+                    fluids_print("Switching to observation: qlidar")
                 else:
                     self.obs_space = OBS_NONE
                     fluids_print("Switching to observation: none")
