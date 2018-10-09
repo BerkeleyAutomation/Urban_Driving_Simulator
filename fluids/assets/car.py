@@ -55,7 +55,7 @@ class Car(Shape):
         self.last_to_goal   = 0
         self.stopped_time   = 0
         self.running_time   = 0
-        
+
         self.last_blob_time = -1
         self.cached_blob    = self.get_future_shape()
 
@@ -153,7 +153,7 @@ class Car(Shape):
         """
         Returns predicted direction of the car based on waypoints
         """
-        if self.waypoints == []: return 
+        if self.waypoints == []: return
         future_index = min(len(self.waypoints) - 1, 1)
         start = np.array([self.x , self.y])
         first = np.array([self.waypoints[0].x, self.waypoints[0].y]) - start
@@ -161,7 +161,7 @@ class Car(Shape):
         c = np.dot(first, future) / np.linalg.norm(first) / np.linalg.norm(future)
         angle = np.math.atan2(np.linalg.det([first,future]),np.dot(first,future))
         angle = np.degrees(angle)
-        thresh = 10 
+        thresh = 10
         if angle > thresh:
             print(angle)
             return RIGHT
@@ -249,3 +249,6 @@ class Car(Shape):
                                 (175, 175, 175),
                                 traj_ob,
                                 5)
+
+            for wp in self.waypoints[0].owner.waypoints:
+                wp.render_debug(surface, color=(0, 100, 0), width=20)
