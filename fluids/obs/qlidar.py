@@ -4,10 +4,23 @@ import pygame
 import shapely
 
 from fluids.obs.obs import FluidsObs
-from fluids.utils import distance
+from fluids.utils import distance, fluids_assert
 
 class QLidarObservation(FluidsObs):
-    def __init__(self, car, det_range=200, n_beams=8):
+    """
+    QLidar observation type.
+
+    Parameters
+    ----------
+    det_range: int
+        Detection range of lidar beams
+    n_beams: int
+        Number of uniformly spaced beams to use, when using uniform beam distribution
+    beam_distribution: list of int
+        If specified, uses a custom beam distribution. Values in this array are between [-1, 1].
+        Ex: [-1, -0.5, 0, 0.5] corresponds to beams at -180, -90, 0, and 90 degree positions.
+    """
+    def __init__(self, car, det_range=200, n_beams=8, beam_distribution=[-1, -0.5, 0, 0.5]):
         from fluids.assets import Shape
 
         state = car.state
@@ -27,8 +40,14 @@ class QLidarObservation(FluidsObs):
                 if car.can_collide(obj) and self.grid_square.intersects(obj):
                     self.all_collideables.append(obj)
 
+
         x, y = car.x, car.y
-        beam_deltas = (np.arange(n_beams)/float(n_beams/2)-1)*np.pi
+
+        if beam_distribution:
+            n_beams     = len(beam_distribution)
+            beam_deltas = np.array(beam_distribution) * np.pi
+        else:
+            beam_deltas = np.linspace(-1, 1, n_beams + 1) * np.pi
         self.linestrings = []
         self.detections = []
         for beam_delta in beam_deltas:

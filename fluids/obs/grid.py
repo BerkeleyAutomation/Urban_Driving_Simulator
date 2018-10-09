@@ -13,7 +13,8 @@ class GridObservation(FluidsObs):
     Observation is an occupancy grid over the detection region. 
     Observation has 9 dimensions: terrain, drivable regions, illegal drivable 
     regions, cars, pedestrians, traffic lights, way points, point trajectory and edge trajectory.
-    Array representation is (grid_size, grid_size, 9)
+    Array representation size is shape.
+    Field size of observation is obs_dim.
     """
     def __init__(self, car, obs_dim=500, shape=(500,500)):
         from fluids.assets import ALL_OBJS, TrafficLight, Lane, Terrain, Sidewalk, \

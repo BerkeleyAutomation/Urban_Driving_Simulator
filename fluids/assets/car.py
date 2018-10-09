@@ -207,7 +207,7 @@ class Car(Shape):
                 return super(Car, self).can_collide(other)
             return False
         elif type(other) is TrafficLight:
-            if other.color == (200, 0, 0):
+            if other.color == RED:
                 return super(Car, self).can_collide(other)
             return False
         return super(Car, self).can_collide(other)
