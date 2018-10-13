@@ -65,7 +65,7 @@ class QLidarObservation(FluidsObs):
                     d = distance((x, y), list(isect.coords)[0])
                     if d < min_coll_d:
                         min_coll_d = d
-            self.detections.append(min_coll_d)
+            self.detections.append([min_coll_d])
 
     def get_array(self):
         return np.array(self.detections)
