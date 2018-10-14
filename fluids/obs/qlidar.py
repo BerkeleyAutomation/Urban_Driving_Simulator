@@ -16,7 +16,7 @@ class QLidarObservation(FluidsObs):
         Detection range of lidar beams
     n_beams: int
         Number of uniformly spaced beams to use, when using uniform beam distribution
-    beam_distribution: list of int
+    beam_distribution: list of float
         If specified, uses a custom beam distribution. Values in this array are between [-1, 1].
         Ex: [-1, -0.5, 0, 0.5] corresponds to beams at -180, -90, 0, and 90 degree positions.
     """
@@ -43,7 +43,7 @@ class QLidarObservation(FluidsObs):
 
         x, y = car.x, car.y
 
-        if beam_distribution:
+        if np.any(beam_distribution):
             n_beams     = len(beam_distribution)
             beam_deltas = np.array(beam_distribution) * np.pi
         else:
