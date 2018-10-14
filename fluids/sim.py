@@ -437,3 +437,14 @@ class FluidSim(object):
             if car.stopped_time < 10:
                 return False
         return True
+
+    def detect_collision(self, car_keys):
+        """
+        Returns if car was in collision.
+        If car_keys is iterable of keys, returns a dict mapping key->bool for collision status
+        If car_keys is just one key, returns bool
+        """
+        if type(car_keys) != int:
+            return {k:self.state.is_in_collision(self.state.type_map[Car][k]) for k in car_keys}
+        else:
+            return self.state.is_in_collision(self.state.type_map[Car][car_keys])
