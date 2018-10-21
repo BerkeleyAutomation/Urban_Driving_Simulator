@@ -19,8 +19,11 @@ class QLidarObservation(FluidsObs):
     beam_distribution: list of float
         If specified, uses a custom beam distribution. Values in this array are between [-1, 1].
         Ex: [-1, -0.5, 0, 0.5] corresponds to beams at -180, -90, 0, and 90 degree positions.
+    goal_distance: int
+        The number of waypoint steps to look ahead when generating a "goal direction vector"
     """
-    def __init__(self, car, det_range=200, n_beams=8, beam_distribution=[-1, -0.5, 0, 0.5]):
+    def __init__(self, car, det_range=200, n_beams=8, beam_distribution=None,
+                 goal_distance=4):
         from fluids.assets import Shape
 
         state = car.state
@@ -42,7 +45,23 @@ class QLidarObservation(FluidsObs):
 
 
         x, y = car.x, car.y
+        goal_distance = min(goal_distance, len(car.waypoints)-1)
+        goal_wp = car.waypoints[goal_distance]
+        goalx, goaly = goal_wp.x, goal_wp.y
 
+
+
+        if (goalx == x):
+            if y - goaly > 0:
+                gangle = np.pi / 2
+            else:
+                gangle = -np.pi / 2
+        else:
+            gangle = (np.arctan((y - goaly) / (goalx - x)) % (2 * np.pi))
+        if (goalx - x < 0):
+            gangle = gangle + np.pi
+        gangle = gangle % (2 * np.pi)
+            #gangle = car.angle
         if np.any(beam_distribution):
             n_beams     = len(beam_distribution)
             beam_deltas = np.array(beam_distribution) * np.pi
@@ -51,7 +70,7 @@ class QLidarObservation(FluidsObs):
         self.linestrings = []
         self.detections = []
         for beam_delta in beam_deltas:
-            beam_angle = car.angle + beam_delta
+            beam_angle = (car.angle + beam_delta) % (2 * np.pi)
 
             xd = x + np.cos(beam_angle) * det_range
             yd = y - np.sin(beam_angle) * det_range
@@ -65,7 +84,18 @@ class QLidarObservation(FluidsObs):
                     d = distance((x, y), list(isect.coords)[0])
                     if d < min_coll_d:
                         min_coll_d = d
-            self.detections.append([min_coll_d])
+
+            d_gangle = min(abs(beam_angle - gangle),
+                           2*np.pi - abs(beam_angle - gangle))
+
+
+            self.detections.append([min_coll_d, d_gangle])
+
+        self.detections = np.array(self.detections)
+
+        min_angle_index = min(enumerate(self.detections[:,1]), key=lambda x:x[1])[0]
+        self.detections[:,1] = 0
+        self.detections[min_angle_index,1] = 1
 
     def get_array(self):
         return np.array(self.detections)
@@ -73,8 +103,19 @@ class QLidarObservation(FluidsObs):
     def render(self, surface):
         self.grid_square.render(surface, border=10)
         if self.car.vis_level > 4:
-            for obj in self.all_collideables:
-                obj.render_debug(surface)
+            # for obj in self.all_collideables:
+            #     obj.render_debug(surface)
+            # xd = np.cos(self.gangle) * 100
+            # yd = np.sin(self.gangle) * 100
+            # pygame.draw.circle(surface,
+            #                    (0, 0, 255),
+            #                    (int(self.car.x+xd), int(self.car.y-yd)),
+            #                    10)
+            # pygame.draw.circle(surface,
+            #                    (0, 0, 255),
+            #                    (int(self.goalx), int(self.goaly)),
+            #                    10)
+
             for det, (beam_delta, ls) in \
                 zip(self.detections, self.linestrings):
 
@@ -86,9 +127,16 @@ class QLidarObservation(FluidsObs):
                 xd = np.cos(angle) * det[0]
                 yd = np.sin(angle) * det[0]
 
+                
                 color = (255, 0, 0)
                 if det[0] == self.det_range:
                     color = (0, 255, 0)
+
+                if det[1]:
+                    pygame.draw.circle(surface,
+                                       (0, 0, 255),
+                                       (int(self.car.x+xd), int(self.car.y-yd)),
+                                       10)
                 pygame.draw.line(surface,
                                  color,
                                  (self.car.x, self.car.y),

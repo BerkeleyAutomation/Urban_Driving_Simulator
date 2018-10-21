@@ -105,7 +105,7 @@ class Shape(object):
     def update_points(self, x, y, angle):
         self.x = x
         self.y = y
-        self.angle = angle
+        self.angle = angle % (2 * np.pi)
         origin = np.array([self.x, self.y])
         self.points = self.origin_points.dot(rotation_array(self.angle)) + origin
         xs, ys = self.points[:,0], self.points[:,1]
