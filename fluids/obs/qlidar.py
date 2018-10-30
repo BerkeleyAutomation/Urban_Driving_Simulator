@@ -6,6 +6,7 @@ import shapely
 from fluids.obs.obs import FluidsObs
 from fluids.utils import distance, fluids_assert
 
+
 class QLidarObservation(FluidsObs):
     """
     QLidar observation type.
@@ -19,12 +20,15 @@ class QLidarObservation(FluidsObs):
     beam_distribution: list of float
         If specified, uses a custom beam distribution. Values in this array are between [-1, 1].
         Ex: [-1, -0.5, 0, 0.5] corresponds to beams at -180, -90, 0, and 90 degree positions.
+    ped_buffer: int
+        If specified > 0, creates a buffered detection region around a pedestrian
     goal_distance: int
         The number of waypoint steps to look ahead when generating a "goal direction vector"
     """
     def __init__(self, car, det_range=200, n_beams=8, beam_distribution=None,
+                 ped_buffer=0,
                  goal_distance=4):
-        from fluids.assets import Shape
+        from fluids.assets import Shape, Pedestrian
 
         state = car.state
 
@@ -79,7 +83,10 @@ class QLidarObservation(FluidsObs):
 
             min_coll_d = det_range
             for obj in self.all_collideables:
-                isect = linestring.intersection(obj.shapely_obj)
+                other_shape = obj.shapely_obj
+                if (ped_buffer and type(obj) == Pedestrian):
+                    other_shape = other_shape.buffer(ped_buffer)
+                isect = linestring.intersection(other_shape)
                 if not isect.is_empty:
                     d = distance((x, y), list(isect.coords)[0])
                     if d < min_coll_d:

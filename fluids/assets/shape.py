@@ -62,7 +62,7 @@ class Shape(object):
             x, y, angle = other
         else:
             x, y, angle = other.x, other.y, other.angle
-        new_points = self.points - np.array([x, y])
+        new_points = np.array(self.shapely_obj.exterior.coords) - np.array([x, y])
         new_points = new_points.dot(rotation_array(-angle))
         new_points = new_points + np.array(offset)
         shape = Shape(points=new_points[:,:2], color=self.color)
@@ -88,6 +88,7 @@ class Shape(object):
     def dist_to(self, other):
         return self.shapely_obj.distance(other.shapely_obj)
 
+
     def render(self, surface, border=4, color=None):
         if not color:
             color = self.color
@@ -103,14 +104,27 @@ class Shape(object):
         pass
 
     def update_points(self, x, y, angle):
+        dx = self.x - x
+        dy = self.y - y
+        dangle = (angle - self.angle + 6 * np.pi) % (2 * np.pi)
         self.x = x
         self.y = y
         self.angle = angle % (2 * np.pi)
-        origin = np.array([self.x, self.y])
-        self.points = self.origin_points.dot(rotation_array(self.angle)) + origin
+        # origin = np.array([self.x, self.y])
+        # self.points = self.origin_points.dot(rotation_array(self.angle)) + origin
+        # xs, ys = self.points[:,0], self.points[:,1]
+
+        self.shapely_obj = shapely.affinity.translate(self.shapely_obj,
+                                                      -dx, -dy)
+        self.shapely_obj = shapely.affinity.rotate(self.shapely_obj,
+                                                   -dangle,
+                                                   (self.x, self.y),
+                                                   use_radians=True)
+        self.points = np.array(self.shapely_obj.exterior.coords)
         xs, ys = self.points[:,0], self.points[:,1]
         self.minx, self.maxx = min(xs), max(xs)
         self.miny, self.maxy = min(ys), max(ys)
-        self.shapely_obj = shapely.geometry.Polygon(self.points)
+
+        #self.shapely_obj = shapely.geometry.Polygon(self.points)
 
         
