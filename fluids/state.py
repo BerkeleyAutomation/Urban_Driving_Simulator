@@ -107,7 +107,6 @@ class State(object):
                    "TrafficLight"  : TrafficLight,
                    "CrossWalkLight": CrossWalkLight,
                    "Pedestrian"    : Pedestrian}[obj_info['type']]
-
             obj = typ(state=self, vis_level=vis_level, **obj_info)
             if not use_traffic_lights and type(obj) == TrafficLight:
                 continue
