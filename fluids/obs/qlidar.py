@@ -22,13 +22,18 @@ class QLidarObservation(FluidsObs):
         Ex: [-1, -0.5, 0, 0.5] corresponds to beams at -180, -90, 0, and 90 degree positions.
     ped_buffer: int
         If specified > 0, creates a buffered detection region around a pedestrian
+    layers: list of types
+        If specified, provides control over multiple layers of QLIDAR observations, and the 
+         types of detected objects
+        To detect 1 layer of only cars, set this to [[fluids.assets.Car]]
     goal_distance: int
         The number of waypoint steps to look ahead when generating a "goal direction vector"
     """
     def __init__(self, car, det_range=200, n_beams=8, beam_distribution=None,
                  ped_buffer=0,
+                 layers=None,
                  goal_distance=4):
-        from fluids.assets import Shape, Pedestrian
+        from fluids.assets import Shape, Pedestrian, Car
 
         state = car.state
 
@@ -40,12 +45,19 @@ class QLidarObservation(FluidsObs):
                                  angle=car.angle,
                                  color=None)
 
+        layers = [[Car, Pedestrian]]
+        
         self.all_collideables = []
-
+        if layers == None:
+            layers = [self.car.collideables]
+        layer_collideables = [[] for l in layers]
         for c in self.car.collideables:
             for k, obj in iteritems(state.type_map[c]):
                 if car.can_collide(obj) and self.grid_square.intersects(obj):
                     self.all_collideables.append(obj)
+                    for l in range(len(layers)):
+                        if c in layers[l]:
+                            layer_collideables[l].append(obj)
 
 
         x, y = car.x, car.y
@@ -65,7 +77,6 @@ class QLidarObservation(FluidsObs):
         if (goalx - x < 0):
             gangle = gangle + np.pi
         gangle = gangle % (2 * np.pi)
-            #gangle = car.angle
         if np.any(beam_distribution):
             n_beams     = len(beam_distribution)
             beam_deltas = np.array(beam_distribution) * np.pi
@@ -81,22 +92,25 @@ class QLidarObservation(FluidsObs):
             linestring = shapely.geometry.LineString([(x, y), (xd, yd)])
             self.linestrings.append((beam_delta, linestring))
 
-            min_coll_d = det_range
-            for obj in self.all_collideables:
-                other_shape = obj.shapely_obj
-                if (ped_buffer and type(obj) == Pedestrian):
-                    other_shape = other_shape.buffer(ped_buffer)
-                isect = linestring.intersection(other_shape)
-                if not isect.is_empty:
-                    d = distance((x, y), list(isect.coords)[0])
-                    if d < min_coll_d:
-                        min_coll_d = d
+            min_coll_ds = []
+            for i in range(len(layers)):
+                min_coll_d = det_range
+                for obj in layer_collideables[i]:
+                    other_shape = obj.shapely_obj
+                    if (ped_buffer and type(obj) == Pedestrian):
+                        other_shape = other_shape.buffer(ped_buffer)
+                    isect = linestring.intersection(other_shape)
+                    if not isect.is_empty:
+                        d = distance((x, y), list(isect.coords)[0])
+                        if d < min_coll_d:
+                            min_coll_d = d
 
+
+                min_coll_ds.append(min_coll_d)
             d_gangle = min(abs(beam_angle - gangle),
-                           2*np.pi - abs(beam_angle - gangle))
-
-
-            self.detections.append([min_coll_d, d_gangle])
+                    2*np.pi - abs(beam_angle - gangle))
+            min_coll_ds.append(d_gangle)
+            self.detections.append(min_coll_ds)
 
         self.detections = np.array(self.detections)
 
@@ -106,7 +120,7 @@ class QLidarObservation(FluidsObs):
 
     def get_array(self):
         return np.array(self.detections)
-            
+
     def render(self, surface):
         self.grid_square.render(surface, border=10)
         if self.car.vis_level > 4:
@@ -134,7 +148,7 @@ class QLidarObservation(FluidsObs):
                 xd = np.cos(angle) * det[0]
                 yd = np.sin(angle) * det[0]
 
-                
+
                 color = (255, 0, 0)
                 if det[0] == self.det_range:
                     color = (0, 255, 0)
@@ -149,4 +163,3 @@ class QLidarObservation(FluidsObs):
                                  (self.car.x, self.car.y),
                                  (self.car.x+xd, self.car.y-yd),
                                  4)
-                                 
