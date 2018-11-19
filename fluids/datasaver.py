@@ -1,5 +1,5 @@
 from fluids.actions import SteeringAccAction
-from fluids.consts import OBS_NONE
+from fluids.consts import OBS_GRID
 from fluids.utils import *
 import pickle
 import os
@@ -14,7 +14,7 @@ class DataSaver():
     """
 
     #def __init__(self, fluid_sim, file, keys=None, obs=[OBS_NONE], act=[SteeringAccAction], batch_size=500, make_dir=True, obs_kwargs={}):
-    def __init__(self, fluid_sim, file_path, keys=None, obs={"obs_none": (OBS_NONE, {})}, act={"steeringacc": SteeringAccAction}, batch_size=500, make_dir=True):   
+    def __init__(self, fluid_sim, file_path, keys=None, obs={"obs_grid": (OBS_GRID, {"obs_dim": 300, "shape": (40, 40)})}, act={"steeringacc": SteeringAccAction}, batch_size=500, make_dir=True):   
         """
             Save data from FLUIDS simulation.
 
