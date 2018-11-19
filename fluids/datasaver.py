@@ -13,7 +13,8 @@ class DataSaver():
     Once loading the np.array, data can be accessed (for example) with data[data['key']==128] to get all data for 'key'==128
     """
 
-    def __init__(self, fluid_sim, file, keys=None, obs=[OBS_NONE], act=[SteeringAccAction], batch_size=500, make_dir=True, obs_kwargs={}):
+    #def __init__(self, fluid_sim, file, keys=None, obs=[OBS_NONE], act=[SteeringAccAction], batch_size=500, make_dir=True, obs_kwargs={}):
+    def __init__(self, fluid_sim, file_path, keys=None, obs={"obs_none": (OBS_NONE, {})}, act={"steeringacc": SteeringAccAction}, batch_size=500, make_dir=True):   
         """
             Save data from FLUIDS simulation.
 
@@ -22,17 +23,16 @@ class DataSaver():
                              with suffixes _1, _2 etc. might be created if data
                              gets too large
             keys: Keys of cars to gather observations from. Default is controlled car keys.
-            obs: List of observations to record. Default is [OBS_NONE]
-            act: List of actions to record. Default is [SteeringAccAction]
+            obs: Dict of observations to record. Format is (obs_name: (obs_type, obs_kwargs)) Default is [OBS_NONE]
+            act: Dict of actions to record. Format is (act_name: act_type) Default is [SteeringAccAction]
             batch_size: Number of iterations to run before dumping data. Default is 500.
             make_dir: Boolean. Flags if directory specified should be created or not.
         """
         self.fluid_sim = fluid_sim
-        self.file = file
+        self.file = file_path
         self.obs = obs
         self.act = act
         self.batch_size = batch_size
-        self.obs_kwargs = obs_kwargs
         if make_dir:
             dir = os.path.dirname(self.file)
             os.makedirs(dir, exist_ok=True)
@@ -56,12 +56,12 @@ class DataSaver():
     def get_obs_and_act(self, key):
         observations = [] #(obs_name, observation)
         actions = [] #(act_name, action)
-        for obs_space in self.obs:
-            curr_observation = self.fluid_sim.state.objects[key].make_observation(obs_space, **self.obs_kwargs).get_array() 
-            observations.append((obs_space, curr_observation))
-        for act_space in self.act:
+        for obs_name, (obs_space, obs_kwargs) in self.obs.items():
+            curr_observation = self.fluid_sim.state.objects[key].make_observation(obs_space, **obs_kwargs).get_array() 
+            observations.append((obs_name, curr_observation))
+        for act_name, act_space in self.act.items():
             curr_act = self.fluid_sim.get_supervisor_actions(act_space, [key])[key].get_array()
-            actions.append((act_space.__name__, curr_act))
+            actions.append((act_name, curr_act))
         return observations, actions
 
     def dump(self):
