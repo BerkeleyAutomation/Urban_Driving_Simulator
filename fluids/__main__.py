@@ -76,7 +76,7 @@ state = fluids.State(layout=args.state,
 simulator.set_state(state)
 
 if args.datasaver != "":
-    data_saver = fluids.DataSaver(fluid_sim=simulator, file=args.datasaver, batch_size=4)
+    data_saver = fluids.DataSaver(fluid_sim=simulator, file_path=args.datasaver, batch_size=4)
     simulator.set_data_saver(data_saver)
 
 t = 0
