@@ -5,10 +5,19 @@ import shapely.geometry
 from fluids.utils import rotation_array
 
 class Shape(object):
-    def __init__(self, x=0, y=0, xdim=0, ydim=0, points=[], mass=0, type=None,
-                 angle=0, angle_deg=0, color=(255, 255, 255), border_color=(0xE4, 0xE4, 0xE4), vis_level=1,
+    def __init__(self, x=0, y=0,
+                 xdim=0, ydim=0,
+                 points=[],
+                 mass=0,
+                 type=None,
+                 angle=0, angle_deg=0,
+                 color=(255, 255, 255),
+                 border_color=(0xE4, 0xE4, 0xE4),
+                 vis_level=1,
                  state=None,
-                 collideables=[]):
+                 collideables=[],
+                 waypoints=None):
+
         if angle_deg:
             angle = np.deg2rad(angle_deg)
         if not len(points):
@@ -44,7 +53,7 @@ class Shape(object):
         self.color         = color
         self.border_color  = border_color
         self.state         = state
-
+        self.waypoints     = [] if not waypoints else waypoints
     def intersects(self, other):
         return self.shapely_obj.intersects(other.shapely_obj)
 
@@ -53,7 +62,7 @@ class Shape(object):
             x, y, angle = other
         else:
             x, y, angle = other.x, other.y, other.angle
-        new_points = self.points - np.array([x, y])
+        new_points = np.array(self.shapely_obj.exterior.coords) - np.array([x, y])
         new_points = new_points.dot(rotation_array(-angle))
         new_points = new_points + np.array(offset)
         shape = Shape(points=new_points[:,:2], color=self.color)
@@ -79,6 +88,7 @@ class Shape(object):
     def dist_to(self, other):
         return self.shapely_obj.distance(other.shapely_obj)
 
+
     def render(self, surface, border=4, color=None):
         if not color:
             color = self.color
@@ -94,14 +104,27 @@ class Shape(object):
         pass
 
     def update_points(self, x, y, angle):
+        dx = self.x - x
+        dy = self.y - y
+        dangle = (angle - self.angle + 6 * np.pi) % (2 * np.pi)
         self.x = x
         self.y = y
-        self.angle = angle
-        origin = np.array([self.x, self.y])
-        self.points = self.origin_points.dot(rotation_array(self.angle)) + origin
+        self.angle = angle % (2 * np.pi)
+        # origin = np.array([self.x, self.y])
+        # self.points = self.origin_points.dot(rotation_array(self.angle)) + origin
+        # xs, ys = self.points[:,0], self.points[:,1]
+
+        self.shapely_obj = shapely.affinity.translate(self.shapely_obj,
+                                                      -dx, -dy)
+        self.shapely_obj = shapely.affinity.rotate(self.shapely_obj,
+                                                   -dangle,
+                                                   (self.x, self.y),
+                                                   use_radians=True)
+        self.points = np.array(self.shapely_obj.exterior.coords)
         xs, ys = self.points[:,0], self.points[:,1]
         self.minx, self.maxx = min(xs), max(xs)
         self.miny, self.maxy = min(ys), max(ys)
-        self.shapely_obj = shapely.geometry.Polygon(self.points)
+
+        #self.shapely_obj = shapely.geometry.Polygon(self.points)
 
         

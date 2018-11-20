@@ -21,7 +21,7 @@ parser.add_argument('-p', metavar='N', type=int, default=5,
 parser.add_argument('-v', metavar='N', type=int, default=1,
                     help='Visualization level')
 parser.add_argument('-o', metavar='str', type=str, default="birdseye",
-                    choices=["none", "birdseye", "grid"],
+                    choices=["none", "birdseye", "grid", "qlidar"],
                     help='Observation type')
 parser.add_argument('--screen-height', metavar='N', dest='screen_dim', type=int, default=800,
                     help='Sets screen height')
@@ -56,7 +56,8 @@ fluids_print("")
 
 obs = {"none"     :fluids.OBS_NONE,
        "birdseye" :fluids.OBS_BIRDSEYE,
-       "grid"     :fluids.OBS_GRID}[args.o]
+       "grid"     :fluids.OBS_GRID,
+       "qlidar"   :fluids.OBS_QLIDAR}[args.o]
 
 simulator = fluids.FluidSim(visualization_level=args.v,
                             fps                =args.fps,
@@ -75,7 +76,7 @@ state = fluids.State(layout=args.state,
 simulator.set_state(state)
 
 if args.datasaver != "":
-    data_saver = fluids.DataSaver(fluid_sim=simulator, file=args.datasaver, obs=[fluids.OBS_BIRDSEYE], batch_size=4)
+    data_saver = fluids.DataSaver(fluid_sim=simulator, file_path=args.datasaver, batch_size=4)
     simulator.set_data_saver(data_saver)
 
 t = 0

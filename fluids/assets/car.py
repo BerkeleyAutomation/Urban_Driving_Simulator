@@ -55,7 +55,7 @@ class Car(Shape):
         self.last_to_goal   = 0
         self.stopped_time   = 0
         self.running_time   = 0
-        
+
         self.last_blob_time = -1
         self.cached_blob    = self.get_future_shape()
 
@@ -67,6 +67,8 @@ class Car(Shape):
             self.last_obs = GridObservation(self, **kwargs)
         elif obs_space == OBS_BIRDSEYE:
             self.last_obs = BirdsEyeObservation(self, **kwargs)
+        elif obs_space == OBS_QLIDAR:
+            self.last_obs = QLidarObservation(self, **kwargs)
         elif obs_space:
             fluids_assert(False, "Observation space not legal")
         return self.last_obs
@@ -153,7 +155,7 @@ class Car(Shape):
         """
         Returns predicted direction of the car based on waypoints
         """
-        if self.waypoints == []: return 
+        if self.waypoints == []: return
         future_index = min(len(self.waypoints) - 1, 1)
         start = np.array([self.x , self.y])
         first = np.array([self.waypoints[0].x, self.waypoints[0].y]) - start
@@ -161,7 +163,7 @@ class Car(Shape):
         c = np.dot(first, future) / np.linalg.norm(first) / np.linalg.norm(future)
         angle = np.math.atan2(np.linalg.det([first,future]),np.dot(first,future))
         angle = np.degrees(angle)
-        thresh = 10 
+        thresh = 10
         if angle > thresh:
             print(angle)
             return RIGHT
@@ -205,7 +207,7 @@ class Car(Shape):
                 return super(Car, self).can_collide(other)
             return False
         elif type(other) is TrafficLight:
-            if other.color == (200, 0, 0):
+            if other.color == RED:
                 return super(Car, self).can_collide(other)
             return False
         return super(Car, self).can_collide(other)
@@ -217,7 +219,7 @@ class Car(Shape):
                 line = shapely.geometry.LineString([(self.waypoints[0].x, self.waypoints[0].y),
                                                     (self.x, self.y)]).buffer(20, resolution=2)
                 buf = [t[2] for t in self.trajectory][:max(int(1+6*self.vel/self.max_vel), 0)]
-                self.cached_blob = shapely.ops.cascaded_union([line] + buf)
+                self.cached_blob = shapely.ops.unary_union([line] + buf)
             else:
                 self.cached_blob = self.shapely_obj
 
@@ -249,3 +251,6 @@ class Car(Shape):
                                 (175, 175, 175),
                                 traj_ob,
                                 5)
+
+            for wp in self.waypoints[0].owner.waypoints:
+                wp.render_debug(surface, color=(0, 100, 0), width=20)
