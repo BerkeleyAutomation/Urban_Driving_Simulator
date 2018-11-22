@@ -45,8 +45,6 @@ class QLidarObservation(FluidsObs):
                                  angle=car.angle,
                                  color=None)
 
-        layers = [[Car, Pedestrian]]
-        
         self.all_collideables = []
         if layers == None:
             layers = [self.car.collideables]

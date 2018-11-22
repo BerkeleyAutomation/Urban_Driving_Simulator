@@ -68,6 +68,7 @@ class DataSaver():
         file_name = "{}_{}.npz".format(self.file, self.file_num)
         fluids_print("Dumping batch in {}".format(file_name))
         dumped_data = np.array(self.curr_data, dtype=self.dtype)
+        fluids_print("Memory use: {} mb".format(dumped_data.nbytes * 1e-6))
         start =  time.time()
         np.savez_compressed(file_name, dumped_data)
         fluids_print("Saved compressed file in {}s".format(round(time.time() - start)))
