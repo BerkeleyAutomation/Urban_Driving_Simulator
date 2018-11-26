@@ -14,19 +14,23 @@ class Sidewalk(Shape):
         else:
             self.start_waypoints = [Waypoint(point0[0],
                                              point0[1],
-                                             self,
+                                             owner=self,
+                                             ydim=5,
                                              angle=self.angle),
                                     Waypoint(point1[0],
                                              point1[1],
-                                             self,
+                                             owner=self,
+                                             ydim=5,
                                              angle=self.angle + np.pi)]
             self.end_waypoints   = [Waypoint(point1[0],
                                              point1[1],
-                                             self,
+                                             owner=self,
+                                             ydim=5,
                                              angle=self.angle),
                                     Waypoint(point0[0],
                                              point0[1],
-                                             self,
+                                             owner=self,
+                                             ydim=5,
                                              angle=self.angle + np.pi)]
 
             self.start_waypoints[0].nxt = [self.end_waypoints[0]]
