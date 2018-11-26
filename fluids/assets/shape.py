@@ -92,10 +92,14 @@ class Shape(object):
     def render(self, surface, border=4, color=None):
         if not color:
             color = self.color
-        if color:
-            pygame.draw.polygon(surface, color, self.points)
-        if border:
-            pygame.draw.polygon(surface, self.border_color, self.points, border)
+        if self.xdim != 1 or self.ydim != 1:
+            if color:
+                pygame.draw.polygon(surface, color, self.points)
+            if border:
+                pygame.draw.polygon(surface, self.border_color, self.points, border)
+        else:
+            pygame.draw.circle(surface, color, (int(self.x), int(self.y)), 5)
+
 
     def render_debug(self, surface, color=(255, 0, 0), width=10):
         pygame.draw.polygon(surface, color, self.points, width)

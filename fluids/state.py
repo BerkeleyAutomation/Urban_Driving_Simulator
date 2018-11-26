@@ -41,12 +41,15 @@ class State(object):
         Sets whether traffic lights are generated
     use_ped_lights: bool
         Sets whether pedestrian lights are generated
+    waypoint_width: int
+        Sets width of waypoints. Increasing this makes waypoints span the lanes
     """
     def __init__(self,
                  layout             =STATE_CITY,
                  controlled_cars    =0,
                  background_cars    =0,
                  background_peds    =0,
+                 waypoint_width     =5,
                  use_traffic_lights =True,
                  use_ped_lights     =True,
                  vis_level          =1):
@@ -90,6 +93,8 @@ class State(object):
                    "CrossWalk"  : CrossWalk,
                    "PedCrossing": PedCrossing,
                    "Sidewalk"   : Sidewalk}[obj_info['type']]
+            if typ == Lane:
+                obj_info["wp_width"] = waypoint_width
             obj = typ(state=self, vis_level=vis_level, **obj_info)
 
             if typ == Lane:
@@ -128,7 +133,7 @@ class State(object):
 
             for wp_info in layout['waypoints']:
                 index = wp_info.pop('index')
-                wp = Waypoint(owner=None, **wp_info)
+                wp = Waypoint(owner=None, ydim=waypoint_width, **wp_info)
                 wp_map[index] = wp
                 self.waypoints.append(wp)
             for wp in self.waypoints:

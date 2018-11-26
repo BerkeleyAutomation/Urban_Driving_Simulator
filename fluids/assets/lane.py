@@ -5,7 +5,7 @@ from fluids.assets.shape import Shape
 from fluids.assets.waypoint import Waypoint
 
 class Lane(Shape):
-    def __init__(self, start_wp=None, end_wp=None, **kwargs):
+    def __init__(self, start_wp=None, end_wp=None, wp_width=5, **kwargs):
         #FCF59B
         Shape.__init__(self, color=(0xff, 0xff, 0xff), **kwargs)
 
@@ -18,11 +18,13 @@ class Lane(Shape):
 
             self.start_waypoint = Waypoint(self.start_waypoint[0],
                                            self.start_waypoint[1],
-                                           self,
+                                           ydim=wp_width,
+                                           owner=self,
                                            angle=self.angle)
             self.end_waypoint   = Waypoint(self.end_waypoint[0],
                                            self.end_waypoint[1],
-                                           self,
+                                           ydim=wp_width,
+                                           owner=self,
                                            angle=self.angle)
 
             self.start_waypoint.nxt = [self.end_waypoint]
