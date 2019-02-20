@@ -5,11 +5,15 @@ import random
 import shapely
 import shapely.ops
 
+from fluids.assets.waypoint import Waypoint
+
 from fluids.assets.shape import Shape
 from fluids.actions import *
 from fluids.utils import PIDController, fluids_assert
 from fluids.obs import *
 from fluids.consts import *
+
+from collections import deque
 
 
 def integrator(state, t, steer, acc, lr, lf):
@@ -59,6 +63,8 @@ class Car(Shape):
         self.last_blob_time = -1
         self.cached_blob    = self.get_future_shape()
 
+        self.position_history = deque(maxlen=1)
+
 
     def make_observation(self, obs_space=OBS_NONE, **kwargs):
         if obs_space == OBS_NONE:
@@ -69,6 +75,10 @@ class Car(Shape):
             self.last_obs = BirdsEyeObservation(self, **kwargs)
         elif obs_space == OBS_QLIDAR:
             self.last_obs = QLidarObservation(self, **kwargs)
+        elif obs_space == OBS_CHAUFFEUR:
+            self.last_obs = ChauffeurObservation(self, **kwargs)
+            if self.position_history.maxlen != self.last_obs.history: 
+                self.position_history = deque(maxlen=self.last_obs.history)
         elif obs_space:
             fluids_assert(False, "Observation space not legal")
         return self.last_obs
@@ -95,7 +105,8 @@ class Car(Shape):
         self.vel = vel
         self.update_points(x, y, angle)
         self.running_time += 1
-
+        
+        self.position_history.append(Waypoint(x, y))
 
 
 

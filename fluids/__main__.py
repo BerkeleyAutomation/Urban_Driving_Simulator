@@ -57,7 +57,8 @@ fluids_print("")
 obs = {"none"     :fluids.OBS_NONE,
        "birdseye" :fluids.OBS_BIRDSEYE,
        "grid"     :fluids.OBS_GRID,
-       "qlidar"   :fluids.OBS_QLIDAR}[args.o]
+       "qlidar"   :fluids.OBS_QLIDAR,
+       "chauffeur":fluids.OBS_CHAUFFEUR}[args.o]
 
 simulator = fluids.FluidSim(visualization_level=args.v,
                             fps                =args.fps,

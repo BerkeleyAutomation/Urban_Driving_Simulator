@@ -4,6 +4,7 @@ OBS_QLIDAR   = "fluids_obs_qlidar"
 OBS_GRID     = "fluids_obs_grid"
 OBS_BIRDSEYE = "fluids_obs_birdseye"
 OBS_NONE     = "fluids_obs_none"
+OBS_CHAUFFEUR= "fluids_obs_chauffeur"
 
 BACKGROUND_CSP = "fluids_background_csp"
 BACKGROUND_NULL = "fluids_background_null"
