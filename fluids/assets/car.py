@@ -229,7 +229,7 @@ class Car(Shape):
 
                 line = shapely.geometry.LineString([(self.waypoints[0].x, self.waypoints[0].y),
                                                     (self.x, self.y)]).buffer(20, resolution=2)
-                buf = [t[2] for t in self.trajectory][:max(int(1+6*self.vel/self.max_vel), 0)]
+                buf = [t[2] for t in self.trajectory][:max(int(1+2*self.vel/self.max_vel), 0)]
                 self.cached_blob = shapely.ops.unary_union([line] + buf)
             else:
                 self.cached_blob = self.shapely_obj

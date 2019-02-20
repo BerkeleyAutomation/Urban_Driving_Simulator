@@ -122,7 +122,7 @@ class ChauffeurObservation(FluidsObs):
         #     rel_obj = obj.get_relative(rel)
         #     rel_obj.render(light_window_green, border=None)
 
-        point = (int(gd/6), int(gd/2))
+        point = (int(gd/2), int(gd/2))
         edge_point = None
 
         def is_on_screen(point, gd):
@@ -155,14 +155,16 @@ class ChauffeurObservation(FluidsObs):
         rel_point = self.car.position_history[0]
         rel_point = rel_point.get_relative(rel)
         point = int(rel_point.x), int(rel_point.y)
-        for p in self.car.position_history:
+        color_change = (255 - 150) / len(self.car.position_history)
+        for i, p in enumerate(self.car.position_history):
             if p == point: continue
             relp = p.get_relative(rel)
             new_point = int(relp.x), int(relp.y)
             # if not edge_point and is_on_screen(point, gd) and not is_on_screen(new_point, gd):
             #     edge_point = new_point
 
-            pygame.draw.line(past_car_pose_window, (255, 255, 255), point, new_point, 5)
+            color = int(255 - i*color_change)
+            pygame.draw.line(past_car_pose_window, (color, 255, 255), point, new_point, line_width)
             point = new_point
 
 
