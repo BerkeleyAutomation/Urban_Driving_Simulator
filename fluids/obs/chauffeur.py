@@ -79,31 +79,31 @@ class ChauffeurObservation(FluidsObs):
                self.car.y-gd/2*np.sin(a0)+gd/2*np.sin(a1),
                self.car.angle)
 
-        # for typ in [Terrain, Sidewalk, PedCrossing]:
-        #     for obj in collideable_map[typ]:
-        #         rel_obj = obj.get_relative(rel)
-        #         rel_obj.render(terrain_window, border=None)
+        for typ in [Terrain, Sidewalk, PedCrossing]:
+            for obj in collideable_map[typ]:
+                rel_obj = obj.get_relative(rel)
+                rel_obj.render(drivable_window, border=None, color=(100, 100, 100))
 
-        # for obj in collideable_map[Lane]:
-        #     rel_obj = obj.get_relative(rel)
-        #     if not car.can_collide(obj):
-        #         rel_obj.render(drivable_window, border=None)
-        #     else:
-        #         rel_obj.render(undrivable_window, border=None)
-        # for obj in collideable_map[Street]:
-        #     rel_obj = obj.get_relative(rel)
-        #     rel_obj.render(drivable_window, border=None)
+        for obj in collideable_map[Lane]:
+            rel_obj = obj.get_relative(rel)
+            if not car.can_collide(obj):
+                rel_obj.render(drivable_window, border=None, color=(255,255,255))
+            #else:
+                #rel_obj.render(undrivable_window, border=None)
+        for obj in collideable_map[Street]:
+            rel_obj = obj.get_relative(rel)
+            rel_obj.render(drivable_window, border=None, color=(150, 150, 150))
 
         # All other cars
         for obj in collideable_map[Car] + collideable_map[Pedestrian]:
             if obj == self.car:
                 continue
             rel_obj = obj.get_relative(rel)
-            rel_obj.render(car_window, border=None)
+            rel_obj.render(car_window, border=None, color=(255, 255, 255))
 
         # My car
         rel_obj = self.car.get_relative(rel)
-        rel_obj.render(my_car_window, border=None)
+        rel_obj.render(my_car_window, border=None, color=(255, 255, 255))
 
 
 
@@ -154,7 +154,7 @@ class ChauffeurObservation(FluidsObs):
                 pygame.draw.line(direction_edge_window, (255, 255, 255), (0, gd - 1), (gd - 1, gd - 1), line_width)
 
         point = None
-        color_change = (255 - 150) / len(self.car.waypoints)
+        color_change = (255 - 50) / len(self.car.waypoints)
         for i, p in enumerate(self.car.waypoints):
             if p == point: continue
             relp = p.get_relative(rel)
@@ -164,11 +164,11 @@ class ChauffeurObservation(FluidsObs):
 
             if point is not None:
                 color = int(255 - i*color_change)
-                pygame.draw.line(route_window, (color, 255, 255), point, new_point, line_width)
+                pygame.draw.line(route_window, (color, color, color), point, new_point, line_width)
             point = new_point
 
         point = None
-        color_change = (255 - 150) / len(self.car.position_history)
+        color_change = (255 - 50) / len(self.car.position_history)
         for i, p in enumerate(self.car.position_history):
             if p == point: continue
             relp = p.get_relative(rel)
@@ -178,13 +178,13 @@ class ChauffeurObservation(FluidsObs):
 
             if point is not None:
                 color = int(255 - i*color_change)
-                pygame.draw.line(past_car_pose_window, (color, 255, 255), point, new_point, line_width)
+                pygame.draw.line(past_car_pose_window, (color, color, color), point, new_point, line_width)
             point = new_point
 
 
         self.pygame_rep = [pygame.transform.rotate(window, 90) for window in [
                                                                               # terrain_window,
-                                                                              # drivable_window,
+                                                                              drivable_window,
                                                                               # undrivable_window,
                                                                               car_window,
                                                                               my_car_window,
