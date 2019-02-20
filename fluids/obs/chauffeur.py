@@ -60,6 +60,7 @@ class ChauffeurObservation(FluidsObs):
         my_car_window     = pygame.Surface((self.grid_dim, self.grid_dim))
         car_window        = pygame.Surface((self.grid_dim, self.grid_dim))
         past_car_pose_window  = pygame.Surface((self.grid_dim, self.grid_dim))
+        route_window = pygame.Surface((self.grid_dim, self.grid_dim))
 
         ped_window        = pygame.Surface((self.grid_dim, self.grid_dim))
         light_window_red  = pygame.Surface((self.grid_dim, self.grid_dim))
@@ -128,7 +129,7 @@ class ChauffeurObservation(FluidsObs):
         def is_on_screen(point, gd):
             return 0 <= point[0] < gd and 0 <= point[1] < gd
         
-        line_width = 20
+        line_width = 10 
         for p in self.car.waypoints:
             relp = p.get_relative(rel)
             new_point = int(relp.x), int(relp.y)
@@ -152,9 +153,21 @@ class ChauffeurObservation(FluidsObs):
             if edge_point[1] == gd - 1:
                 pygame.draw.line(direction_edge_window, (255, 255, 255), (0, gd - 1), (gd - 1, gd - 1), line_width)
 
-        rel_point = self.car.position_history[0]
-        rel_point = rel_point.get_relative(rel)
-        point = int(rel_point.x), int(rel_point.y)
+        point = None
+        color_change = (255 - 150) / len(self.car.waypoints)
+        for i, p in enumerate(self.car.waypoints):
+            if p == point: continue
+            relp = p.get_relative(rel)
+            new_point = int(relp.x), int(relp.y)
+            # if not edge_point and is_on_screen(point, gd) and not is_on_screen(new_point, gd):
+            #     edge_point = new_point
+
+            if point is not None:
+                color = int(255 - i*color_change)
+                pygame.draw.line(route_window, (color, 255, 255), point, new_point, line_width)
+            point = new_point
+
+        point = None
         color_change = (255 - 150) / len(self.car.position_history)
         for i, p in enumerate(self.car.position_history):
             if p == point: continue
@@ -163,8 +176,9 @@ class ChauffeurObservation(FluidsObs):
             # if not edge_point and is_on_screen(point, gd) and not is_on_screen(new_point, gd):
             #     edge_point = new_point
 
-            color = int(255 - i*color_change)
-            pygame.draw.line(past_car_pose_window, (color, 255, 255), point, new_point, line_width)
+            if point is not None:
+                color = int(255 - i*color_change)
+                pygame.draw.line(past_car_pose_window, (color, 255, 255), point, new_point, line_width)
             point = new_point
 
 
@@ -175,6 +189,7 @@ class ChauffeurObservation(FluidsObs):
                                                                               car_window,
                                                                               my_car_window,
                                                                               past_car_pose_window,
+                                                                              route_window
                                                                               # ped_window,
                                                                               # light_window_red,
                                                                               # light_window_green,
