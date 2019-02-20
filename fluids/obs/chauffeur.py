@@ -31,8 +31,6 @@ class ChauffeurObservation(FluidsObs):
                                  color=None, border_color=(200,0,0))
         self.history = history
 
-        # self.position_history = deque(maxlen=self.history)
-
         self.all_collideables = []
         collideable_map = {typ:[] for typ in ALL_OBJS}
         for k, obj in iteritems(state.objects):
@@ -111,17 +109,17 @@ class ChauffeurObservation(FluidsObs):
         #     rel_obj = obj.get_relative(rel)
         #     rel_obj.render(ped_window, border=None)
 
-        # for obj in collideable_map["TrafficLight-Red"]:
-        #     rel_obj = obj.get_relative(rel)
-        #     rel_obj.render(light_window_red, border=None)
+        for obj in collideable_map["TrafficLight-Red"]:
+            rel_obj = obj.get_relative(rel)
+            rel_obj.render(light_window_red, border=None)
 
-        # for obj in collideable_map["TrafficLight-Green"]:
-        #     rel_obj = obj.get_relative(rel)
-        #     rel_obj.render(light_window_green, border=None)
+        for obj in collideable_map["TrafficLight-Green"]:
+            rel_obj = obj.get_relative(rel)
+            rel_obj.render(light_window_green, border=None)
         
-        # for obj in collideable_map["TrafficLight-Yellow"]:
-        #     rel_obj = obj.get_relative(rel)
-        #     rel_obj.render(light_window_green, border=None)
+        for obj in collideable_map["TrafficLight-Yellow"]:
+            rel_obj = obj.get_relative(rel)
+            rel_obj.render(light_window_yellow, border=None)
 
         point = (int(gd/2), int(gd/2))
         edge_point = None
@@ -189,11 +187,11 @@ class ChauffeurObservation(FluidsObs):
                                                                               car_window,
                                                                               my_car_window,
                                                                               past_car_pose_window,
-                                                                              route_window
+                                                                              route_window,
                                                                               # ped_window,
-                                                                              # light_window_red,
-                                                                              # light_window_green,
-                                                                              # light_window_yellow,
+                                                                              light_window_red,
+                                                                              light_window_green,
+                                                                              light_window_yellow,
                                                                               # direction_window,
                                                                               # direction_pixel_window,
                                                                               # direction_edge_window
