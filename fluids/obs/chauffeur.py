@@ -56,7 +56,8 @@ class ChauffeurObservation(FluidsObs):
         undrivable_window = pygame.Surface((self.grid_dim, self.grid_dim))
 
         my_car_window     = pygame.Surface((self.grid_dim, self.grid_dim))
-        car_window        = pygame.Surface((self.grid_dim, self.grid_dim))
+        # car_window        = pygame.Surface((self.grid_dim, self.grid_dim))
+        past_cars_and_peds_windows = {i: pygame.Surface((self.grid_dim, self.grid_dim)) for i in range(10)} # should be self.history, not 10
         past_car_pose_window  = pygame.Surface((self.grid_dim, self.grid_dim))
         route_window = pygame.Surface((self.grid_dim, self.grid_dim))
 
@@ -92,22 +93,17 @@ class ChauffeurObservation(FluidsObs):
             rel_obj = obj.get_relative(rel)
             rel_obj.render(drivable_window, border=None, color=(150, 150, 150))
 
-        # All other cars
+        # All other cars and pedestrians
         for obj in collideable_map[Car] + collideable_map[Pedestrian]:
-            if obj == self.car:
+            if obj == self.car: # skip main car
                 continue
-            rel_obj = obj.get_relative(rel)
-            rel_obj.render(car_window, border=None, color=(255, 255, 255))
+            for i, shape_info in enumerate(obj.shape_history):
+                rel_shape = shape_info.get_relative(rel)
+                pygame.draw.polygon(past_cars_and_peds_windows[i], (255, 255, 255), rel_shape.points)
 
         # My car
         rel_obj = self.car.get_relative(rel)
         rel_obj.render(my_car_window, border=None, color=(255, 255, 255))
-
-
-
-        # for obj in collideable_map[Pedestrian]:
-        #     rel_obj = obj.get_relative(rel)
-        #     rel_obj.render(ped_window, border=None)
 
         for obj in collideable_map["TrafficLight-Red"]:
             rel_obj = obj.get_relative(rel)
@@ -184,14 +180,16 @@ class ChauffeurObservation(FluidsObs):
                                                                               # terrain_window,
                                                                               drivable_window,
                                                                               # undrivable_window,
-                                                                              car_window,
+                                                                              # car_window,
+                                                                              past_cars_and_peds_windows[0],
+                                                                              past_cars_and_peds_windows[9],
                                                                               my_car_window,
                                                                               past_car_pose_window,
                                                                               route_window,
                                                                               # ped_window,
                                                                               light_window_red,
                                                                               light_window_green,
-                                                                              light_window_yellow,
+                                                                              # light_window_yellow,
                                                                               # direction_window,
                                                                               # direction_pixel_window,
                                                                               # direction_edge_window

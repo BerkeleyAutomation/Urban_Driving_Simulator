@@ -64,6 +64,7 @@ class Car(Shape):
         self.cached_blob    = self.get_future_shape()
 
         self.position_history = deque(maxlen=1)
+        self.shape_history = deque(maxlen=10) # TODO: Fix this so it isn't hardcoded
 
 
     def make_observation(self, obs_space=OBS_NONE, **kwargs):
@@ -105,9 +106,9 @@ class Car(Shape):
         self.vel = vel
         self.update_points(x, y, angle)
         self.running_time += 1
-        
-        self.position_history.append(Waypoint(x, y))
 
+        self.position_history.append(Waypoint(x, y))
+        self.shape_history.append(Shape(points=self.points.copy(), angle=self.angle))
 
 
     def step(self, action):
