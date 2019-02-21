@@ -5,6 +5,7 @@ import pygame
 from fluids.assets.shape import Shape
 from fluids.assets.car import Car
 from fluids.assets.crosswalk_light import CrossWalkLight
+from collections import deque
 class Pedestrian(Shape):
     collideables = [Car, CrossWalkLight]
     def __init__(self, max_vel=2, vel=0, planning_depth=2, dim=25, **kwargs):
@@ -14,6 +15,7 @@ class Pedestrian(Shape):
         self.waypoints      = []
         self.trajectory     = []
         self.planning_depth = planning_depth
+        self.shape_history = deque(maxlen=10) # TODO: Fix this so it isn't hardcoded
 
     def get_future_shape(self):
         if len(self.waypoints) and len(self.trajectory):
@@ -44,6 +46,7 @@ class Pedestrian(Shape):
             self.waypoints.pop(0)
             if len(self.trajectory):
                 self.trajectory.pop(0)
+        self.shape_history.append(Shape(points=self.points.copy(), angle=self.angle))
 
     def can_collide(self, other):
         from fluids.assets import CrossWalkLight
