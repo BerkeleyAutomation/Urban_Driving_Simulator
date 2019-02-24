@@ -29,6 +29,22 @@ class SteeringVelAction(Action):
     def get_array(self):
         return np.array([self.steer, self.vel])
 
+class WaypointVelAction(Action):
+    """
+    This action provides waypoint and velocity control
+
+    Parameters
+    ----------
+    waypoint: tuple of (x, y)
+    vel: float in range (0, 1)
+    """
+    def __init__(self, waypoint, vel):
+        self.waypoint = waypoint
+        self.vel = vel
+    def get_action(self):
+        return self.waypoint, self.vel
+    def get_array(self):
+        return np.array([self.waypoint[0], self.waypoint[1], self.vel])
 
 class SteeringAccAction(Action):
     """

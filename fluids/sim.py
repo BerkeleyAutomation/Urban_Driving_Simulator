@@ -421,6 +421,7 @@ class FluidSim(object):
                     actions[k] = v.Value()
 
 
+        import ipdb; ipdb.set_trace()
         self.next_actions = actions
 
 

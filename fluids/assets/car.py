@@ -134,6 +134,11 @@ class Car(Shape):
             _, acc = self.PIDController(VelocityAction(vel)).get_action()
             self.raw_step(steer, acc)
             self.last_action = action
+        elif type(action) == WaypointVelAction:
+            waypoint, vel = action.get_action()
+            steer, acc = self.PIDController(VelocityAction(vel), target_pos=waypoint).get_action()
+            self.raw_step(steer, acc)
+            self.last_action = action
         elif type(action) == LastValidAction:
             self.step(self.last_action)
             return
@@ -185,14 +190,17 @@ class Car(Shape):
             return STRAIGHT
 
 
-    def PIDController(self, target_vel, update=True):
+    def PIDController(self, target_vel, target_pos=None, update=True):
         target_vel = target_vel.get_action() * self.max_vel
+
         if len(self.waypoints):
             target_x = self.waypoints[0].x
             target_y = self.waypoints[0].y
         else:
             target_x = self.x
             target_y = self.y
+        if target_pos:
+            target_x, target_y = target_pos
 
         ac2 = np.arctan2(self.y - target_y, target_x - self.x)
         self.angle = self.angle % (2 * np.pi)
