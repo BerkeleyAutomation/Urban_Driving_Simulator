@@ -2,12 +2,12 @@ from six import iteritems
 import numpy as np
 import pygame
 from fluids.assets.shape import Shape
+from fluids.assets.waypoint import Waypoint
 from fluids.obs.obs import FluidsObs
 from fluids.utils import rotation_array
 from scipy.misc import imresize
 from fluids.consts import *
-
-# from collections import deque
+from collections import deque
 
 class ChauffeurObservation(FluidsObs):
     """
@@ -31,6 +31,12 @@ class ChauffeurObservation(FluidsObs):
                                  color=None, border_color=(200,0,0))
         self.history = history
 
+        if not hasattr(car, 'position_history'): car.position_history = deque(maxlen=history)
+        if not hasattr(car, 'cars_and_peds_history'): car.cars_and_peds_history = deque(maxlen=history)
+        if not hasattr(car, 'red_traffic_history'): car.red_traffic_history = deque(maxlen=history)
+        if not hasattr(car, 'yellow_traffic_history'): car.yellow_traffic_history = deque(maxlen=history)
+        if not hasattr(car, 'green_traffic_history'): car.green_traffic_history = deque(maxlen=history)
+
         self.all_collideables = []
         collideable_map = {typ:[] for typ in ALL_OBJS}
         for k, obj in iteritems(state.objects):
@@ -51,25 +57,14 @@ class ChauffeurObservation(FluidsObs):
             collideable_map[Waypoint].append(waypoint)
             self.all_collideables.append(waypoint)
 
-        terrain_window    = pygame.Surface((self.grid_dim, self.grid_dim))
-        drivable_window   = pygame.Surface((self.grid_dim, self.grid_dim))
-        undrivable_window = pygame.Surface((self.grid_dim, self.grid_dim))
-
-        my_car_window     = pygame.Surface((self.grid_dim, self.grid_dim))
-        # car_window        = pygame.Surface((self.grid_dim, self.grid_dim))
-        past_cars_and_peds_windows = {i: pygame.Surface((self.grid_dim, self.grid_dim)) for i in range(10)} # should be self.history, not 10
-        past_car_pose_window  = pygame.Surface((self.grid_dim, self.grid_dim))
-        route_window = pygame.Surface((self.grid_dim, self.grid_dim))
-
-        ped_window        = pygame.Surface((self.grid_dim, self.grid_dim))
-        light_window_red  = pygame.Surface((self.grid_dim, self.grid_dim))
-        light_window_green= pygame.Surface((self.grid_dim, self.grid_dim))
-        light_window_yellow=pygame.Surface((self.grid_dim, self.grid_dim))
-        direction_window  = pygame.Surface((self.grid_dim, self.grid_dim))
-        direction_pixel_window \
-                          = pygame.Surface((self.grid_dim, self.grid_dim))
-        direction_edge_window \
-                          = pygame.Surface((self.grid_dim, self.grid_dim))
+        drivable_window             = pygame.Surface((self.grid_dim, self.grid_dim))
+        car_window                  = pygame.Surface((self.grid_dim, self.grid_dim))
+        current_frame_cars_and_peds = pygame.Surface((self.grid_dim, self.grid_dim))
+        past_car_pose_window        = pygame.Surface((self.grid_dim, self.grid_dim))
+        route_window                = pygame.Surface((self.grid_dim, self.grid_dim))
+        light_window_red            = pygame.Surface((self.grid_dim, self.grid_dim))
+        light_window_green          = pygame.Surface((self.grid_dim, self.grid_dim))
+        light_window_yellow         = pygame.Surface((self.grid_dim, self.grid_dim))
 
         gd = self.grid_dim
         a0 = self.car.angle + np.pi / 2
@@ -78,6 +73,8 @@ class ChauffeurObservation(FluidsObs):
                self.car.y-gd/2*np.sin(a0)+gd/2*np.sin(a1),
                self.car.angle)
 
+
+        # DRIVEABLE WINDOW
         for typ in [Terrain, Sidewalk, PedCrossing]:
             for obj in collideable_map[typ]:
                 rel_obj = obj.get_relative(rel)
@@ -93,60 +90,47 @@ class ChauffeurObservation(FluidsObs):
             rel_obj = obj.get_relative(rel)
             rel_obj.render(drivable_window, border=None, color=(150, 150, 150))
 
-        # All other cars and pedestrians
+
+        # CAR WINDOW
+        rel_obj = self.car.get_relative(rel)
+        rel_obj.render(car_window, border=None, color=(255, 255, 255))
+
+
+        # OTHER CARS AND PEDESTRIANS WINDOWS
         for obj in collideable_map[Car] + collideable_map[Pedestrian]:
             if obj == self.car: # skip main car
                 continue
-            for i, shape_info in enumerate(obj.shape_history):
-                rel_shape = shape_info.get_relative(rel)
-                pygame.draw.polygon(past_cars_and_peds_windows[i], (255, 255, 255), rel_shape.points)
+            rel_obj = obj.get_relative(rel)
+            rel_obj.render(current_frame_cars_and_peds, border=None, color=(150, 150, 150))
+        car.cars_and_peds_history.append(current_frame_cars_and_peds)
 
-        # My car
-        rel_obj = self.car.get_relative(rel)
-        rel_obj.render(my_car_window, border=None, color=(255, 255, 255))
 
+        # TRAFFIC LIGHT WINDOWS
         for obj in collideable_map["TrafficLight-Red"]:
             rel_obj = obj.get_relative(rel)
-            rel_obj.render(light_window_red, border=None)
+            rel_obj.render(light_window_red, border=None, color=(255, 255, 255))
+        car.red_traffic_history.append(light_window_red)
 
         for obj in collideable_map["TrafficLight-Green"]:
             rel_obj = obj.get_relative(rel)
-            rel_obj.render(light_window_green, border=None)
+            rel_obj.render(light_window_green, border=None, color=(255, 255, 255))
+        car.green_traffic_history.append(light_window_green)
         
         for obj in collideable_map["TrafficLight-Yellow"]:
             rel_obj = obj.get_relative(rel)
-            rel_obj.render(light_window_yellow, border=None)
+            rel_obj.render(light_window_yellow, border=None, color=(255, 255, 255))
+        car.yellow_traffic_history.append(light_window_yellow)
 
+
+        # ADDITIONAL DRAWING SETUP
         point = (int(gd/2), int(gd/2))
         edge_point = None
-
         def is_on_screen(point, gd):
             return 0 <= point[0] < gd and 0 <= point[1] < gd
-        
-        line_width = 10 
-        for p in self.car.waypoints:
-            relp = p.get_relative(rel)
-            new_point = int(relp.x), int(relp.y)
-            if not edge_point and is_on_screen(point, gd) and not is_on_screen(new_point, gd):
-                edge_point = new_point
+        line_width = 10
 
-            pygame.draw.line(direction_window, (255, 255, 255), point, new_point, line_width)
-            point = new_point
-        
-        if edge_point:
-            edge_point = (min(gd - 1, max(0, edge_point[0])), min(gd - 1, max(0, edge_point[1])))
-            pygame.draw.circle(direction_pixel_window, (255, 255, 255), edge_point, line_width)
-        
-        if edge_point:
-            if edge_point[0] == 0:
-                pygame.draw.line(direction_edge_window, (255, 255, 255), (0, 0), (0, gd - 1), line_width)
-            if edge_point[0] == gd - 1:
-                pygame.draw.line(direction_edge_window, (255, 255, 255), (gd - 1, 0), (gd - 1, gd - 1), line_width)
-            if edge_point[1] == 0:
-                pygame.draw.line(direction_edge_window, (255, 255, 255), (0, 0), (gd - 1, 0), line_width)
-            if edge_point[1] == gd - 1:
-                pygame.draw.line(direction_edge_window, (255, 255, 255), (0, gd - 1), (gd - 1, gd - 1), line_width)
 
+        # ROUTE WINDOW
         point = None
         color_change = (255 - 50) / len(self.car.waypoints)
         for i, p in enumerate(self.car.waypoints):
@@ -155,13 +139,15 @@ class ChauffeurObservation(FluidsObs):
             new_point = int(relp.x), int(relp.y)
             # if not edge_point and is_on_screen(point, gd) and not is_on_screen(new_point, gd):
             #     edge_point = new_point
-
             if point is not None:
                 color = int(255 - i*color_change)
                 pygame.draw.line(route_window, (color, color, color), point, new_point, line_width)
             point = new_point
 
+
+        # PAST CAR POSE WINDOW
         point = None
+        car.position_history.append(Waypoint(car.x, car.y))
         color_change = (255 - 50) / len(self.car.position_history)
         for i, p in enumerate(self.car.position_history):
             if p == point: continue
@@ -169,31 +155,34 @@ class ChauffeurObservation(FluidsObs):
             new_point = int(relp.x), int(relp.y)
             # if not edge_point and is_on_screen(point, gd) and not is_on_screen(new_point, gd):
             #     edge_point = new_point
-
             if point is not None:
-                color = int(255 - i*color_change)
+                color = int(50 + i*color_change)
                 pygame.draw.line(past_car_pose_window, (color, color, color), point, new_point, line_width)
             point = new_point
 
 
         self.pygame_rep = [pygame.transform.rotate(window, 90) for window in [
-                                                                              # terrain_window,
-                                                                              drivable_window,
-                                                                              # undrivable_window,
+                                                                              # drivable_window,
                                                                               # car_window,
-                                                                              past_cars_and_peds_windows[0],
-                                                                              past_cars_and_peds_windows[9],
-                                                                              my_car_window,
+                                                                              car.cars_and_peds_history[0],
+                                                                              car.cars_and_peds_history[-1],
                                                                               past_car_pose_window,
                                                                               route_window,
-                                                                              # ped_window,
-                                                                              light_window_red,
-                                                                              light_window_green,
+                                                                              car.red_traffic_history[0],
+                                                                              car.red_traffic_history[-1],
                                                                               # light_window_yellow,
-                                                                              # direction_window,
-                                                                              # direction_pixel_window,
-                                                                              # direction_edge_window
                                                                               ]]
+
+        self.total_rep = [pygame.transform.rotate(window, 90) for window in [ 
+                                                                              drivable_window,
+                                                                              car_window,
+                                                                              past_car_pose_window,
+                                                                              route_window,] + 
+                                                                              list(car.cars_and_peds_history) + 
+                                                                              list(car.red_traffic_history) + 
+                                                                              list(car.yellow_traffic_history) +
+                                                                              list(car.green_traffic_history)
+                                                                            ]
 
     def render(self, surface):
         self.grid_square.render(surface, border=10)
@@ -212,9 +201,9 @@ class ChauffeurObservation(FluidsObs):
                                                      (self.grid_dim+10, self.grid_dim+10)), 10)
 
     def get_array(self):
-        arr = np.zeros((self.grid_dim, self.grid_dim, len(self.pygame_rep)))
-        for i in range(len(self.pygame_rep)):
-            arr[:,:,i] = pygame.surfarray.array2d(self.pygame_rep[i]) != 0
+        arr = np.zeros((self.grid_dim, self.grid_dim, len(self.total_rep)))
+        for i in range(len(self.total_rep)):
+            arr[:,:,i] = pygame.surfarray.array2d(self.total_rep[i]) != 0
             # print(pygame.surfarray.array2d(self.pygame_rep[i]) != 0)
             
         if self.downsample:
