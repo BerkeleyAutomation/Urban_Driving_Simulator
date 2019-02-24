@@ -287,6 +287,10 @@ class FluidSim(object):
                 self.next_actions[k], update=False).get_action()[0],
                                     self.next_actions[k].get_action())
                     for k in keys}
+        elif action_type == WaypointVelAction:
+            return {k:WaypointVelAction(
+                (self.state.dynamic_objects[k].waypoints[0].x, self.state.dynamic_objects[k].waypoints[0].y), 
+                self.next_actions[k].get_action()) for k in keys}
         else:
             fluids_assert(false, "Illegal action type")
 
@@ -421,7 +425,6 @@ class FluidSim(object):
                     actions[k] = v.Value()
 
 
-        import ipdb; ipdb.set_trace()
         self.next_actions = actions
 
 
