@@ -288,9 +288,13 @@ class FluidSim(object):
                                     self.next_actions[k].get_action())
                     for k in keys}
         elif action_type == WaypointVelAction:
-            return {k:WaypointVelAction(
-                (self.state.dynamic_objects[k].waypoints[0].x, self.state.dynamic_objects[k].waypoints[0].y), 
-                self.next_actions[k].get_action()) for k in keys}
+            store = {}
+            for k in keys:
+                waypoint = self.state.dynamic_objects[k].closest_waypoint_ego
+                store[k] = WaypointVelAction(
+                    (waypoint.x, waypoint.y, waypoint.angle),
+                    self.next_actions[k].get_action()) 
+            return store
         else:
             fluids_assert(false, "Illegal action type")
 
@@ -432,6 +436,14 @@ class FluidSim(object):
         fluids_assert(self.state, "run_time called without setting the state")
         return self.state.time
 
+    def agent_in_deadlock(self, key):
+        """
+        Returns true if multiagent planner has deadlocked
+        """
+        car = self.state.dynamic_objects[key]
+        if car.stopped_time < 20:
+            return False
+        return True
 
     def in_deadlock(self):
         """
