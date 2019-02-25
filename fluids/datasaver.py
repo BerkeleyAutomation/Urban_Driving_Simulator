@@ -28,6 +28,7 @@ class DataSaver():
             batch_size: Number of iterations to run before dumping data. Default is 500.
             make_dir: Boolean. Flags if directory specified should be created or not.
         """
+
         self.fluid_sim = fluid_sim
         self.file = file_path
         self.obs = obs
@@ -37,6 +38,10 @@ class DataSaver():
             dir = os.path.dirname(self.file)
             os.makedirs(dir, exist_ok=True)
 
+        self.keys = keys
+        if keys is None:
+            self.keys = self.fluid_sim.state.background_cars.keys()
+
         self.curr_batch = 0
         self.file_num = 0
         self.curr_data = []
@@ -44,7 +49,7 @@ class DataSaver():
 
     def generate_dtype(self):
         dtype = [('time', np.int32), ('key', np.int32)]
-        k = list(self.fluid_sim.state.background_cars.keys())[0]
+        k = list(self.keys)[0]
 
         obs, acts = self.get_obs_and_act(k)
         for obs_space, observation in obs:
@@ -81,7 +86,7 @@ class DataSaver():
         self.curr_batch += 1
 
         time = self.fluid_sim.run_time()
-        for k in self.fluid_sim.state.background_cars.keys():
+        for k in self.keys:#self.fluid_sim.state.background_cars.keys():
             obs, acts = self.get_obs_and_act(k)
             curr_data = np.zeros(1, dtype=self.dtype)
             curr_data['time'] = time
@@ -95,4 +100,7 @@ class DataSaver():
         if self.curr_batch % self.batch_size == 0:
             self.dump()
             self.curr_batch = 0
+
+    def set_keys(self, keys):
+        self.keys = keys
 

@@ -31,11 +31,11 @@ class ChauffeurObservation(FluidsObs):
                                  color=None, border_color=(200,0,0))
         self.history = history
 
-        if not hasattr(car, 'position_history'): car.position_history = deque(maxlen=history)
-        if not hasattr(car, 'cars_and_peds_history'): car.cars_and_peds_history = deque(maxlen=history)
-        if not hasattr(car, 'red_traffic_history'): car.red_traffic_history = deque(maxlen=history)
-        if not hasattr(car, 'yellow_traffic_history'): car.yellow_traffic_history = deque(maxlen=history)
-        if not hasattr(car, 'green_traffic_history'): car.green_traffic_history = deque(maxlen=history)
+        if not hasattr(car, 'position_history'): car.position_history = deque([pygame.Surface((self.grid_dim, self.grid_dim)) for _ in range(history)], maxlen=history)
+        if not hasattr(car, 'cars_and_peds_history'): car.cars_and_peds_history = deque([pygame.Surface((self.grid_dim, self.grid_dim)) for _ in range(history)], maxlen=history)
+        if not hasattr(car, 'red_traffic_history'): car.red_traffic_history = deque([pygame.Surface((self.grid_dim, self.grid_dim)) for _ in range(history)], maxlen=history)
+        if not hasattr(car, 'yellow_traffic_history'): car.yellow_traffic_history = deque([pygame.Surface((self.grid_dim, self.grid_dim)) for _ in range(history)], maxlen=history)
+        if not hasattr(car, 'green_traffic_history'): car.green_traffic_history = deque([pygame.Surface((self.grid_dim, self.grid_dim)) for _ in range(history)], maxlen=history)
 
         self.all_collideables = []
         collideable_map = {typ:[] for typ in ALL_OBJS}
@@ -140,10 +140,13 @@ class ChauffeurObservation(FluidsObs):
             # if not edge_point and is_on_screen(point, gd) and not is_on_screen(new_point, gd):
             #     edge_point = new_point
             if point is not None:
-                color = int(255 - i*color_change)
+                color = int(50 + i*color_change)
                 pygame.draw.line(route_window, (color, color, color), point, new_point, line_width)
             point = new_point
 
+        # NEXT WAYPOINT REL
+        relp = p.get_relative(self.car.waypoints[0])
+        self.car.closest_waypoint_ego = relp
 
         # PAST CAR POSE WINDOW
         point = None

@@ -137,7 +137,7 @@ class Car(Shape):
             self.last_action = action
         elif type(action) == WaypointVelAction:
             waypoint, vel = action.get_action()
-            steer, acc = self.PIDController(VelocityAction(vel), target_pos=waypoint).get_action()
+            steer, acc = self.PIDController(VelocityAction(vel), target_pos=(waypoint[0], waypoint[1])).get_action()
             self.raw_step(steer, acc)
             self.last_action = action
         elif type(action) == LastValidAction:
