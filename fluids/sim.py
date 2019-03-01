@@ -440,6 +440,7 @@ class FluidSim(object):
         """
         Returns true if multiagent planner has deadlocked
         """
+        if key not in self.state.dynamic_objects: return True
         car = self.state.dynamic_objects[key]
         if car.stopped_time < 20:
             return False
@@ -450,7 +451,7 @@ class FluidSim(object):
         Returns true if multiagent planner has deadlocked
         """
         for _, car in iteritems(self.state.type_map[Car]):
-            if car.stopped_time < 10:
+            if car.stopped_time < 20:
                 return False
         return True
 
