@@ -5,13 +5,13 @@ simulator = fluids.FluidSim(visualization_level=100,        # How much debug vis
                             fps=0,                          # If set to non 0, caps the FPS. Target is 30
                             obs_space=fluids.OBS_CHAUFFEUR, # OBS_BIRDSEYE, OBS_GRID, or OBS_NONE
                             background_control=fluids.BACKGROUND_CSP,
-                            obs_args={"history":30}
+                            obs_args={"history":10}
                             ) # BACKGROUND_CSP or BACKGROUND_NULL
 
 state = fluids.State(
     layout=fluids.STATE_CITY,
-    background_cars=10,           # How many background cars
-    background_peds=10,
+    background_cars=1,           # How many background cars
+    background_peds=1,
     controlled_cars=1,            # How many cars to control. Set to 0 for background cars only
     )
 
