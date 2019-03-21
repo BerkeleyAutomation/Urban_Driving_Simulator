@@ -18,8 +18,7 @@ class ChauffeurObservation(FluidsObs):
     Array representation is (grid_size, grid_size, 11)
     """
     def __init__(self, car, obs_dim=500, shape=(500,500), history=10):
-        from fluids.assets import ALL_OBJS, TrafficLight, Lane, Terrain, Sidewalk, \
-            PedCrossing, Street, Car, Waypoint, Pedestrian
+        from fluids.assets import ALL_OBJS, TrafficLight, Lane, Terrain, Sidewalk, PedCrossing, Street, Car, Waypoint, Pedestrian
         state = car.state
         self.car = car
         self.shape = shape
@@ -33,9 +32,9 @@ class ChauffeurObservation(FluidsObs):
 
         if not hasattr(car, 'position_history'): car.position_history = deque([pygame.Surface((self.grid_dim, self.grid_dim)) for _ in range(history)], maxlen=history)
         if not hasattr(car, 'cars_and_peds_history'): car.cars_and_peds_history = deque([pygame.Surface((self.grid_dim, self.grid_dim)) for _ in range(history)], maxlen=history)
-        if not hasattr(car, 'red_traffic_history'): car.red_traffic_history = deque([pygame.Surface((self.grid_dim, self.grid_dim)) for _ in range(history)], maxlen=history)
-        if not hasattr(car, 'yellow_traffic_history'): car.yellow_traffic_history = deque([pygame.Surface((self.grid_dim, self.grid_dim)) for _ in range(history)], maxlen=history)
-        if not hasattr(car, 'green_traffic_history'): car.green_traffic_history = deque([pygame.Surface((self.grid_dim, self.grid_dim)) for _ in range(history)], maxlen=history)
+        if not hasattr(car, 'traffic_history'): car.traffic_history = deque([pygame.Surface((self.grid_dim, self.grid_dim)) for _ in range(history)], maxlen=history)
+        #if not hasattr(car, 'yellow_traffic_history'): car.yellow_traffic_history = deque([pygame.Surface((self.grid_dim, self.grid_dim)) for _ in range(history)], maxlen=history)
+        #if not hasattr(car, 'green_traffic_history'): car.green_traffic_history = deque([pygame.Surface((self.grid_dim, self.grid_dim)) for _ in range(history)], maxlen=history)
 
         self.all_collideables = []
         collideable_map = {typ:[] for typ in ALL_OBJS}
@@ -62,9 +61,9 @@ class ChauffeurObservation(FluidsObs):
         current_frame_cars_and_peds = pygame.Surface((self.grid_dim, self.grid_dim))
         past_car_pose_window        = pygame.Surface((self.grid_dim, self.grid_dim))
         route_window                = pygame.Surface((self.grid_dim, self.grid_dim))
-        light_window_red            = pygame.Surface((self.grid_dim, self.grid_dim))
-        light_window_green          = pygame.Surface((self.grid_dim, self.grid_dim))
-        light_window_yellow         = pygame.Surface((self.grid_dim, self.grid_dim))
+        light_window                = pygame.Surface((self.grid_dim, self.grid_dim))
+        #light_window_green          = pygame.Surface((self.grid_dim, self.grid_dim))
+        #light_window_yellow         = pygame.Surface((self.grid_dim, self.grid_dim))
 
         gd = self.grid_dim
         a0 = self.car.angle + np.pi / 2
@@ -108,18 +107,16 @@ class ChauffeurObservation(FluidsObs):
         # TRAFFIC LIGHT WINDOWS
         for obj in collideable_map["TrafficLight-Red"]:
             rel_obj = obj.get_relative(rel)
-            rel_obj.render(light_window_red, border=None, color=(255, 255, 255))
-        car.red_traffic_history.append(light_window_red)
+            rel_obj.render(light_window, border=None, color=(255, 255, 255))
 
         for obj in collideable_map["TrafficLight-Green"]:
             rel_obj = obj.get_relative(rel)
-            rel_obj.render(light_window_green, border=None, color=(255, 255, 255))
-        car.green_traffic_history.append(light_window_green)
+            rel_obj.render(light_window, border=None, color=(150, 150, 150))
         
         for obj in collideable_map["TrafficLight-Yellow"]:
             rel_obj = obj.get_relative(rel)
-            rel_obj.render(light_window_yellow, border=None, color=(255, 255, 255))
-        car.yellow_traffic_history.append(light_window_yellow)
+            rel_obj.render(light_window, border=None, color=(60, 60, 60))
+        car.traffic_history.append(light_window)
 
 
         # ADDITIONAL DRAWING SETUP
@@ -167,12 +164,12 @@ class ChauffeurObservation(FluidsObs):
         self.pygame_rep = [pygame.transform.rotate(window, 90) for window in [
                                                                               # drivable_window,
                                                                               # car_window,
-                                                                              car.cars_and_peds_history[0],
-                                                                              car.cars_and_peds_history[-1],
+                                                                              #car.cars_and_peds_history[0],
+                                                                              #car.cars_and_peds_history[-1],
                                                                               past_car_pose_window,
                                                                               route_window,
-                                                                              car.red_traffic_history[0],
-                                                                              car.red_traffic_history[-1],
+                                                                              car.traffic_history[0],
+                                                                              car.traffic_history[-1],
                                                                               # light_window_yellow,
                                                                               ]]
 
@@ -182,9 +179,7 @@ class ChauffeurObservation(FluidsObs):
                                                                               past_car_pose_window,
                                                                               route_window,] + 
                                                                               list(car.cars_and_peds_history) + 
-                                                                              list(car.red_traffic_history) + 
-                                                                              list(car.yellow_traffic_history) +
-                                                                              list(car.green_traffic_history)
+                                                                              list(car.traffic_history)
                                                                             ]
 
     def render(self, surface):
@@ -202,13 +197,13 @@ class ChauffeurObservation(FluidsObs):
                         pygame.draw.rect(surface, (200, 0, 0),
                                          pygame.Rect((surface.get_size()[0] - self.grid_dim*(x+1)-5, 0-5+self.grid_dim*y),
                                                      (self.grid_dim+10, self.grid_dim+10)), 10)
+        #self.get_array()
 
     def get_array(self):
         arr = np.zeros((self.grid_dim, self.grid_dim, len(self.total_rep)))
         for i in range(len(self.total_rep)):
-            arr[:,:,i] = pygame.surfarray.array2d(self.total_rep[i]) != 0
+            arr[:,:,i] = pygame.surfarray.array2d(self.total_rep[i]) / 2**32 * 255
             # print(pygame.surfarray.array2d(self.pygame_rep[i]) != 0)
-            
         if self.downsample:
             arr = self.sp_imresize(arr, self.shape)
         return arr
