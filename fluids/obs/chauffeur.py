@@ -202,8 +202,8 @@ class ChauffeurObservation(FluidsObs):
     def get_array(self):
         arr = np.zeros((self.grid_dim, self.grid_dim, len(self.total_rep)))
         for i in range(len(self.total_rep)):
-            arr[:,:,i] = pygame.surfarray.array2d(self.total_rep[i]) / 2**32 * 255
-            # print(pygame.surfarray.array2d(self.pygame_rep[i]) != 0)
+            # arr[:,:,i] = pygame.surfarray.array2d(self.total_rep[i]) / (2.**32 - 1) * 255
+            arr[:,:,i] = pygame.surfarray.pixels2d(self.total_rep[i]) / (2**32) * 255 # seems to be more reliable
         if self.downsample:
             arr = self.sp_imresize(arr, self.shape)
         return arr
