@@ -57,6 +57,7 @@ class FluidSim(object):
                  background_control  =BACKGROUND_NULL,
                  reward_fn           =REWARD_PATH,
                  screen_dim          =800,
+                 dt                  =1,
                  ):
 
         self.state                 = None
@@ -80,6 +81,7 @@ class FluidSim(object):
         self.last_obs              = {}
         self.next_actions          = {}
         self.data_saver = None
+        self.dt = dt
 
 
     def __del__(self):
@@ -233,7 +235,7 @@ class FluidSim(object):
 
         # Get background vehicle and pedestrian controls
         self.multiagent_plan()
-        self.save_data()
+        if self.state.time % self.dt == 0: self.save_data()
 
         return reward_step
     def get_observations(self, keys={}):
