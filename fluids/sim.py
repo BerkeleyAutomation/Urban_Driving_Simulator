@@ -291,8 +291,13 @@ class FluidSim(object):
             store = {}
             for k in keys:
                 waypoint = self.state.dynamic_objects[k].closest_waypoint_ego
+                car = self.state.dynamic_objects[k]
+                way_x = car.x - car.waypoints[0].x
+                way_y = car.y - car.waypoints[0].y
+                way_angle = car.angle - np.arctan(car.waypoints[0].y / car.waypoints[0].x)
+                print(way_x, way_y, way_angle * 180 / np.pi, car.angle)
                 store[k] = WaypointVelAction(
-                    (waypoint.x, waypoint.y, waypoint.angle),
+                    (way_x, way_y, way_angle),
                     self.next_actions[k].get_action()) 
             return store
         else:
