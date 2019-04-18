@@ -20,8 +20,8 @@ parser.add_argument('-p', metavar='N', type=int, default=5,
                     help='Number of background pedestrians')
 parser.add_argument('-v', metavar='N', type=int, default=1,
                     help='Visualization level')
-parser.add_argument('-o', metavar='str', type=str, default="birdseye",
-                    choices=["none", "birdseye", "grid", "qlidar"],
+parser.add_argument('-o', metavar='str', type=str, default="chauffeur",
+                    choices=["none", "birdseye", "grid", "qlidar", "chauffeur"],
                     help='Observation type')
 parser.add_argument('--screen-height', metavar='N', dest='screen_dim', type=int, default=800,
                     help='Sets screen height')
@@ -84,7 +84,8 @@ t = 0
 while not args.time or t < args.time:
     actions = {k: fluids.KeyboardAction() for k in simulator.get_control_keys()}
     rew = simulator.step(actions)
-    obs = simulator.get_observations(simulator.get_control_keys())
+    obs = simulator.get_observations(simulator.state.background_cars.keys())
+    act = simulator.get_supervisor_actions(fluids.WaypointVelAction, simulator.state.background_cars.keys())
     simulator.render()
     t = t + 1
 
