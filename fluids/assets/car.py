@@ -168,7 +168,7 @@ class Car(Shape):
 
         return
 
-    def get_direction(self):
+    def get_direction(self, thresh=10):
         """
         Returns predicted direction of the car based on waypoints
         """
@@ -180,12 +180,11 @@ class Car(Shape):
         c = np.dot(first, future) / np.linalg.norm(first) / np.linalg.norm(future)
         angle = np.math.atan2(np.linalg.det([first,future]),np.dot(first,future))
         angle = np.degrees(angle)
-        thresh = 10
         if angle > thresh:
-            print(angle)
+            # print(angle)
             return RIGHT
         elif angle < -thresh:
-            print(angle)
+            # print(angle)
             return LEFT
         else:
             return STRAIGHT
