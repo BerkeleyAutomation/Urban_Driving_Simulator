@@ -35,7 +35,11 @@ class WaypointVelAction(Action):
 
     Parameters
     ----------
+<<<<<<< HEAD
     waypoint: tuple of (x, y, angle, distance) all relative to car
+=======
+    waypoint: tuple of (x, y, angle)
+>>>>>>> 7052fce75670c2eef64ce3b70a935ca7c18c0e04
     vel: float in range (0, 1)
     """
     def __init__(self, waypoint, vel):
