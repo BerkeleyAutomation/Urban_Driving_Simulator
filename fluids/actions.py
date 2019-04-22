@@ -35,7 +35,7 @@ class WaypointVelAction(Action):
 
     Parameters
     ----------
-    waypoint: tuple of (x, y, angle)
+    waypoint: tuple of (x, y, angle, distance) all relative to car
     vel: float in range (0, 1)
     """
     def __init__(self, waypoint, vel):
@@ -44,7 +44,7 @@ class WaypointVelAction(Action):
     def get_action(self):
         return self.waypoint, self.vel
     def get_array(self):
-        return np.array([self.waypoint[0], self.waypoint[1], self.waypoint[2], self.vel])
+        return np.array([self.waypoint[0], self.waypoint[1], self.waypoint[2], self.waypoint[3], self.vel])
 
 class SteeringAccAction(Action):
     """
