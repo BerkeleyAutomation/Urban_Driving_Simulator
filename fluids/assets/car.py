@@ -65,6 +65,8 @@ class Car(Shape):
 
         self.position_history = deque(maxlen=1)
         self.shape_history = deque(maxlen=10) # TODO: Fix this so it isn't hardcoded
+        self.steps_at_current_waypoint = 0
+        self.fixed_waypoint = None
 
 
     def make_observation(self, obs_space=OBS_NONE, **kwargs):
@@ -157,12 +159,14 @@ class Car(Shape):
 
         self.last_to_goal = distance_to_next - self.dist_to(self.waypoints[0])
         self.last_distance = np.linalg.norm([self.x - startx, self.y - starty])
+        self.steps_at_current_waypoint += 1
         if self.last_distance == 0:
             self.stopped_time += 1
         else:
             self.stopped_time = 0
         if len(self.waypoints) and self.intersects(self.waypoints[0]):
             self.waypoints.pop(0)
+            self.steps_at_current_waypoint = 0
             if len(self.trajectory):
                 self.trajectory.pop(0)
 
