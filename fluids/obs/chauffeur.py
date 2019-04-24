@@ -148,7 +148,7 @@ class ChauffeurObservation(FluidsObs):
         # PAST CAR POSE WINDOW
         point = None
         # car.position_history.append(Waypoint(car.x, car.y))
-        color_change = (255 - 50) / len(self.car.position_history)
+        color_change = (255 - 50) / (len(self.car.position_history) + 1)
         for i, p in enumerate(self.car.position_history):
             if p == point: continue
             relp = p.get_relative(rel)
