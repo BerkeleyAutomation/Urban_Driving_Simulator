@@ -292,14 +292,31 @@ class FluidSim(object):
         elif action_type == WaypointVelAction:
             store = {}
             for k in keys:
-                waypoint = self.state.dynamic_objects[k].closest_waypoint_ego
+                # waypoint = self.state.dynamic_objects[k].closest_waypoint_ego
                 car = self.state.dynamic_objects[k]
-                way_x = car.x - car.waypoints[0].x
-                way_y = car.y - car.waypoints[0].y
-                way_angle = car.angle - np.arctan(car.waypoints[0].y / car.waypoints[0].x)
-                #print(way_x, way_y, way_angle * 180 / np.pi, car.angle)
+                nearest_waypoint = car.waypoints[0]
+                next_waypoint = car.waypoints[1]
+                nearest_to_next_waypoint = np.array([next_waypoint.x - nearest_waypoint.x, next_waypoint.y - nearest_waypoint.y])
+                direction_to_next_waypoint = nearest_to_next_waypoint / np.linalg.norm(nearest_to_next_waypoint)
+                delta_x, delta_y = car.last_distance * direction_to_next_waypoint[0], car.last_distance * direction_to_next_waypoint[1]
+                
+                if not car.fixed_waypoint or car.steps_at_current_waypoint < 1:
+                    car.fixed_waypoint = Waypoint(nearest_waypoint.x + delta_x, nearest_waypoint.y + delta_y)
+                else:
+                    car.fixed_waypoint = Waypoint(car.fixed_waypoint.x + delta_x, car.fixed_waypoint.y + delta_y)
+
+                way_x = car.fixed_waypoint.x - car.x
+                way_y = car.fixed_waypoint.y - car.y
+                sign = -1 if car.get_direction(thresh=0.5) == RIGHT else 1
+                angle = (np.arctan2(-way_y, way_x) * 180 / np.pi) % 90 # use -way_y because (0,0) is top left
+                angle = sign * np.min([np.abs(angle), 90 - np.abs(angle)])
+                distance_to_waypoint = np.linalg.norm([way_x, way_y])
+                # print(angle)
+                # print(distance_to_waypoint)
+                # print(way_x, way_y)
+
                 store[k] = WaypointVelAction(
-                    (way_x, way_y, way_angle),
+                    (way_x, way_y, angle, distance_to_waypoint),
                     self.next_actions[k].get_action()) 
             return store
         else:
