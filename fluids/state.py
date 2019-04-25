@@ -37,6 +37,8 @@ class State(object):
         Number of cars to control with the background planner
     background_peds: int
         Number of pedestrians to control with the background planner
+    load_state: False or str
+        If str load_state of dynamic objects from path otherwise generate new state
     use_traffic_lights: bool
         Sets whether traffic lights are generated
     use_ped_lights: bool
@@ -52,9 +54,12 @@ class State(object):
                  waypoint_width     =5,
                  use_traffic_lights =True,
                  use_ped_lights     =True,
-                 vis_level          =1):
+                 vis_level          =1,
+                 load_state=False 
+                 ):
 
         fluids_print("Loading layout: " + layout)
+        self.layout_name = layout
         layout = open(os.path.join(basedir, "layouts", layout + ".json"))
         cfilename = "{}{}.json".format(
             hashlib.md5(str(layout).encode()).hexdigest()[:10],
@@ -107,22 +112,6 @@ class State(object):
             self.static_objects[key] = obj
             obj_info['fluids_obj'] = obj
         car_ids = []
-        for obj_info in layout['dynamic_objects']:
-            typ = {"Car"           : Car,
-                   "TrafficLight"  : TrafficLight,
-                   "CrossWalkLight": CrossWalkLight,
-                   "Pedestrian"    : Pedestrian}[obj_info['type']]
-            obj = typ(state=self, vis_level=vis_level, **obj_info)
-            if not use_traffic_lights and type(obj) == TrafficLight:
-                continue
-            if not use_ped_lights and type(obj) == CrossWalkLight:
-                continue
-            key = get_id()
-            if type == Car:
-                car_ids.append(key)
-            self.type_map[typ][key] = obj
-            self.objects[key] = obj
-            self.dynamic_objects[key] = obj
 
 
         fluids_print("Generating trajectory map")
@@ -193,18 +182,66 @@ class State(object):
         for waypoint in self.ped_waypoints:
             waypoint.create_edges(buff=5)
 
+        if not load_state:
+            fluids_print("Generating dynamic objects")
+            dynamic_objects = layout['dynamic_objects']
+            for i in range(controlled_cars + background_cars):
+                while True:
+                    start = lanes[np.random.random_integers(0, len(lanes)-1)]
+                    x = np.random.uniform(start.minx + 50, start.maxx - 50)
+                    y = np.random.uniform(start.miny + 50, start.maxy - 50)
+                    angle = start.angle + np.random.uniform(-0.1, 0.1)
+                    car = Car(state=self, x=x, y=y, angle=angle, vis_level=vis_level)
+                    min_d = min([car.dist_to(other) for k, other \
+                                 in iteritems(self.type_map[Car])] + [np.inf])
+                    if min_d > 10 and not self.is_in_collision(car):
+                        key = get_id()
+                        for waypoint in self.waypoints:
+                            if car.intersects(waypoint):
+                                while car.intersects(waypoint):
+                                    waypoint = random.choice(waypoint.nxt).out_p
+                                waypoint = random.choice(waypoint.nxt).out_p
+                                car.waypoints = [waypoint]
+                                break
+                        self.type_map[Car][key] = car
+                        self.objects[key] = car
+                        car_ids.append(key)
+                        self.dynamic_objects[key] = car
+                        break
 
-        fluids_print("Generating cars")
-        for i in range(controlled_cars + background_cars):
-            while True:
-                start = lanes[np.random.random_integers(0, len(lanes)-1)]
-                x = np.random.uniform(start.minx + 50, start.maxx - 50)
-                y = np.random.uniform(start.miny + 50, start.maxy - 50)
-                angle = start.angle + np.random.uniform(-0.1, 0.1)
-                car = Car(state=self, x=x, y=y, angle=angle, vis_level=vis_level)
-                min_d = min([car.dist_to(other) for k, other \
-                             in iteritems(self.type_map[Car])] + [np.inf])
-                if min_d > 10 and not self.is_in_collision(car):
+            self.controlled_cars = {k: self.objects[k] for k in car_ids[:controlled_cars]}
+            self.background_cars = {k: self.objects[k] for k in car_ids[controlled_cars:]}
+
+            fluids_print("Generating peds")
+            for i in range(background_peds):
+                while True:
+                    wp = random.choice(self.ped_waypoints)
+                    ped = Pedestrian(state=self, x=wp.x, y=wp.y,
+                                     angle=wp.angle, vis_level=vis_level)
+                    while ped.intersects(wp):
+                        wp = random.choice(wp.nxt).out_p
+                    ped.waypoints = [wp]
+                    if not self.is_in_collision(ped):
+                        key = get_id()
+                        self.objects[key] = ped
+                        self.type_map[Pedestrian][key] = ped
+                        self.dynamic_objects[key] = ped
+                        break
+        else:
+            fluids_print("Loading dynamic objects from saved state {}".format(load_state))
+            json_state = json.load(open(load_state, 'r'))
+            dynamic_objects = json_state["dynamic_objects"]
+            fluids_assert(json_state["layout_name"] == self.layout_name, "Must reload state on the same layout")
+            self.controlled_cars = {}
+            self.background_cars = {}
+            for obj_info in dynamic_objects:
+                typ = {"Car"           : Car,
+                       "TrafficLight"  : TrafficLight,
+                       "CrossWalkLight": CrossWalkLight,
+                       "Pedestrian"    : Pedestrian}[obj_info['type']]
+                if typ not in [Car, Pedestrian]: continue
+                if typ == Car:
+                    car = Car(state=self, x=obj_info["x"], y=obj_info["y"], angle=obj_info["angle"], vis_level=vis_level)
                     key = get_id()
                     for waypoint in self.waypoints:
                         if car.intersects(waypoint):
@@ -217,30 +254,42 @@ class State(object):
                     self.objects[key] = car
                     car_ids.append(key)
                     self.dynamic_objects[key] = car
-                    break
+                    if obj_info["controlled"]:
+                        self.controlled_cars[key] = car
+                    else:
+                        self.background_cars[key] = car
 
-        self.controlled_cars = {k: self.objects[k] for k in car_ids[:controlled_cars]}
+                if typ == Pedestrian:
+                    ped = Pedestrian(state=self, x=obj_info["x"], y=obj_info["y"], angle=obj_info["angle"], vis_level=vis_level)
+                    key = get_id()
+                    for waypoint in self.ped_waypoints:
+                        if ped.intersects(waypoint):
+                            while ped.intersects(waypoint):
+                                waypoint = random.choice(waypoint.nxt).out_p
+                            ped.waypoints = [waypoint]
+                            break
+                    self.type_map[Pedestrian][key] = ped
+                    self.objects[key] = ped
+                    self.dynamic_objects[key] = ped 
         for k, car in iteritems(self.controlled_cars):
             car.color = (0x0b,0x04,0xf4)#(0x5B,0x5C,0xF7)
-        self.background_cars = {k: self.objects[k] for k in car_ids[controlled_cars:]}
 
-
-        fluids_print("Generating peds")
-        for i in range(background_peds):
-            while True:
-                wp = random.choice(self.ped_waypoints)
-                ped = Pedestrian(state=self, x=wp.x, y=wp.y,
-                                 angle=wp.angle, vis_level=vis_level)
-                while ped.intersects(wp):
-                    wp = random.choice(wp.nxt).out_p
-                ped.waypoints = [wp]
-                if not self.is_in_collision(ped):
-                    key = get_id()
-                    self.objects[key] = ped
-                    self.type_map[Pedestrian][key] = ped
-                    self.dynamic_objects[key] = obj
-                    break
-
+        for obj_info in dynamic_objects:
+            typ = {"Car"           : Car,
+                   "TrafficLight"  : TrafficLight,
+                   "CrossWalkLight": CrossWalkLight,
+                   "Pedestrian"    : Pedestrian}[obj_info['type']]
+            if not use_traffic_lights and type(obj) == TrafficLight:
+                continue
+            if not use_ped_lights and type(obj) == CrossWalkLight:
+                continue
+            if typ in [Car, Pedestrian]:
+                continue
+            obj = typ(state=self, vis_level=vis_level, **obj_info)
+            key = get_id()
+            self.type_map[typ][key] = obj
+            self.objects[key] = obj
+            self.dynamic_objects[key] = obj
 
         if not cache_found:
             fluids_print("Caching layout to: " + cfilename)
@@ -386,3 +435,26 @@ class State(object):
 
     def get_controlled_collisions(self):
         return
+
+    def save_state(self, path):
+        fluids_print("Saving state to {}".format(path))
+        state = {"layout_name": self.layout_name, "dynamic_objects": []}
+        for k, obj in self.dynamic_objects.items():
+            typ = type(obj)
+            
+            obj_info = {"type": typ.__name__, "x": obj.x, "y": obj.y}
+            if typ == TrafficLight or typ == CrossWalkLight:
+                obj_info["angle_deg"] = np.rad2deg(obj.angle) 
+                obj_info["init_color"] = {RED:"red", YELLOW:"red", GREEN:"green"}[obj.color]
+            elif typ == Car:
+                obj_info["angle"] = obj.angle
+                obj_info["controlled"] = k in self.controlled_cars.keys()
+            elif typ == Pedestrian:
+                obj_info["angle"] = obj.angle
+            else:
+                continue
+            state["dynamic_objects"].append(obj_info)
+        with open(path, "w") as outfile:
+            json.dump(state, outfile, indent=1)
+
+

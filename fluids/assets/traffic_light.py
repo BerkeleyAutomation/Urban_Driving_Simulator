@@ -6,6 +6,7 @@ from fluids.consts import *
 
 class TrafficLight(Shape):
     def __init__(self, init_color="red", **kwargs):
+        self.init_color = init_color
         color = {"red":RED,
                  "green":GREEN,
                  "yellow":YELLOW}[init_color]

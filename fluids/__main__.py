@@ -35,6 +35,8 @@ parser.add_argument('--state', metavar='file', type=str, default=fluids.STATE_CI
                     help='Layout file for state generation')
 parser.add_argument('--datasaver', metavar='datasaver', type=str, default="",
                     help='Path for datasaver. Empty string disables datasaver.')
+parser.add_argument('--load_state', metavar='load_state', type=str, default=False,
+                    help='Path to saved state')
 
 parser.add_argument('--fps', metavar='N', dest='fps', type=int, default=0,
                     help='Sets max FPS, default is unlimited FPS')
@@ -46,6 +48,7 @@ fluids_print("            Visualization level : {}".format(args.v))
 fluids_print("            Observation type    : {}".format(args.o))
 fluids_print("            Scene layout        : {}".format(args.state))
 fluids_print("            Datasaver           : {}".format("disabled" if not args.datasaver else "Storing file at " + args.datasaver))
+fluids_print("            Loaded State        : {}".format("disabled" if not args.load_state else "Loading state from " + args.load_state))
 fluids_print("            Simulation time     : {}".format("unlimited" if not args.time else args.time))
 fluids_print("            Pedestrian lights   : {}".format("enabled" if args.pedlights else "disabled"))
 fluids_print("            Traffic lights      : {}".format("enabled" if args.trafficlights else "disabled"))
@@ -72,7 +75,8 @@ state = fluids.State(layout=args.state,
                      controlled_cars    =args.c,
                      background_peds    =args.p,
                      use_traffic_lights =args.trafficlights,
-                     use_ped_lights     =args.pedlights)
+                     use_ped_lights     =args.pedlights,
+                     load_state         =args.load_state)
 
 simulator.set_state(state)
 
@@ -88,4 +92,6 @@ while not args.time or t < args.time:
     act = simulator.get_supervisor_actions(fluids.WaypointVelAction, simulator.state.background_cars.keys())
     simulator.render()
     t = t + 1
+    #if t % 10 == 0:
+    #    simulator.state.save_state("/Users/ragz/Documents/drive/autolab/FLUIDS_IL/saved_states/state_{}.json".format(t))
 

@@ -1,8 +1,9 @@
 from fluids.assets.shape import Shape
+from fluids.consts import *
 
-RED = (200, 0, 0)
-YELLOW = (200, 200, 0),
-GREEN = (0, 200, 0)
+#RED = (200, 0, 0)
+#YELLOW = (200, 200, 0),
+#GREEN = (0, 200, 0)
 
 
 class CrossWalkLight(Shape):
