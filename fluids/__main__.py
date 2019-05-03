@@ -1,6 +1,7 @@
 import fluids
 from fluids.utils import fluids_print
 import argparse
+import time
 
 key_help = """
 Keyboard commands for when visualizer is running:
@@ -79,6 +80,17 @@ state = fluids.State(layout=args.state,
                      load_state         =args.load_state)
 
 simulator.set_state(state)
+#for i in range(10, 111, 10):
+#    state = fluids.State(layout=args.state,
+#                         background_cars    =args.b,
+#                         controlled_cars    =args.c,
+#                         background_peds    =args.p,
+#                         use_traffic_lights =args.trafficlights,
+#                         use_ped_lights     =args.pedlights,
+#                         load_state         ="/Users/ragz/Documents/drive/autolab/FLUIDS_IL/saved_states/state_{}.json".format(i))
+#    simulator.set_state(state)
+#    simulator.render()
+#    time.sleep(5)
 
 if args.datasaver != "":
     data_saver = fluids.DataSaver(fluid_sim=simulator, file_path=args.datasaver, batch_size=4)

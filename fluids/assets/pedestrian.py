@@ -54,7 +54,7 @@ class Pedestrian(Shape):
             if other.color == (200, 0, 0):
                 return super(Pedestrian, self).can_collide(other)
             return False
-        return super(Pedestrian, self.can_collide(other))
+        return super(Pedestrian, self).can_collide(other)
 
     def render(self, surface, **kwargs):
         super(Pedestrian, self).render(surface, **kwargs)
